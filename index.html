@@ -347,43 +347,22 @@
 
 <canvas id="bg-canvas"></canvas>
 
-<header class="header-bar-wrapper">
-    <nav class="header-bar">
-        <div class="nav-brand-group">
-            <div class="mascot-orbit">
-                <img src="purple.gif" alt="Timmy the Sheep" title="Timmy the Sheep" class="nav-mascot">
-                <span class="orbit-beacon"></span>
-            </div>
-            <div id="profile-badge" class="nav-profile-badge">
-                <div id="profile-name" class="profile-name-text"></div>
-                <div id="profile-rank" class="profile-rank-text"></div>
-            </div>
+<div class="header-bar">
+    <div style="display: flex; align-items: center; gap: 1rem; margin-right: auto;">
+        <img src="purple.gif" alt="Timmy the Sheep" title="Timmy the Sheep" style="height: 100px;">
+        <div id="profile-badge" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; backdrop-filter: blur(10px); display: none; flex-direction: column; gap: 4px; font-family: monospace; font-size: 0.9rem;">
+            <div id="profile-name" style="font-weight: bold; color: #a855f7;"></div>
+            <div id="profile-rank" style="opacity: 0.8;"></div>
         </div>
-        <div class="nav-actions-group">
-            <a href="https://hypergenius12.github.io/crap-games/" target="_blank" rel="noopener" class="nav-pill worse-games-pill">
-                <span class="pill-dot amber"></span>
-                <span>Worse Games</span>
-                <span class="pill-arrow">&rarr;</span>
-            </a>
-            <button type="button" class="nav-pill bookmark-pill" onclick="addBookmark()" title="Bookmark hypergenius12">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                <span>Bookmark</span>
-            </button>
-            <button type="button" class="nav-pill bug-pill" onclick="openBugReportModal()" title="Report an issue">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>Report Bug</span>
-            </button>
-            <button type="button" class="nav-pill feedback-pill" onclick="openFeedbackModal()" title="Submit Feedback">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span>Feedback</span>
-            </button>
-            <button type="button" class="nav-pill share-pill" onclick="shareSite(this)" title="Share Website">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                <span class="share-btn-text">Share</span>
-            </button>
-        </div>
-    </nav>
-</header>
+    </div>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 20; display: flex; align-items: center;">
+        <a href="https://hypergenius12.github.io/crap-games/" target="_blank" rel="noopener" class="share-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;">Worse Games &rarr;</a>
+        <button class="share-btn" onclick="addBookmark()" style="margin-right: 10px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); color: #a855f7; padding: 0.2rem 0.5rem; font-size: 0.75rem;">Bookmark</button>
+        <button class="share-btn" onclick="openBugReportModal()" style="margin-right: 10px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">Report Bug</button>
+        <button class="share-btn" onclick="openFeedbackModal()" style="margin-right: 10px; background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #22c55e;">Submit Feedback</button>
+        <button class="share-btn" onclick="shareSite(this)">Share</button>
+    </div>
+</div>
 
 <script>
     function addBookmark() {
@@ -394,14 +373,8 @@
 </script>
 
 <div class="container">
-    <div class="hero-station">
-        <div class="station-chip">
-            <span class="pulsing-beacon"></span>
-            <span>DEEP SPACE OBSERVATORY &bull; SECTOR 12</span>
-        </div>
-        <h1 class="cosmic-title">hypergenius 12</h1>
-        <p class="subtitle">A curated constellation of standalone interactive games, simulations, and creative experiments floating in deep space.</p>
-    </div>
+    <h1>hypergenius 12</h1>
+    <p class="subtitle">A curated selection of my web projects and experiments.</p>
 
     <div class="projects-grid">
 
@@ -654,132 +627,370 @@
     }
 
     if (isWebGLAvailable()) {
-        // Set up WebGL 3D parallax scene
         const canvas = document.getElementById('bg-canvas');
-    const scene = new THREE.Scene();
-    
-    // Always use dark mode for the 3D scene to match the site's CSS
-    scene.background = new THREE.Color(0x09090b);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x06070f);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 4.0;
 
-    // Create particles
-    const geometry = new THREE.BufferGeometry();
-    const particlesCount = 2000;
-    const posArray = new Float32Array(particlesCount * 3);
-    const originalPosArray = new Float32Array(particlesCount * 3);
-    const velocities = new Float32Array(particlesCount * 3);
-
-    for(let i = 0; i < particlesCount * 3; i++) {
-        // distribute particles around space
-        const val = (Math.random() - 0.5) * 15;
-        posArray[i] = val;
-        originalPosArray[i] = val;
-        velocities[i] = 0;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    
-    const material = new THREE.PointsMaterial({
-        size: 0.02,
-        color: 0xa1a1aa,
-        transparent: true,
-        opacity: 0.8
-    });
-
-    const particlesMesh = new THREE.Points(geometry, material);
-    scene.add(particlesMesh);
-
-    camera.position.z = 3;
-
-    // Mouse Parallax Interaction
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    const windowHalfX = window.innerWidth / 2;
-    const windowHalfY = window.innerHeight / 2;
-
-    document.addEventListener('mousemove', (event) => {
-        mouseX = (event.clientX - windowHalfX);
-        mouseY = (event.clientY - windowHalfY);
-    });
-
-    // Handle theme change dynamically
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        const newIsDark = e.matches;
-        scene.background.setHex(newIsDark ? 0x09090b : 0xf4f4f5);
-        material.color.setHex(newIsDark ? 0xa1a1aa : 0x71717a);
-    });
-
-    // Handle resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Animation Loop
-    const clock = new THREE.Clock();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        const elapsedTime = clock.getElapsedTime();
-
-        // Spring physics for scatter
-        const positions = geometry.attributes.position.array;
-        let needsUpdate = false;
-        for(let i = 0; i < particlesCount * 3; i++) {
-            if (Math.abs(velocities[i]) > 0.0001 || Math.abs(positions[i] - originalPosArray[i]) > 0.0001) {
-                const force = (originalPosArray[i] - positions[i]) * 0.05;
-                velocities[i] += force;
-                velocities[i] *= 0.85; // friction
-                positions[i] += velocities[i];
-                needsUpdate = true;
-            }
+        // --- Procedural Canvas Textures for Organic Space ---
+        // 1. Soft Circular Star Texture
+        function createStarTexture() {
+            const c = document.createElement('canvas');
+            c.width = 32;
+            c.height = 32;
+            const ctx = c.getContext('2d');
+            const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 15);
+            g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            g.addColorStop(0.25, 'rgba(235, 245, 255, 0.85)');
+            g.addColorStop(0.65, 'rgba(180, 210, 255, 0.25)');
+            g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 32, 32);
+            const tex = new THREE.CanvasTexture(c);
+            tex.needsUpdate = true;
+            return tex;
         }
-        if (needsUpdate) geometry.attributes.position.needsUpdate = true;
 
-        // Base slow rotation
-        particlesMesh.rotation.y = elapsedTime * 0.05;
-        particlesMesh.rotation.x = elapsedTime * 0.02;
+        // 2. Soft Organic Volumetric Nebula Cloud Puffs
+        function createNebulaTexture(colorCenter, colorMid) {
+            const c = document.createElement('canvas');
+            c.width = 512;
+            c.height = 512;
+            const ctx = c.getContext('2d');
+            const cx = 256, cy = 256;
 
-        // Mouse Parallax effect
-        targetX = mouseX * 0.001;
-        targetY = mouseY * 0.001;
+            // Base soft gradient
+            const baseG = ctx.createRadialGradient(cx, cy, 0, cx, cy, 240);
+            baseG.addColorStop(0, colorCenter);
+            baseG.addColorStop(0.4, colorMid);
+            baseG.addColorStop(0.8, 'rgba(6, 10, 25, 0.05)');
+            baseG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = baseG;
+            ctx.fillRect(0, 0, 512, 512);
+
+            // Multiple organic asymmetric puffs
+            for (let i = 0; i < 7; i++) {
+                const angle = (i / 7) * Math.PI * 2 + (Math.random() * 0.4);
+                const dist = 60 + Math.random() * 80;
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+                const r = 100 + Math.random() * 60;
+                const pg = ctx.createRadialGradient(px, py, 0, px, py, r);
+                pg.addColorStop(0, colorCenter.replace(/[\d\.]+\)$/, '0.18)'));
+                pg.addColorStop(0.5, colorMid.replace(/[\d\.]+\)$/, '0.06)'));
+                pg.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = pg;
+                ctx.beginPath();
+                ctx.arc(px, py, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const tex = new THREE.CanvasTexture(c);
+            tex.needsUpdate = true;
+            return tex;
+        }
+
+        const starTex = createStarTexture();
         
-        particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
-        particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
+        // Natural astronomical deep space nebula hues (deep cosmic indigo, ethereal cyan, muted cosmic violet)
+        const nebulaTexIndigo = createNebulaTexture('rgba(45, 30, 95, 0.35)', 'rgba(25, 18, 60, 0.12)');
+        const nebulaTexCyan = createNebulaTexture('rgba(16, 65, 110, 0.32)', 'rgba(8, 35, 65, 0.1)');
+        const nebulaTexViolet = createNebulaTexture('rgba(65, 25, 80, 0.28)', 'rgba(30, 10, 45, 0.09)');
 
-        renderer.render(scene, camera);
-    }
-    
-    animate();
+        // --- Nebula Clouds in 3D Space ---
+        const nebulaGroup = new THREE.Group();
+        const nebulaMeshes = [];
+        const nebulaData = [
+            { tex: nebulaTexIndigo, x: -16, y: 10, z: -32, size: 48, rot: 0.00012, opacity: 0.38 },
+            { tex: nebulaTexCyan,   x: 18, y: -6, z: -36, size: 52, rot: -0.00015, opacity: 0.34 },
+            { tex: nebulaTexViolet, x: -4, y: -14, z: -28, size: 44, rot: 0.0001, opacity: 0.3 },
+            { tex: nebulaTexCyan,   x: -18, y: -12, z: -40, size: 46, rot: -0.00014, opacity: 0.28 },
+            { tex: nebulaTexIndigo, x: 20, y: 14, z: -38, size: 50, rot: 0.00013, opacity: 0.32 },
+            { tex: nebulaTexViolet, x: 2, y: 16, z: -30, size: 42, rot: -0.00011, opacity: 0.26 }
+        ];
 
-    // Share functionality
-    function shareSite(btn) {
-        const originalText = btn ? btn.innerText : 'Share';
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            if (btn) {
-                btn.innerText = 'Copied!';
-                setTimeout(() => btn.innerText = originalText, 2000);
+        nebulaData.forEach(d => {
+            const geo = new THREE.PlaneGeometry(d.size, d.size);
+            const mat = new THREE.MeshBasicMaterial({
+                map: d.tex,
+                transparent: true,
+                opacity: d.opacity,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(d.x, d.y, d.z);
+            mesh.rotation.z = Math.random() * Math.PI * 2;
+            mesh.userData = {
+                rotSpeed: d.rot,
+                baseY: d.y,
+                baseOpacity: d.opacity,
+                phase: Math.random() * Math.PI * 2
+            };
+            nebulaMeshes.push(mesh);
+            nebulaGroup.add(mesh);
+        });
+        scene.add(nebulaGroup);
+
+        // --- Realistic Deep Starfield (3,200 Stars) ---
+        const starCount = 3200;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(starCount * 3);
+        const starOrigPos = new Float32Array(starCount * 3);
+        const starVel = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+
+        // Astronomical star spectral colors
+        const starColorsPalette = [
+            [1.0, 1.0, 1.0],       // Brilliant White (70%)
+            [1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0],
+            [0.82, 0.90, 1.0],     // Soft Blue-White (15%)
+            [1.0, 0.95, 0.82],     // Pale Sun Gold (10%)
+            [0.92, 0.85, 1.0]      // Soft Lavender (5%)
+        ];
+
+        for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            const x = (Math.random() - 0.5) * 80;
+            const y = (Math.random() - 0.5) * 80;
+            const z = (Math.random() - 0.5) * 65 - 10;
+
+            starPos[i3] = x;
+            starPos[i3 + 1] = y;
+            starPos[i3 + 2] = z;
+
+            starOrigPos[i3] = x;
+            starOrigPos[i3 + 1] = y;
+            starOrigPos[i3 + 2] = z;
+
+            starVel[i3] = 0;
+            starVel[i3 + 1] = 0;
+            starVel[i3 + 2] = 0;
+
+            const c = starColorsPalette[Math.floor(Math.random() * starColorsPalette.length)];
+            const lum = 0.5 + Math.random() * 0.5;
+            starColors[i3] = c[0] * lum;
+            starColors[i3 + 1] = c[1] * lum;
+            starColors[i3 + 2] = c[2] * lum;
+        }
+
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+        const starMat = new THREE.PointsMaterial({
+            size: 0.13,
+            map: starTex,
+            transparent: true,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const starPoints = new THREE.Points(starGeo, starMat);
+        scene.add(starPoints);
+
+        // --- Subtle Twinkling Prominent Stars (70 Stars) ---
+        const twinkleCount = 70;
+        const twinkleGeo = new THREE.BufferGeometry();
+        const twinklePos = new Float32Array(twinkleCount * 3);
+
+        for (let i = 0; i < twinkleCount; i++) {
+            const i3 = i * 3;
+            twinklePos[i3] = (Math.random() - 0.5) * 60;
+            twinklePos[i3 + 1] = (Math.random() - 0.5) * 55;
+            twinklePos[i3 + 2] = (Math.random() - 0.5) * 40 - 5;
+        }
+
+        twinkleGeo.setAttribute('position', new THREE.BufferAttribute(twinklePos, 3));
+
+        const twinkleMat = new THREE.PointsMaterial({
+            size: 0.28,
+            map: starTex,
+            transparent: true,
+            opacity: 0.75,
+            color: 0xffffff,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const twinklePoints = new THREE.Points(twinkleGeo, twinkleMat);
+        scene.add(twinklePoints);
+
+        // --- Gentle Shooting Star / Meteor ---
+        const meteor = {
+            active: false,
+            pos: new THREE.Vector3(),
+            dir: new THREE.Vector3(-1.2, -0.7, 0.1).normalize(),
+            speed: 0.6,
+            life: 0,
+            maxLife: 35,
+            line: null
+        };
+
+        const meteorGeo = new THREE.BufferGeometry();
+        const meteorPositions = new Float32Array(6);
+        meteorGeo.setAttribute('position', new THREE.BufferAttribute(meteorPositions, 3));
+        const meteorMat = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending
+        });
+        meteor.line = new THREE.Line(meteorGeo, meteorMat);
+        scene.add(meteor.line);
+
+        function spawnMeteor() {
+            if (meteor.active) return;
+            meteor.active = true;
+            meteor.life = 0;
+            meteor.maxLife = 30 + Math.random() * 20;
+            const x = 15 + Math.random() * 20;
+            const y = 10 + Math.random() * 12;
+            const z = -15 - Math.random() * 15;
+            meteor.pos.set(x, y, z);
+        }
+
+        setInterval(() => {
+            if (Math.random() > 0.4) spawnMeteor();
+        }, 9000);
+
+        // --- Interaction & Parallax ---
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+        let scrollProgress = 0;
+
+        const halfW = window.innerWidth / 2;
+        const halfH = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', e => {
+            mouseX = (e.clientX - halfW) / halfW;
+            mouseY = (e.clientY - halfH) / halfH;
+        });
+
+        function updateScroll() {
+            const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+            scrollProgress = window.scrollY / maxScroll;
+        }
+        window.addEventListener('scroll', updateScroll, { passive: true });
+        updateScroll();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+
+        // Gentle star bounce on background click
+        document.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'CANVAS' || e.target.classList.contains('container')) {
+                for (let i = 0; i < starCount * 3; i++) {
+                    starVel[i] = (Math.random() - 0.5) * 0.8;
+                }
             }
         });
-    }
-    document.addEventListener('mousedown', (e) => {
-        // Scatter stars on bg click
-        if (e.target.tagName === 'CANVAS' || e.target.className === 'container') {
-            for(let i = 0; i < particlesCount * 3; i++) {
-                velocities[i] = (Math.random() - 0.5) * 1.5;
+
+        // Theme listener
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            scene.background.setHex(e.matches ? 0x06070f : 0xf4f4f5);
+            starMat.color.setHex(e.matches ? 0xffffff : 0x475569);
+        });
+
+        // --- Render Loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime();
+
+            // 1. Slow, majestic nebula rotation & subtle breathing
+            nebulaMeshes.forEach(mesh => {
+                mesh.rotation.z += mesh.userData.rotSpeed;
+                mesh.material.opacity = mesh.userData.baseOpacity + Math.sin(elapsed * 0.5 + mesh.userData.phase) * 0.03;
+                // Scroll parallax: gentle depth shift
+                mesh.position.y = mesh.userData.baseY + scrollProgress * 5;
+            });
+
+            // 2. Star spring physics on click
+            const positions = starGeo.attributes.position.array;
+            let needsUpdate = false;
+            for (let i = 0; i < starCount * 3; i++) {
+                if (Math.abs(starVel[i]) > 0.0001 || Math.abs(positions[i] - starOrigPos[i]) > 0.0001) {
+                    const force = (starOrigPos[i] - positions[i]) * 0.05;
+                    starVel[i] += force;
+                    starVel[i] *= 0.88;
+                    positions[i] += starVel[i];
+                    needsUpdate = true;
+                }
             }
+            if (needsUpdate) starGeo.attributes.position.needsUpdate = true;
+
+            // 3. Twinkling stars
+            twinkleMat.opacity = 0.55 + Math.sin(elapsed * 2.5) * 0.3;
+
+            // 4. Meteor animation
+            if (meteor.active) {
+                meteor.life++;
+                const head = meteor.pos.clone().add(meteor.dir.clone().multiplyScalar(meteor.life * meteor.speed));
+                const tailLen = Math.min(meteor.life * meteor.speed * 0.7, 3.2);
+                const tail = head.clone().sub(meteor.dir.clone().multiplyScalar(tailLen));
+
+                const mPos = meteor.line.geometry.attributes.position.array;
+                mPos[0] = head.x; mPos[1] = head.y; mPos[2] = head.z;
+                mPos[3] = tail.x; mPos[4] = tail.y; mPos[5] = tail.z;
+                meteor.line.geometry.attributes.position.needsUpdate = true;
+
+                const fade = 1 - (meteor.life / meteor.maxLife);
+                meteor.line.material.opacity = Math.max(0, fade * 0.85);
+
+                if (meteor.life >= meteor.maxLife) {
+                    meteor.active = false;
+                    meteor.line.material.opacity = 0;
+                }
+            }
+
+            // 5. Parallax: Camera smooth response to mouse and scroll
+            targetX = mouseX * 0.05;
+            targetY = -mouseY * 0.04;
+
+            camera.rotation.y += (targetX - camera.rotation.y) * 0.04;
+            camera.rotation.x += (targetY - camera.rotation.x) * 0.04;
+
+            // Subtle flight through space on scroll:
+            // As user scrolls down, camera smoothly moves along Z and Y
+            const targetZ = 4.0 - scrollProgress * 1.8;
+            const targetCamY = -scrollProgress * 2.2;
+            camera.position.z += (targetZ - camera.position.z) * 0.06;
+            camera.position.y += (targetCamY - camera.position.y) * 0.06;
+
+            // Slow cosmic drift
+            starPoints.rotation.y = elapsed * 0.008;
+            starPoints.rotation.x = elapsed * 0.003;
+            twinklePoints.rotation.y = elapsed * 0.006;
+
+            renderer.render(scene, camera);
         }
-    });
+
+        animate();
+
+        // Share functionality
+        window.shareSite = function(btn) {
+            const originalText = btn ? btn.innerText : 'Share';
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                if (btn) {
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => btn.innerText = originalText, 2000);
+                }
+            });
+        };
     } else {
-        // Fallback for browsers without WebGL
         document.getElementById('bg-canvas').style.display = 'none';
     }
 
