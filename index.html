@@ -347,22 +347,43 @@
 
 <canvas id="bg-canvas"></canvas>
 
-<div class="header-bar">
-    <div style="display: flex; align-items: center; gap: 1rem; margin-right: auto;">
-        <img src="purple.gif" alt="Timmy the Sheep" title="Timmy the Sheep" style="height: 100px;">
-        <div id="profile-badge" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; backdrop-filter: blur(10px); display: none; flex-direction: column; gap: 4px; font-family: monospace; font-size: 0.9rem;">
-            <div id="profile-name" style="font-weight: bold; color: #a855f7;"></div>
-            <div id="profile-rank" style="opacity: 0.8;"></div>
+<header class="header-bar-wrapper">
+    <nav class="header-bar">
+        <div class="nav-brand-group">
+            <div class="mascot-orbit">
+                <img src="purple.gif" alt="Timmy the Sheep" title="Timmy the Sheep" class="nav-mascot">
+                <span class="orbit-beacon"></span>
+            </div>
+            <div id="profile-badge" class="nav-profile-badge">
+                <div id="profile-name" class="profile-name-text"></div>
+                <div id="profile-rank" class="profile-rank-text"></div>
+            </div>
         </div>
-    </div>
-    <div style="position: absolute; top: 20px; right: 20px; z-index: 20; display: flex; align-items: center;">
-        <a href="https://hypergenius12.github.io/crap-games/" target="_blank" rel="noopener" class="share-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;">Worse Games &rarr;</a>
-        <button class="share-btn" onclick="addBookmark()" style="margin-right: 10px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); color: #a855f7; padding: 0.2rem 0.5rem; font-size: 0.75rem;">Bookmark</button>
-        <button class="share-btn" onclick="openBugReportModal()" style="margin-right: 10px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">Report Bug</button>
-        <button class="share-btn" onclick="openFeedbackModal()" style="margin-right: 10px; background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #22c55e;">Submit Feedback</button>
-        <button class="share-btn" onclick="shareSite(this)">Share</button>
-    </div>
-</div>
+        <div class="nav-actions-group">
+            <a href="https://hypergenius12.github.io/crap-games/" target="_blank" rel="noopener" class="nav-pill worse-games-pill">
+                <span class="pill-dot amber"></span>
+                <span>Worse Games</span>
+                <span class="pill-arrow">&rarr;</span>
+            </a>
+            <button type="button" class="nav-pill bookmark-pill" onclick="addBookmark()" title="Bookmark hypergenius12">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                <span>Bookmark</span>
+            </button>
+            <button type="button" class="nav-pill bug-pill" onclick="openBugReportModal()" title="Report an issue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Report Bug</span>
+            </button>
+            <button type="button" class="nav-pill feedback-pill" onclick="openFeedbackModal()" title="Submit Feedback">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Feedback</span>
+            </button>
+            <button type="button" class="nav-pill share-pill" onclick="shareSite(this)" title="Share Website">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <span class="share-btn-text">Share</span>
+            </button>
+        </div>
+    </nav>
+</header>
 
 <script>
     function addBookmark() {
@@ -373,8 +394,14 @@
 </script>
 
 <div class="container">
-    <h1>hypergenius 12</h1>
-    <p class="subtitle">A curated selection of my web projects and experiments.</p>
+    <div class="hero-station">
+        <div class="station-chip">
+            <span class="pulsing-beacon"></span>
+            <span>DEEP SPACE OBSERVATORY &bull; SECTOR 12</span>
+        </div>
+        <h1 class="cosmic-title">hypergenius 12</h1>
+        <p class="subtitle">A curated constellation of standalone interactive games, simulations, and creative experiments floating in deep space.</p>
+    </div>
 
     <div class="projects-grid">
 
