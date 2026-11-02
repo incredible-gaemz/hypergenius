@@ -424,13 +424,6 @@ const _glowTransparentIndices = new Uint32Array(MAX_INDICES);
 const _slightGlowOpaqueIndices = new Uint32Array(MAX_INDICES);
 const _slightGlowTransparentIndices = new Uint32Array(MAX_INDICES);
 
-const MAX_CAVE_VERTICES = 400000;
-const MAX_CAVE_INDICES = Math.floor(MAX_CAVE_VERTICES / 4 * 6);
-const _cavePositions = new Float32Array(MAX_CAVE_VERTICES * 3);
-const _caveNormals = new Float32Array(MAX_CAVE_VERTICES * 3);
-const _caveUvs = new Float32Array(MAX_CAVE_VERTICES * 2);
-const _caveColors = new Float32Array(MAX_CAVE_VERTICES * 3);
-const _caveOpaqueIndices = new Uint32Array(MAX_CAVE_INDICES);
 
 const _rawGrassColors = new Float32Array(22 * 22 * 3);
 const _tempGrass = new Float32Array(22 * 22 * 3);
@@ -584,8 +577,6 @@ export class Chunk {
         this.mesh = null;
         this.waterMesh = null;
         this.endPortalMesh = null;
-        this.caveMesh = null;
-        this.caveBox = null;
         this.dirty = false;
         this._generated = false;
         this._inBuildQueue = false;
@@ -794,13 +785,6 @@ export class Chunk {
         let slightGlowOpaqueIndexCount = 0;
         let slightGlowTransparentIndexCount = 0;
 
-        let cavePosCount = 0;
-        let caveUvCount = 0;
-        let caveColorCount = 0;
-        let caveOpaqueIndexCount = 0;
-        let caveVertexCount = 0;
-        let actualMinY = Infinity, actualMaxY = -Infinity;
-        let caveMinY = Infinity, caveMaxY = -Infinity;
 
         let vertexCount = 0;
 
@@ -1595,59 +1579,8 @@ export class Chunk {
                                 bMult = blendedFoliage[bIdx + 2] / folPlainsB;
                             }
 
-                            // Subterranean face check: blocks completely underground in dark caves with no direct/ambient sky view
-                            const colTopY = topOpaqueY[(z + SKY_PAD) * SKY_DIM + (x + SKY_PAD)];
-                            const isSubterraneanFace = (y < colTopY - 2) && (baseSky < 0.85) && !currentProps.transparent && !currentProps.emissive && !currentProps.isLiquid && (currentBlockType !== BLOCKS.CACTUS);
-
                             const flipQuad = (aoColor[0] + aoColor[2] > aoColor[1] + aoColor[3]);
 
-                            if (isSubterraneanFace) {
-                                // Add to dedicated subterranean cave mesh (culled when player is outdoors on surface)
-                                for (let i = 0; i < 4; i++) {
-                                    const v = face.v[i];
-                                    let vx = x + v[0], vy = y + v[1], vz = z + v[2];
-                                    if (vy < caveMinY) caveMinY = vy;
-                                    if (vy > caveMaxY) caveMaxY = vy;
-
-                                    _cavePositions[cavePosCount++] = vx;
-                                    _cavePositions[cavePosCount++] = vy;
-                                    _cavePositions[cavePosCount++] = vz;
-
-                                    _caveNormals[cavePosCount - 3] = face.dir[0];
-                                    _caveNormals[cavePosCount - 2] = face.dir[1];
-                                    _caveNormals[cavePosCount - 1] = face.dir[2];
-
-                                    let vSky = baseSky;
-                                    if (face.dir[1] < 0 && vSky < 1.0) vSky = Math.max(0.48, vSky * 0.94);
-                                    let c = aoColor[i] * faceShade * vSky;
-                                    _caveColors[caveColorCount++] = c * rMult;
-                                    _caveColors[caveColorCount++] = c * gMult;
-                                    _caveColors[caveColorCount++] = c * bMult;
-                                }
-
-                                if (rotateUV) {
-                                    _caveUvs[caveUvCount++] = uvInfo.u; _caveUvs[caveUvCount++] = uvInfo.v + uvInfo.vSize;
-                                    _caveUvs[caveUvCount++] = uvInfo.u; _caveUvs[caveUvCount++] = uvInfo.v;
-                                    _caveUvs[caveUvCount++] = uvInfo.u + uvInfo.uSize; _caveUvs[caveUvCount++] = uvInfo.v;
-                                    _caveUvs[caveUvCount++] = uvInfo.u + uvInfo.uSize; _caveUvs[caveUvCount++] = uvInfo.v + uvInfo.vSize;
-                                } else {
-                                    _caveUvs[caveUvCount++] = uvInfo.u; _caveUvs[caveUvCount++] = uvInfo.v;
-                                    _caveUvs[caveUvCount++] = uvInfo.u + uvInfo.uSize; _caveUvs[caveUvCount++] = uvInfo.v;
-                                    _caveUvs[caveUvCount++] = uvInfo.u + uvInfo.uSize; _caveUvs[caveUvCount++] = uvInfo.v + uvInfo.vSize;
-                                    _caveUvs[caveUvCount++] = uvInfo.u; _caveUvs[caveUvCount++] = uvInfo.v + uvInfo.vSize;
-                                }
-
-                                const ci0 = caveVertexCount, ci1 = caveVertexCount + 1, ci2 = caveVertexCount + 2, ci3 = caveVertexCount + 3;
-                                if (flipQuad) {
-                                    _caveOpaqueIndices[caveOpaqueIndexCount++] = ci1; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci2; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci3;
-                                    _caveOpaqueIndices[caveOpaqueIndexCount++] = ci1; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci3; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci0;
-                                } else {
-                                    _caveOpaqueIndices[caveOpaqueIndexCount++] = ci0; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci1; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci2;
-                                    _caveOpaqueIndices[caveOpaqueIndexCount++] = ci0; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci2; _caveOpaqueIndices[caveOpaqueIndexCount++] = ci3;
-                                }
-                                caveVertexCount += 4;
-                            } else {
-                                // Add to main surface mesh
                                 for (let i = 0; i < 4; i++) {
                                     const v = face.v[i];
                                     let vx = x + v[0];
@@ -1666,9 +1599,6 @@ export class Chunk {
                                         if (v[2] === 0) vz = z + 0.0625;
                                         else if (v[2] === 1) vz = z + 0.9375;
                                     }
-
-                                    if (vy < actualMinY) actualMinY = vy;
-                                    if (vy > actualMaxY) actualMaxY = vy;
 
                                     _positions[posCount++] = vx;
                                     _positions[posCount++] = vy;
@@ -1777,7 +1707,6 @@ export class Chunk {
                     }
                 }
             }
-        }
 
         const geometry = new THREE.BufferGeometry();
         
@@ -1816,49 +1745,10 @@ export class Chunk {
         // Use shared materials instead of allocating new ones
         const materials = atlas.sharedMaterials;
 
-        if (actualMinY === Infinity) { actualMinY = 0; actualMaxY = CHUNK_HEIGHT; }
-        geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(CHUNK_SIZE/2, (actualMinY + actualMaxY)/2, CHUNK_SIZE/2), Math.max(16, (actualMaxY - actualMinY)/2 + 16));
-        geometry.boundingBox = new THREE.Box3(new THREE.Vector3(0, actualMinY - 0.5, 0), new THREE.Vector3(CHUNK_SIZE, actualMaxY + 0.5, CHUNK_SIZE));
-        this.worldBox.min.set(this.cx * CHUNK_SIZE - 1, actualMinY - 1, this.cz * CHUNK_SIZE - 1);
-        this.worldBox.max.set(this.cx * CHUNK_SIZE + CHUNK_SIZE + 1, actualMaxY + 1, this.cz * CHUNK_SIZE + CHUNK_SIZE + 1);
-
-        // Dedicated subterranean cave mesh (culled when player is outdoors on the surface)
-        if (caveOpaqueIndexCount > 0) {
-            const caveGeometry = new THREE.BufferGeometry();
-            caveGeometry.setIndex(new THREE.BufferAttribute(_caveOpaqueIndices.slice(0, caveOpaqueIndexCount), 1));
-            caveGeometry.setAttribute('position', new THREE.BufferAttribute(_cavePositions.slice(0, cavePosCount), 3));
-            caveGeometry.setAttribute('normal', new THREE.BufferAttribute(_caveNormals.slice(0, cavePosCount), 3));
-            caveGeometry.setAttribute('uv', new THREE.BufferAttribute(_caveUvs.slice(0, caveUvCount), 2));
-            caveGeometry.setAttribute('color', new THREE.BufferAttribute(_caveColors.slice(0, caveColorCount), 3));
-            caveGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(CHUNK_SIZE/2, (caveMinY + caveMaxY)/2, CHUNK_SIZE/2), Math.max(16, (caveMaxY - caveMinY)/2 + 16));
-            caveGeometry.boundingBox = new THREE.Box3(new THREE.Vector3(0, caveMinY - 0.5, 0), new THREE.Vector3(CHUNK_SIZE, caveMaxY + 0.5, CHUNK_SIZE));
-            this.caveBox = new THREE.Box3(
-                new THREE.Vector3(this.cx * CHUNK_SIZE - 1, caveMinY - 1, this.cz * CHUNK_SIZE - 1),
-                new THREE.Vector3(this.cx * CHUNK_SIZE + CHUNK_SIZE + 1, caveMaxY + 1, this.cz * CHUNK_SIZE + CHUNK_SIZE + 1)
-            );
-            if (this.caveMesh) {
-                this.caveMesh.geometry.dispose();
-                this.caveMesh.geometry = caveGeometry;
-                this.caveMesh.material = materials[0];
-            } else {
-                this.caveMesh = new THREE.Mesh(caveGeometry, materials[0]);
-                this.caveMesh.position.set(this.cx * CHUNK_SIZE, 0, this.cz * CHUNK_SIZE);
-                this.caveMesh.userData.isChunkMesh = true;
-                this.caveMesh.castShadow = false;
-                this.caveMesh.receiveShadow = true;
-                this.caveMesh.matrixAutoUpdate = false;
-                this.caveMesh.updateMatrix();
-            }
-            this.caveMesh.visible = false;
-            if (this.mesh && this.mesh.parent && !this.caveMesh.parent) {
-                this.mesh.parent.add(this.caveMesh);
-            }
-        } else if (this.caveMesh) {
-            if (this.caveMesh.parent) this.caveMesh.parent.remove(this.caveMesh);
-            this.caveMesh.geometry.dispose();
-            this.caveMesh = null;
-            this.caveBox = null;
-        }
+        geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(CHUNK_SIZE/2, CHUNK_HEIGHT/2, CHUNK_SIZE/2), Math.max(CHUNK_SIZE, CHUNK_HEIGHT/2));
+        geometry.boundingBox = new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(CHUNK_SIZE, CHUNK_HEIGHT, CHUNK_SIZE));
+        this.worldBox.min.set(this.cx * CHUNK_SIZE - 2, -2, this.cz * CHUNK_SIZE - 2);
+        this.worldBox.max.set(this.cx * CHUNK_SIZE + CHUNK_SIZE + 2, CHUNK_HEIGHT + 2, this.cz * CHUNK_SIZE + CHUNK_SIZE + 2);
 
         if (this.mesh) {
             this.mesh.geometry.dispose();
@@ -1978,12 +1868,6 @@ export class Chunk {
             this.endPortalMesh.geometry.dispose();
             this.endPortalMesh = null;
         }
-        if (this.caveMesh) {
-            if (this.caveMesh.parent) this.caveMesh.parent.remove(this.caveMesh);
-            this.caveMesh.geometry.dispose();
-            this.caveMesh = null;
-            this.caveBox = null;
-        }
         this._inBuildQueue = false;
         this._inGenQueue = false;
         this._generated = false;
@@ -2953,42 +2837,21 @@ export class World {
                 if (chunk.endPortalMesh && !chunk.endPortalMesh.parent) {
                     this.scene.add(chunk.endPortalMesh);
                 }
-                if (chunk.caveMesh && !chunk.caveMesh.parent) {
-                    this.scene.add(chunk.caveMesh);
-                }
                 buildsThisFrame++;
             }
         }
 
-        // Frustum culling and subterranean cave occlusion culling
+        // Frustum culling
         if (this.camera) {
             this.camera.updateMatrixWorld();
             this.projScreenMatrix.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
             this.frustum.setFromProjectionMatrix(this.projScreenMatrix);
-
-            const camX = this.camera.position.x;
-            const camY = this.camera.position.y;
-            const camZ = this.camera.position.z;
-            const surfaceY = this.getHighestBlock(camX, camZ);
-            // Player is underground when camera is 1.5+ blocks below highest surface block
-            const isPlayerUnderground = (camY < surfaceY - 1.5);
 
             for (const chunk of this.chunks.values()) {
                 const isVis = this.frustum.intersectsBox(chunk.worldBox);
                 if (chunk.mesh) chunk.mesh.visible = isVis;
                 if (chunk.waterMesh) chunk.waterMesh.visible = isVis;
                 if (chunk.endPortalMesh) chunk.endPortalMesh.visible = isVis;
-
-                if (chunk.caveMesh) {
-                    if (!isPlayerUnderground) {
-                        // Player is outdoors on the surface: NEVER render hidden subterranean blocks under the ground!
-                        chunk.caveMesh.visible = false;
-                    } else {
-                        // Player is underground: render cave meshes if within cave range and inside camera frustum!
-                        const dChunk = Math.max(Math.abs(chunk.cx - px), Math.abs(chunk.cz - pz));
-                        chunk.caveMesh.visible = (dChunk <= 4) && this.frustum.intersectsBox(chunk.caveBox || chunk.worldBox);
-                    }
-                }
             }
         }
 

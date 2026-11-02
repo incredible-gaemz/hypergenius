@@ -2279,19 +2279,19 @@ export async function createTextureAtlas(useMinecraft = true) {
     await initSteveSkin();
 
     const texture = new THREE.CanvasTexture(canvas);
-    texture.generateMipmaps = true;
+    texture.generateMipmaps = false;
     texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestMipmapLinearFilter;
-    texture.anisotropy = 4;
+    texture.minFilter = THREE.NearestFilter;
+    texture.anisotropy = 1;
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.needsUpdate = true;
 
     // UV helper: returns u,v coordinates (0-1) and size for a face
     const uUnit = TEX_SIZE / atlasW;
     const vUnit = TEX_SIZE / atlasH;
-    // Half-texel border inset guarantees no cross-tile texture atlas bleeding with mipmaps
-    const epsU = 0.35 / atlasW;
-    const epsV = 0.35 / atlasH;
+    // Sub-texel precision epsilon (prevents float rounding at 1.0 without cropping visible block pixels)
+    const epsU = 0.002 / atlasW;
+    const epsV = 0.002 / atlasH;
 
     function getUV(blockType, face, biomeName = null) {
         const map = uvMap[blockType];
