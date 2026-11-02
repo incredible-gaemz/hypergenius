@@ -629,351 +629,169 @@
     if (isWebGLAvailable()) {
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x06070f);
-
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 4.0;
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // --- Procedural Canvas Textures for Organic Space ---
-        // 1. Soft Circular Star Texture
-        function createStarTexture() {
-            const c = document.createElement('canvas');
-            c.width = 32;
-            c.height = 32;
-            const ctx = c.getContext('2d');
-            const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 15);
-            g.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            g.addColorStop(0.25, 'rgba(235, 245, 255, 0.85)');
-            g.addColorStop(0.65, 'rgba(180, 210, 255, 0.25)');
-            g.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, 32, 32);
-            const tex = new THREE.CanvasTexture(c);
-            tex.needsUpdate = true;
-            return tex;
-        }
+        // Smooth mouse tracking with inertia & velocity
+        let targetX = 0.5, targetY = 0.5;
+        let currentX = 0.5, currentY = 0.5;
+        let velX = 0, velY = 0;
+        let scrollYProgress = 0;
 
-        // 2. Soft Organic Volumetric Nebula Cloud Puffs
-        function createNebulaTexture(colorCenter, colorMid) {
-            const c = document.createElement('canvas');
-            c.width = 512;
-            c.height = 512;
-            const ctx = c.getContext('2d');
-            const cx = 256, cy = 256;
-
-            // Base soft gradient
-            const baseG = ctx.createRadialGradient(cx, cy, 0, cx, cy, 240);
-            baseG.addColorStop(0, colorCenter);
-            baseG.addColorStop(0.4, colorMid);
-            baseG.addColorStop(0.8, 'rgba(6, 10, 25, 0.05)');
-            baseG.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = baseG;
-            ctx.fillRect(0, 0, 512, 512);
-
-            // Multiple organic asymmetric puffs
-            for (let i = 0; i < 7; i++) {
-                const angle = (i / 7) * Math.PI * 2 + (Math.random() * 0.4);
-                const dist = 60 + Math.random() * 80;
-                const px = cx + Math.cos(angle) * dist;
-                const py = cy + Math.sin(angle) * dist;
-                const r = 100 + Math.random() * 60;
-                const pg = ctx.createRadialGradient(px, py, 0, px, py, r);
-                pg.addColorStop(0, colorCenter.replace(/[\d\.]+\)$/, '0.18)'));
-                pg.addColorStop(0.5, colorMid.replace(/[\d\.]+\)$/, '0.06)'));
-                pg.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = pg;
-                ctx.beginPath();
-                ctx.arc(px, py, r, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            const tex = new THREE.CanvasTexture(c);
-            tex.needsUpdate = true;
-            return tex;
-        }
-
-        const starTex = createStarTexture();
-        
-        // Natural astronomical deep space nebula hues (deep cosmic indigo, ethereal cyan, muted cosmic violet)
-        const nebulaTexIndigo = createNebulaTexture('rgba(45, 30, 95, 0.35)', 'rgba(25, 18, 60, 0.12)');
-        const nebulaTexCyan = createNebulaTexture('rgba(16, 65, 110, 0.32)', 'rgba(8, 35, 65, 0.1)');
-        const nebulaTexViolet = createNebulaTexture('rgba(65, 25, 80, 0.28)', 'rgba(30, 10, 45, 0.09)');
-
-        // --- Nebula Clouds in 3D Space ---
-        const nebulaGroup = new THREE.Group();
-        const nebulaMeshes = [];
-        const nebulaData = [
-            { tex: nebulaTexIndigo, x: -16, y: 10, z: -32, size: 48, rot: 0.00012, opacity: 0.38 },
-            { tex: nebulaTexCyan,   x: 18, y: -6, z: -36, size: 52, rot: -0.00015, opacity: 0.34 },
-            { tex: nebulaTexViolet, x: -4, y: -14, z: -28, size: 44, rot: 0.0001, opacity: 0.3 },
-            { tex: nebulaTexCyan,   x: -18, y: -12, z: -40, size: 46, rot: -0.00014, opacity: 0.28 },
-            { tex: nebulaTexIndigo, x: 20, y: 14, z: -38, size: 50, rot: 0.00013, opacity: 0.32 },
-            { tex: nebulaTexViolet, x: 2, y: 16, z: -30, size: 42, rot: -0.00011, opacity: 0.26 }
-        ];
-
-        nebulaData.forEach(d => {
-            const geo = new THREE.PlaneGeometry(d.size, d.size);
-            const mat = new THREE.MeshBasicMaterial({
-                map: d.tex,
-                transparent: true,
-                opacity: d.opacity,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(d.x, d.y, d.z);
-            mesh.rotation.z = Math.random() * Math.PI * 2;
-            mesh.userData = {
-                rotSpeed: d.rot,
-                baseY: d.y,
-                baseOpacity: d.opacity,
-                phase: Math.random() * Math.PI * 2
-            };
-            nebulaMeshes.push(mesh);
-            nebulaGroup.add(mesh);
-        });
-        scene.add(nebulaGroup);
-
-        // --- Realistic Deep Starfield (3,200 Stars) ---
-        const starCount = 3200;
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = new Float32Array(starCount * 3);
-        const starOrigPos = new Float32Array(starCount * 3);
-        const starVel = new Float32Array(starCount * 3);
-        const starColors = new Float32Array(starCount * 3);
-
-        // Astronomical star spectral colors
-        const starColorsPalette = [
-            [1.0, 1.0, 1.0],       // Brilliant White (70%)
-            [1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0],
-            [0.82, 0.90, 1.0],     // Soft Blue-White (15%)
-            [1.0, 0.95, 0.82],     // Pale Sun Gold (10%)
-            [0.92, 0.85, 1.0]      // Soft Lavender (5%)
-        ];
-
-        for (let i = 0; i < starCount; i++) {
-            const i3 = i * 3;
-            const x = (Math.random() - 0.5) * 80;
-            const y = (Math.random() - 0.5) * 80;
-            const z = (Math.random() - 0.5) * 65 - 10;
-
-            starPos[i3] = x;
-            starPos[i3 + 1] = y;
-            starPos[i3 + 2] = z;
-
-            starOrigPos[i3] = x;
-            starOrigPos[i3 + 1] = y;
-            starOrigPos[i3 + 2] = z;
-
-            starVel[i3] = 0;
-            starVel[i3 + 1] = 0;
-            starVel[i3 + 2] = 0;
-
-            const c = starColorsPalette[Math.floor(Math.random() * starColorsPalette.length)];
-            const lum = 0.5 + Math.random() * 0.5;
-            starColors[i3] = c[0] * lum;
-            starColors[i3 + 1] = c[1] * lum;
-            starColors[i3 + 2] = c[2] * lum;
-        }
-
-        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-
-        const starMat = new THREE.PointsMaterial({
-            size: 0.13,
-            map: starTex,
-            transparent: true,
-            vertexColors: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-
-        const starPoints = new THREE.Points(starGeo, starMat);
-        scene.add(starPoints);
-
-        // --- Subtle Twinkling Prominent Stars (70 Stars) ---
-        const twinkleCount = 70;
-        const twinkleGeo = new THREE.BufferGeometry();
-        const twinklePos = new Float32Array(twinkleCount * 3);
-
-        for (let i = 0; i < twinkleCount; i++) {
-            const i3 = i * 3;
-            twinklePos[i3] = (Math.random() - 0.5) * 60;
-            twinklePos[i3 + 1] = (Math.random() - 0.5) * 55;
-            twinklePos[i3 + 2] = (Math.random() - 0.5) * 40 - 5;
-        }
-
-        twinkleGeo.setAttribute('position', new THREE.BufferAttribute(twinklePos, 3));
-
-        const twinkleMat = new THREE.PointsMaterial({
-            size: 0.28,
-            map: starTex,
-            transparent: true,
-            opacity: 0.75,
-            color: 0xffffff,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-
-        const twinklePoints = new THREE.Points(twinkleGeo, twinkleMat);
-        scene.add(twinklePoints);
-
-        // --- Gentle Shooting Star / Meteor ---
-        const meteor = {
-            active: false,
-            pos: new THREE.Vector3(),
-            dir: new THREE.Vector3(-1.2, -0.7, 0.1).normalize(),
-            speed: 0.6,
-            life: 0,
-            maxLife: 35,
-            line: null
-        };
-
-        const meteorGeo = new THREE.BufferGeometry();
-        const meteorPositions = new Float32Array(6);
-        meteorGeo.setAttribute('position', new THREE.BufferAttribute(meteorPositions, 3));
-        const meteorMat = new THREE.LineBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0,
-            blending: THREE.AdditiveBlending
-        });
-        meteor.line = new THREE.Line(meteorGeo, meteorMat);
-        scene.add(meteor.line);
-
-        function spawnMeteor() {
-            if (meteor.active) return;
-            meteor.active = true;
-            meteor.life = 0;
-            meteor.maxLife = 30 + Math.random() * 20;
-            const x = 15 + Math.random() * 20;
-            const y = 10 + Math.random() * 12;
-            const z = -15 - Math.random() * 15;
-            meteor.pos.set(x, y, z);
-        }
-
-        setInterval(() => {
-            if (Math.random() > 0.4) spawnMeteor();
-        }, 9000);
-
-        // --- Interaction & Parallax ---
-        let mouseX = 0, mouseY = 0;
-        let targetX = 0, targetY = 0;
-        let scrollProgress = 0;
-
-        const halfW = window.innerWidth / 2;
-        const halfH = window.innerHeight / 2;
-
-        document.addEventListener('mousemove', e => {
-            mouseX = (e.clientX - halfW) / halfW;
-            mouseY = (e.clientY - halfH) / halfH;
+        window.addEventListener('mousemove', e => {
+            targetX = e.clientX / window.innerWidth;
+            targetY = 1.0 - (e.clientY / window.innerHeight);
         });
 
         function updateScroll() {
             const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-            scrollProgress = window.scrollY / maxScroll;
+            scrollYProgress = window.scrollY / maxScroll;
         }
         window.addEventListener('scroll', updateScroll, { passive: true });
         updateScroll();
 
+        // --- GLSL Interactive Smooth Deforming Mesh Gradient ---
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = vec4(position.xy, 0.0, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            precision highp float;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            uniform vec2 u_mouse;
+            uniform vec2 u_mouse_vel;
+            uniform float u_scroll;
+            varying vec2 vUv;
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+                float aspect = u_resolution.x / u_resolution.y;
+                vec2 p = uv;
+                p.x *= aspect;
+
+                vec2 m = u_mouse;
+                m.x *= aspect;
+
+                // Smooth Gaussian fluid deformation around the mouse cursor
+                vec2 dMouse = p - m;
+                float distM = length(dMouse);
+
+                // Elastic displacement field
+                float deformRadius = 0.65;
+                float deformFactor = exp(-distM * distM / (2.0 * deformRadius * deformRadius));
+                vec2 deform = normalize(dMouse + 0.0001) * deformFactor * 0.16;
+
+                // Dynamic velocity drag
+                deform += u_mouse_vel * deformFactor * 0.45;
+
+                // Deformed gradient coordinates with smooth scroll flow
+                vec2 warpP = p - deform;
+                warpP.y -= u_scroll * 0.35;
+
+                float t = u_time * 0.45;
+
+                // 4 Smoothly drifting organic gradient color orbs
+                vec2 c1 = vec2(0.32 * aspect + 0.22 * cos(t * 0.65), 0.30 + 0.18 * sin(t * 0.75));
+                vec2 c2 = vec2(0.72 * aspect + 0.20 * sin(t * 0.55), 0.38 + 0.22 * cos(t * 0.65));
+                vec2 c3 = vec2(0.52 * aspect + 0.24 * cos(t * 0.48), 0.76 + 0.18 * sin(t * 0.58));
+                vec2 c4 = vec2(0.24 * aspect + 0.18 * sin(t * 0.72), 0.72 + 0.20 * cos(t * 0.48));
+
+                // Distances to color centers
+                float d1 = length(warpP - c1);
+                float d2 = length(warpP - c2);
+                float d3 = length(warpP - c3);
+                float d4 = length(warpP - c4);
+                float dm = length(p - m); // Distance for cursor ambient illumination
+
+                // Smooth, broad inverse distance weighting
+                float w1 = 1.0 / (pow(d1 * 1.5, 2.0) + 0.32);
+                float w2 = 1.0 / (pow(d2 * 1.4, 2.0) + 0.32);
+                float w3 = 1.0 / (pow(d3 * 1.6, 2.0) + 0.32);
+                float w4 = 1.0 / (pow(d4 * 1.5, 2.0) + 0.32);
+
+                // Elegant purple & indigo palette
+                vec3 colBase   = vec3(0.04, 0.035, 0.06); // Deep obsidian void (#0a0910)
+                vec3 colPurple = vec3(0.52, 0.18, 0.88); // Royal purple (#852ee0)
+                vec3 colIndigo = vec3(0.24, 0.16, 0.70); // Deep indigo (#3d29b3)
+                vec3 colViolet = vec3(0.68, 0.28, 0.96); // Electric violet (#ae47f5)
+                vec3 colPlum   = vec3(0.38, 0.10, 0.52); // Rich plum (#611a85)
+
+                float totalW = w1 + w2 + w3 + w4;
+                vec3 blendColor = (colPurple * w1 + colIndigo * w2 + colViolet * w3 + colPlum * w4) / totalW;
+
+                // Density mask
+                float density = clamp((w1 + w2 + w3 + w4) * 0.28, 0.0, 1.0);
+                vec3 finalColor = mix(colBase, blendColor, density * 0.85);
+
+                // Interactive ambient light orb directly under the cursor
+                float mouseGlow = exp(-dm * dm / 0.15);
+                finalColor += vec3(0.58, 0.28, 0.98) * mouseGlow * 0.32;
+
+                // Smooth edge vignette
+                float vig = 1.0 - length((uv - 0.5) * 0.55);
+                finalColor *= clamp(vig, 0.2, 1.0);
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        const gradientMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                u_time: { value: 0 },
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+                u_mouse_vel: { value: new THREE.Vector2(0, 0) },
+                u_scroll: { value: 0 }
+            },
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            depthWrite: false,
+            depthTest: false
+        });
+
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), gradientMaterial);
+        scene.add(quad);
+
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            gradientMaterial.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
         });
 
-        // Gentle star bounce on background click
-        document.addEventListener('mousedown', e => {
-            if (e.target.tagName === 'CANVAS' || e.target.classList.contains('container')) {
-                for (let i = 0; i < starCount * 3; i++) {
-                    starVel[i] = (Math.random() - 0.5) * 0.8;
-                }
-            }
+        // Click adds a subtle elastic pulse
+        window.addEventListener('mousedown', () => {
+            velX += (Math.random() - 0.5) * 0.15;
+            velY += (Math.random() - 0.5) * 0.15;
         });
 
-        // Theme listener
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            scene.background.setHex(e.matches ? 0x06070f : 0xf4f4f5);
-            starMat.color.setHex(e.matches ? 0xffffff : 0x475569);
-        });
-
-        // --- Render Loop ---
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
+
+            // Silky smooth spring interpolation for mouse coordinates
+            const prevX = currentX;
+            const prevY = currentY;
+
+            currentX += (targetX - currentX) * 0.07;
+            currentY += (targetY - currentY) * 0.07;
+
+            velX = (currentX - prevX) * 4.0;
+            velY = (currentY - prevY) * 4.0;
+
             const elapsed = clock.getElapsedTime();
-
-            // 1. Slow, majestic nebula rotation & subtle breathing
-            nebulaMeshes.forEach(mesh => {
-                mesh.rotation.z += mesh.userData.rotSpeed;
-                mesh.material.opacity = mesh.userData.baseOpacity + Math.sin(elapsed * 0.5 + mesh.userData.phase) * 0.03;
-                // Scroll parallax: gentle depth shift
-                mesh.position.y = mesh.userData.baseY + scrollProgress * 5;
-            });
-
-            // 2. Star spring physics on click
-            const positions = starGeo.attributes.position.array;
-            let needsUpdate = false;
-            for (let i = 0; i < starCount * 3; i++) {
-                if (Math.abs(starVel[i]) > 0.0001 || Math.abs(positions[i] - starOrigPos[i]) > 0.0001) {
-                    const force = (starOrigPos[i] - positions[i]) * 0.05;
-                    starVel[i] += force;
-                    starVel[i] *= 0.88;
-                    positions[i] += starVel[i];
-                    needsUpdate = true;
-                }
-            }
-            if (needsUpdate) starGeo.attributes.position.needsUpdate = true;
-
-            // 3. Twinkling stars
-            twinkleMat.opacity = 0.55 + Math.sin(elapsed * 2.5) * 0.3;
-
-            // 4. Meteor animation
-            if (meteor.active) {
-                meteor.life++;
-                const head = meteor.pos.clone().add(meteor.dir.clone().multiplyScalar(meteor.life * meteor.speed));
-                const tailLen = Math.min(meteor.life * meteor.speed * 0.7, 3.2);
-                const tail = head.clone().sub(meteor.dir.clone().multiplyScalar(tailLen));
-
-                const mPos = meteor.line.geometry.attributes.position.array;
-                mPos[0] = head.x; mPos[1] = head.y; mPos[2] = head.z;
-                mPos[3] = tail.x; mPos[4] = tail.y; mPos[5] = tail.z;
-                meteor.line.geometry.attributes.position.needsUpdate = true;
-
-                const fade = 1 - (meteor.life / meteor.maxLife);
-                meteor.line.material.opacity = Math.max(0, fade * 0.85);
-
-                if (meteor.life >= meteor.maxLife) {
-                    meteor.active = false;
-                    meteor.line.material.opacity = 0;
-                }
-            }
-
-            // 5. Parallax: Camera smooth response to mouse and scroll
-            targetX = mouseX * 0.05;
-            targetY = -mouseY * 0.04;
-
-            camera.rotation.y += (targetX - camera.rotation.y) * 0.04;
-            camera.rotation.x += (targetY - camera.rotation.x) * 0.04;
-
-            // Subtle flight through space on scroll:
-            // As user scrolls down, camera smoothly moves along Z and Y
-            const targetZ = 4.0 - scrollProgress * 1.8;
-            const targetCamY = -scrollProgress * 2.2;
-            camera.position.z += (targetZ - camera.position.z) * 0.06;
-            camera.position.y += (targetCamY - camera.position.y) * 0.06;
-
-            // Slow cosmic drift
-            starPoints.rotation.y = elapsed * 0.008;
-            starPoints.rotation.x = elapsed * 0.003;
-            twinklePoints.rotation.y = elapsed * 0.006;
+            gradientMaterial.uniforms.u_time.value = elapsed;
+            gradientMaterial.uniforms.u_mouse.value.set(currentX, currentY);
+            gradientMaterial.uniforms.u_mouse_vel.value.set(velX, velY);
+            gradientMaterial.uniforms.u_scroll.value = scrollYProgress;
 
             renderer.render(scene, camera);
         }
