@@ -629,21 +629,145 @@
     if (isWebGLAvailable()) {
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        scene.background = new THREE.Color(0x09090b);
+
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 4.2;
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Smooth mouse tracking with inertia & velocity
-        let targetX = 0.5, targetY = 0.5;
-        let currentX = 0.5, currentY = 0.5;
-        let velX = 0, velY = 0;
+        // Soft Studio Lighting so 3D confetti faces catch realistic glints & specular sheen
+        const ambientLight = new THREE.AmbientLight(0x777788, 0.85);
+        scene.add(ambientLight);
+
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.95);
+        dirLight1.position.set(-2, 4, 3);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0xaabbdd, 0.55);
+        dirLight2.position.set(3, -2, 2);
+        scene.add(dirLight2);
+
+        // --- 3D Fluttering White Confetti Geometry & Instanced Mesh ---
+        const confettiCount = 650;
+        // Rectangular paper slip geometry
+        const slipGeo = new THREE.PlaneGeometry(0.065, 0.038);
+        
+        // Double-sided clean white paper material with realistic shading
+        const confettiMat = new THREE.MeshLambertMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.88
+        });
+
+        const instancedMesh = new THREE.InstancedMesh(slipGeo, confettiMat, confettiCount);
+        instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        scene.add(instancedMesh);
+
+        // Individual physics & animation state for each confetti piece
+        const dummy = new THREE.Object3D();
+        const confettiData = [];
+
+        for (let i = 0; i < confettiCount; i++) {
+            // Distributed across 3D space
+            const x = (Math.random() - 0.5) * 16;
+            const y = (Math.random() - 0.5) * 14;
+            const z = (Math.random() - 0.5) * 8 - 0.5;
+
+            // Random initial 3D orientation
+            const rx = Math.random() * Math.PI * 2;
+            const ry = Math.random() * Math.PI * 2;
+            const rz = Math.random() * Math.PI * 2;
+
+            // Varied scales (tiny distant flakes to crisp foreground slips)
+            const scale = 0.6 + Math.random() * 0.9;
+
+            confettiData.push({
+                baseX: x, baseY: y, baseZ: z,
+                x: x, y: y, z: z,
+                vx: 0, vy: 0, vz: 0,
+                rx: rx, ry: ry, rz: rz,
+                // Gentle zero-G tumbling speeds
+                spinX: (Math.random() - 0.5) * 0.025,
+                spinY: (Math.random() - 0.5) * 0.035,
+                spinZ: (Math.random() - 0.5) * 0.02,
+                // Harmonic sway properties
+                swaySpeed: 0.5 + Math.random() * 1.0,
+                swayRadius: 0.08 + Math.random() * 0.15,
+                phase: Math.random() * Math.PI * 2,
+                scale: scale
+            });
+        }
+
+        // --- Mouse Interaction & Parallax ---
+        let mouseX = 0, mouseY = 0;
+        let targetRotX = 0, targetRotY = 0;
         let scrollYProgress = 0;
+        let prevMouseX = 0, prevMouseY = 0;
+
+        const halfW = window.innerWidth / 2;
+        const halfH = window.innerHeight / 2;
 
         window.addEventListener('mousemove', e => {
-            targetX = e.clientX / window.innerWidth;
-            targetY = 1.0 - (e.clientY / window.innerHeight);
+            const mX = (e.clientX - halfW) / halfW;
+            const mY = (e.clientY - halfH) / halfH;
+            mouseX = mX;
+            mouseY = mY;
+
+            // Mouse breeze: gently push confetti in cursor's wake
+            const worldMouseX = mX * 7.0;
+            const worldMouseY = -mY * 5.0;
+            const deltaX = mX - prevMouseX;
+            const deltaY = mY - prevMouseY;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const c = confettiData[i];
+                const dx = c.x - worldMouseX;
+                const dy = c.y - worldMouseY;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < 2.5) {
+                    const dist = Math.sqrt(distSq);
+                    const force = (1.0 - dist / 1.6) * 0.035;
+                    c.vx += (dx / dist) * force + deltaX * 0.08;
+                    c.vy += (dy / dist) * force - deltaY * 0.08;
+                    // Additional flutter spin when mouse passes by
+                    c.rx += deltaY * 0.4;
+                    c.ry += deltaX * 0.4;
+                }
+            }
+            prevMouseX = mX;
+            prevMouseY = mY;
+        });
+
+        // Click scatter burst: energetic confetti pop that springs back gracefully
+        window.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'CANVAS' || e.target.classList.contains('container') || e.target.classList.contains('header-bar')) {
+                const mX = (e.clientX - halfW) / halfW;
+                const mY = (e.clientY - halfH) / halfH;
+                const clickX = mX * 7.0;
+                const clickY = -mY * 5.0;
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const c = confettiData[i];
+                    const dx = c.x - clickX;
+                    const dy = c.y - clickY;
+                    const distSq = dx * dx + dy * dy;
+
+                    if (distSq < 16.0) {
+                        const dist = Math.sqrt(distSq) + 0.1;
+                        const force = (1.0 - Math.min(1.0, dist / 4.0)) * 0.45;
+                        c.vx += (dx / dist) * force * (0.8 + Math.random() * 0.6);
+                        c.vy += (dy / dist) * force * (0.8 + Math.random() * 0.6);
+                        c.vz += (Math.random() - 0.5) * force * 1.2;
+                        c.spinX += (Math.random() - 0.5) * 0.15;
+                        c.spinY += (Math.random() - 0.5) * 0.15;
+                    }
+                }
+            }
         });
 
         function updateScroll() {
@@ -653,145 +777,83 @@
         window.addEventListener('scroll', updateScroll, { passive: true });
         updateScroll();
 
-        // --- GLSL Interactive Smooth Deforming Mesh Gradient ---
-        const vertexShader = `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = vec4(position.xy, 0.0, 1.0);
-            }
-        `;
-
-        const fragmentShader = `
-            precision highp float;
-            uniform float u_time;
-            uniform vec2 u_resolution;
-            uniform vec2 u_mouse;
-            uniform vec2 u_mouse_vel;
-            uniform float u_scroll;
-            varying vec2 vUv;
-
-            void main() {
-                vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-                float aspect = u_resolution.x / u_resolution.y;
-                vec2 p = uv;
-                p.x *= aspect;
-
-                vec2 m = u_mouse;
-                m.x *= aspect;
-
-                // Smooth Gaussian fluid deformation around the mouse cursor
-                vec2 dMouse = p - m;
-                float distM = length(dMouse);
-
-                // Elastic displacement field
-                float deformRadius = 0.65;
-                float deformFactor = exp(-distM * distM / (2.0 * deformRadius * deformRadius));
-                vec2 deform = normalize(dMouse + 0.0001) * deformFactor * 0.16;
-
-                // Dynamic velocity drag
-                deform += u_mouse_vel * deformFactor * 0.45;
-
-                // Deformed gradient coordinates with smooth scroll flow
-                vec2 warpP = p - deform;
-                warpP.y -= u_scroll * 0.35;
-
-                float t = u_time * 0.45;
-
-                // 4 Smoothly drifting organic gradient color orbs
-                vec2 c1 = vec2(0.32 * aspect + 0.22 * cos(t * 0.65), 0.30 + 0.18 * sin(t * 0.75));
-                vec2 c2 = vec2(0.72 * aspect + 0.20 * sin(t * 0.55), 0.38 + 0.22 * cos(t * 0.65));
-                vec2 c3 = vec2(0.52 * aspect + 0.24 * cos(t * 0.48), 0.76 + 0.18 * sin(t * 0.58));
-                vec2 c4 = vec2(0.24 * aspect + 0.18 * sin(t * 0.72), 0.72 + 0.20 * cos(t * 0.48));
-
-                // Distances to color centers
-                float d1 = length(warpP - c1);
-                float d2 = length(warpP - c2);
-                float d3 = length(warpP - c3);
-                float d4 = length(warpP - c4);
-                float dm = length(p - m); // Distance for cursor ambient illumination
-
-                // Smooth, broad inverse distance weighting
-                float w1 = 1.0 / (pow(d1 * 1.5, 2.0) + 0.32);
-                float w2 = 1.0 / (pow(d2 * 1.4, 2.0) + 0.32);
-                float w3 = 1.0 / (pow(d3 * 1.6, 2.0) + 0.32);
-                float w4 = 1.0 / (pow(d4 * 1.5, 2.0) + 0.32);
-
-                // Elegant purple & indigo palette
-                vec3 colBase   = vec3(0.04, 0.035, 0.06); // Deep obsidian void (#0a0910)
-                vec3 colPurple = vec3(0.52, 0.18, 0.88); // Royal purple (#852ee0)
-                vec3 colIndigo = vec3(0.24, 0.16, 0.70); // Deep indigo (#3d29b3)
-                vec3 colViolet = vec3(0.68, 0.28, 0.96); // Electric violet (#ae47f5)
-                vec3 colPlum   = vec3(0.38, 0.10, 0.52); // Rich plum (#611a85)
-
-                float totalW = w1 + w2 + w3 + w4;
-                vec3 blendColor = (colPurple * w1 + colIndigo * w2 + colViolet * w3 + colPlum * w4) / totalW;
-
-                // Density mask
-                float density = clamp((w1 + w2 + w3 + w4) * 0.28, 0.0, 1.0);
-                vec3 finalColor = mix(colBase, blendColor, density * 0.85);
-
-                // Interactive ambient light orb directly under the cursor
-                float mouseGlow = exp(-dm * dm / 0.15);
-                finalColor += vec3(0.58, 0.28, 0.98) * mouseGlow * 0.32;
-
-                // Smooth edge vignette
-                float vig = 1.0 - length((uv - 0.5) * 0.55);
-                finalColor *= clamp(vig, 0.2, 1.0);
-
-                gl_FragColor = vec4(finalColor, 1.0);
-            }
-        `;
-
-        const gradientMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                u_time: { value: 0 },
-                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
-                u_mouse_vel: { value: new THREE.Vector2(0, 0) },
-                u_scroll: { value: 0 }
-            },
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            depthWrite: false,
-            depthTest: false
-        });
-
-        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), gradientMaterial);
-        scene.add(quad);
-
         window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            gradientMaterial.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
         });
 
-        // Click adds a subtle elastic pulse
-        window.addEventListener('mousedown', () => {
-            velX += (Math.random() - 0.5) * 0.15;
-            velY += (Math.random() - 0.5) * 0.15;
+        // Dynamic theme match
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            scene.background.setHex(e.matches ? 0x09090b : 0xf4f4f5);
+            confettiMat.color.setHex(e.matches ? 0xffffff : 0x27272a);
         });
 
+        // --- Render & Physics Loop ---
         const clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
-
-            // Silky smooth spring interpolation for mouse coordinates
-            const prevX = currentX;
-            const prevY = currentY;
-
-            currentX += (targetX - currentX) * 0.07;
-            currentY += (targetY - currentY) * 0.07;
-
-            velX = (currentX - prevX) * 4.0;
-            velY = (currentY - prevY) * 4.0;
-
             const elapsed = clock.getElapsedTime();
-            gradientMaterial.uniforms.u_time.value = elapsed;
-            gradientMaterial.uniforms.u_mouse.value.set(currentX, currentY);
-            gradientMaterial.uniforms.u_mouse_vel.value.set(velX, velY);
-            gradientMaterial.uniforms.u_scroll.value = scrollYProgress;
+
+            // Update each individual confetti piece
+            for (let i = 0; i < confettiCount; i++) {
+                const c = confettiData[i];
+
+                // Harmonic zero-G air sway
+                const swayX = Math.sin(elapsed * c.swaySpeed + c.phase) * c.swayRadius;
+                const swayY = Math.cos(elapsed * (c.swaySpeed * 0.8) + c.phase) * (c.swayRadius * 0.7);
+
+                // Spring physics back to base position
+                const targetX = c.baseX + swayX;
+                const targetY = c.baseY + swayY;
+                const targetZ = c.baseZ;
+
+                const fx = (targetX - c.x) * 0.035;
+                const fy = (targetY - c.y) * 0.035;
+                const fz = (targetZ - c.z) * 0.035;
+
+                c.vx = (c.vx + fx) * 0.90; // air damping
+                c.vy = (c.vy + fy) * 0.90;
+                c.vz = (c.vz + fz) * 0.90;
+
+                c.x += c.vx;
+                c.y += c.vy;
+                c.z += c.vz;
+
+                // Tumble and spin
+                c.rx += c.spinX;
+                c.ry += c.spinY;
+                c.rz += c.spinZ;
+
+                // Damp excess spin back to ambient tumble
+                c.spinX *= 0.985;
+                c.spinY *= 0.985;
+                c.spinZ *= 0.985;
+
+                // Update transformation matrix
+                dummy.position.set(c.x, c.y, c.z);
+                dummy.rotation.set(c.rx, c.ry, c.rz);
+                dummy.scale.set(c.scale, c.scale, c.scale);
+                dummy.updateMatrix();
+
+                instancedMesh.setMatrixAt(i, dummy.matrix);
+            }
+            instancedMesh.instanceMatrix.needsUpdate = true;
+
+            // Camera Parallax & Subtle Flight
+            targetRotX = -mouseY * 0.05;
+            targetRotY = mouseX * 0.06;
+
+            camera.rotation.y += (targetRotY - camera.rotation.y) * 0.05;
+            camera.rotation.x += (targetRotX - camera.rotation.x) * 0.05;
+
+            // Scroll parallax: camera glides gently through confetti
+            const targetCamY = -scrollYProgress * 2.5;
+            const targetCamZ = 4.2 - scrollYProgress * 1.2;
+            camera.position.y += (targetCamY - camera.position.y) * 0.06;
+            camera.position.z += (targetCamZ - camera.position.z) * 0.06;
 
             renderer.render(scene, camera);
         }
