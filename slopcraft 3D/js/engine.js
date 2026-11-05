@@ -821,6 +821,12 @@ export class Chunk {
                 }
             };
 
+            const sky = isGlowing ? 1.0 : getSkyLightFactor(bx, by, bz);
+            const cTop = aoMult * 1.0 * sky;
+            const cBot = aoMult * 0.55 * sky;
+            const cX = aoMult * 0.75 * sky;
+            const cZ = aoMult * 0.85 * sky;
+
             // Top (+Y)
             if (!(cullMask & 1)) {
                 _positions[posCount++] = minX; _positions[posCount++] = maxY; _positions[posCount++] = maxZ;
@@ -830,7 +836,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = 0; _normals[posCount - 11 + k * 3] = 1; _normals[posCount - 10 + k * 3] = 0;
-                    _colors[colorCount++] = aoMult; _colors[colorCount++] = aoMult; _colors[colorCount++] = aoMult;
+                    _colors[colorCount++] = cTop; _colors[colorCount++] = cTop; _colors[colorCount++] = cTop;
                 }
 
                 _uvs[uvCount++] = uvTop.u + (minX - bx) * uvTop.uSize; _uvs[uvCount++] = uvTop.v + (minZ - bz) * uvTop.vSize;
@@ -852,8 +858,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = 0; _normals[posCount - 11 + k * 3] = -1; _normals[posCount - 10 + k * 3] = 0;
-                    const c = aoMult * 0.5;
-                    _colors[colorCount++] = c; _colors[colorCount++] = c; _colors[colorCount++] = c;
+                    _colors[colorCount++] = cBot; _colors[colorCount++] = cBot; _colors[colorCount++] = cBot;
                 }
 
                 _uvs[uvCount++] = uvBottom.u + (minX - bx) * uvBottom.uSize; _uvs[uvCount++] = uvBottom.v + (minZ - bz) * uvBottom.vSize;
@@ -875,8 +880,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = 1; _normals[posCount - 11 + k * 3] = 0; _normals[posCount - 10 + k * 3] = 0;
-                    const c = aoMult * 0.6;
-                    _colors[colorCount++] = c; _colors[colorCount++] = c; _colors[colorCount++] = c;
+                    _colors[colorCount++] = cX; _colors[colorCount++] = cX; _colors[colorCount++] = cX;
                 }
 
                 _uvs[uvCount++] = uvSide.u + (minZ - bz) * uvSide.uSize; _uvs[uvCount++] = uvSide.v + (minY - by) * uvSide.vSize;
@@ -898,8 +902,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = -1; _normals[posCount - 11 + k * 3] = 0; _normals[posCount - 10 + k * 3] = 0;
-                    const c = aoMult * 0.6;
-                    _colors[colorCount++] = c; _colors[colorCount++] = c; _colors[colorCount++] = c;
+                    _colors[colorCount++] = cX; _colors[colorCount++] = cX; _colors[colorCount++] = cX;
                 }
 
                 _uvs[uvCount++] = uvSide.u + (1 - (maxZ - bz)) * uvSide.uSize; _uvs[uvCount++] = uvSide.v + (minY - by) * uvSide.vSize;
@@ -921,8 +924,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = 0; _normals[posCount - 11 + k * 3] = 0; _normals[posCount - 10 + k * 3] = 1;
-                    const c = aoMult * 0.8;
-                    _colors[colorCount++] = c; _colors[colorCount++] = c; _colors[colorCount++] = c;
+                    _colors[colorCount++] = cZ; _colors[colorCount++] = cZ; _colors[colorCount++] = cZ;
                 }
 
                 _uvs[uvCount++] = uvSide.u + (minX - bx) * uvSide.uSize; _uvs[uvCount++] = uvSide.v + (minY - by) * uvSide.vSize;
@@ -944,8 +946,7 @@ export class Chunk {
 
                 for (let k = 0; k < 4; k++) {
                     _normals[posCount - 12 + k * 3] = 0; _normals[posCount - 11 + k * 3] = 0; _normals[posCount - 10 + k * 3] = -1;
-                    const c = aoMult * 0.8;
-                    _colors[colorCount++] = c; _colors[colorCount++] = c; _colors[colorCount++] = c;
+                    _colors[colorCount++] = cZ; _colors[colorCount++] = cZ; _colors[colorCount++] = cZ;
                 }
 
                 _uvs[uvCount++] = uvSide.u + (1 - (maxX - bx)) * uvSide.uSize; _uvs[uvCount++] = uvSide.v + (minY - by) * uvSide.vSize;
@@ -1325,7 +1326,9 @@ export class Chunk {
                             pushCustomBox(x, y, z, x + 1, y + 0.5, z + 1, x, y, z, uvTop, uvSide, uvBottom, cullBottom ? 2 : 0, 1.0);
                         } else if (props.isStair) {
                             // Step 1: Base half slab
-                            pushCustomBox(x, y, z, x + 1, y + 0.5, z + 1, x, y, z, uvTop, uvSide, uvBottom, 0, 1.0);
+                            const belowBlock = (y > 0) ? this.getBlock(x, y - 1, z) : getBlockOptimized(wx, y - 1, wz);
+                            const cullBottom = getBlockProperties(belowBlock).solid && !getBlockProperties(belowBlock).isSlab;
+                            pushCustomBox(x, y, z, x + 1, y + 0.5, z + 1, x, y, z, uvTop, uvSide, uvBottom, cullBottom ? 2 : 0, 1.0);
 
                             // Step 2: Upper step based on facing
                             // 0: North (-Z), 1: East (+X), 2: South (+Z), 3: West (-X)
@@ -1350,21 +1353,23 @@ export class Chunk {
                             const fE = getStairFacing(wx + 1, y, wz);
 
                             if (facing === 0) { // High at North (-Z), Low at South (+Z)
-                                if (fS === 1 && fW !== 0) pushCustomBox(x + 0.5, y + 0.5, z + 0.5, x + 1.0, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
-                                if (fS === 3 && fE !== 0) pushCustomBox(x, y + 0.5, z + 0.5, x + 0.5, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
+                                if (fS === 1 && fW !== 0) pushCustomBox(x + 0.5, y + 0.5, z + 0.5, x + 1.0, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2 | 32, 1.0);
+                                if (fS === 3 && fE !== 0) pushCustomBox(x, y + 0.5, z + 0.5, x + 0.5, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2 | 32, 1.0);
                             } else if (facing === 2) { // High at South (+Z), Low at North (-Z)
-                                if (fN === 1 && fW !== 2) pushCustomBox(x + 0.5, y + 0.5, z, x + 1.0, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
-                                if (fN === 3 && fE !== 2) pushCustomBox(x, y + 0.5, z, x + 0.5, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
+                                if (fN === 1 && fW !== 2) pushCustomBox(x + 0.5, y + 0.5, z, x + 1.0, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2 | 16, 1.0);
+                                if (fN === 3 && fE !== 2) pushCustomBox(x, y + 0.5, z, x + 0.5, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2 | 16, 1.0);
                             } else if (facing === 1) { // High at East (+X), Low at West (-X)
-                                if (fW === 0 && fS !== 1) pushCustomBox(x, y + 0.5, z, x + 0.5, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
-                                if (fW === 2 && fN !== 1) pushCustomBox(x, y + 0.5, z + 0.5, x + 0.5, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
+                                if (fW === 0 && fS !== 1) pushCustomBox(x, y + 0.5, z, x + 0.5, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2 | 4, 1.0);
+                                if (fW === 2 && fN !== 1) pushCustomBox(x, y + 0.5, z + 0.5, x + 0.5, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2 | 4, 1.0);
                             } else if (facing === 3) { // High at West (-X), Low at East (+X)
-                                if (fE === 0 && fS !== 3) pushCustomBox(x + 0.5, y + 0.5, z, x + 1.0, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
-                                if (fE === 2 && fN !== 3) pushCustomBox(x + 0.5, y + 0.5, z + 0.5, x + 1.0, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2, 1.0);
+                                if (fE === 0 && fS !== 3) pushCustomBox(x + 0.5, y + 0.5, z, x + 1.0, y + 1.0, z + 0.5, x, y, z, uvTop, uvSide, uvBottom, 2 | 8, 1.0);
+                                if (fE === 2 && fN !== 3) pushCustomBox(x + 0.5, y + 0.5, z + 0.5, x + 1.0, y + 1.0, z + 1.0, x, y, z, uvTop, uvSide, uvBottom, 2 | 8, 1.0);
                             }
                         } else if (props.isFence) {
+                            const belowBlock = (y > 0) ? this.getBlock(x, y - 1, z) : getBlockOptimized(wx, y - 1, wz);
+                            const cullBottom = getBlockProperties(belowBlock).solid ? 2 : 0;
                             // Center post
-                            pushCustomBox(x + 6/16, y, z + 6/16, x + 10/16, y + 1.0, z + 10/16, x, y, z, uvTop, uvSide, uvBottom, 0, 1.0);
+                            pushCustomBox(x + 6/16, y, z + 6/16, x + 10/16, y + 1.0, z + 10/16, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 1.0);
 
                             const canConn = (b) => { const p = getBlockProperties(b); return p.solid || p.isFence || p.isWall || p.isFenceGate; };
                             if (canConn(getBlockOptimized(wx, y, wz - 1))) {
@@ -1384,14 +1389,16 @@ export class Chunk {
                                 pushCustomBox(x + 10/16, y + 6/16, z + 7/16, x + 1, y + 9/16, z + 9/16, x, y, z, uvTop, uvSide, uvBottom, 0, 0.95);
                             }
                         } else if (props.isWall) {
+                            const belowBlock = (y > 0) ? this.getBlock(x, y - 1, z) : getBlockOptimized(wx, y - 1, wz);
+                            const cullBottom = getBlockProperties(belowBlock).solid ? 2 : 0;
                             // Center post
-                            pushCustomBox(x + 4/16, y, z + 4/16, x + 12/16, y + 1.0, z + 12/16, x, y, z, uvTop, uvSide, uvBottom, 0, 1.0);
+                            pushCustomBox(x + 4/16, y, z + 4/16, x + 12/16, y + 1.0, z + 12/16, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 1.0);
 
                             const canConn = (b) => { const p = getBlockProperties(b); return p.solid || p.isWall || p.isFence || p.isFenceGate; };
-                            if (canConn(getBlockOptimized(wx, y, wz - 1))) pushCustomBox(x + 5/16, y, z, x + 11/16, y + 14/16, z + 4/16, x, y, z, uvTop, uvSide, uvBottom, 0, 0.95);
-                            if (canConn(getBlockOptimized(wx, y, wz + 1))) pushCustomBox(x + 5/16, y, z + 12/16, x + 11/16, y + 14/16, z + 1, x, y, z, uvTop, uvSide, uvBottom, 0, 0.95);
-                            if (canConn(getBlockOptimized(wx - 1, y, wz))) pushCustomBox(x, y, z + 5/16, x + 4/16, y + 14/16, z + 11/16, x, y, z, uvTop, uvSide, uvBottom, 0, 0.95);
-                            if (canConn(getBlockOptimized(wx + 1, y, wz))) pushCustomBox(x + 12/16, y, z + 5/16, x + 1, y + 14/16, z + 11/16, x, y, z, uvTop, uvSide, uvBottom, 0, 0.95);
+                            if (canConn(getBlockOptimized(wx, y, wz - 1))) pushCustomBox(x + 5/16, y, z, x + 11/16, y + 14/16, z + 4/16, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 0.95);
+                            if (canConn(getBlockOptimized(wx, y, wz + 1))) pushCustomBox(x + 5/16, y, z + 12/16, x + 11/16, y + 14/16, z + 1, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 0.95);
+                            if (canConn(getBlockOptimized(wx - 1, y, wz))) pushCustomBox(x, y, z + 5/16, x + 4/16, y + 14/16, z + 11/16, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 0.95);
+                            if (canConn(getBlockOptimized(wx + 1, y, wz))) pushCustomBox(x + 12/16, y, z + 5/16, x + 1, y + 14/16, z + 11/16, x, y, z, uvTop, uvSide, uvBottom, cullBottom, 0.95);
                         }
                         continue;
                     }
@@ -1487,7 +1494,8 @@ export class Chunk {
                                 } else if (effectiveNeighborProps.isLiquid) {
                                     shouldRenderFace = true; // Liquid boundary (e.g. water next to lava)
                                 } else if (effectiveNeighborProps.transparent) {
-                                    shouldRenderFace = true; // Transparent block boundary (e.g. glass, ice, doors)
+                                    const isBarrier = effectiveNeighborType === BLOCKS.GLASS || effectiveNeighborType === BLOCKS.ICE;
+                                    shouldRenderFace = !isBarrier;
                                 }
                             }
                         } else {
@@ -1559,8 +1567,9 @@ export class Chunk {
                             
                             let waterFade = 0;
                             if (effectiveNeighborType === BLOCKS.WATER || effectiveNeighborType === BLOCKS.SWAMP_WATER || neighborType === BLOCKS.WATER || neighborType === BLOCKS.SWAMP_WATER) {
-                                let depth = Math.max(0, 22 - y);
-                                waterFade = Math.min(1.0, depth / 10.0);
+                                const seaLvl = (window.worldGenParams && window.worldGenParams.seaLevel !== undefined) ? window.worldGenParams.seaLevel : 62;
+                                let depth = Math.max(0, seaLvl - y);
+                                waterFade = Math.min(1.0, depth / 16.0);
                             }
 
                             const isGrassBlock = (currentBlockType === BLOCKS.GRASS || currentBlockType === BLOCKS.SWAMP_GRASS || currentBlockType === BLOCKS.SAVANNA_GRASS);
@@ -1579,7 +1588,7 @@ export class Chunk {
                                 bMult = blendedFoliage[bIdx + 2] / folPlainsB;
                             }
 
-                            const flipQuad = (aoColor[0] + aoColor[2] > aoColor[1] + aoColor[3]);
+                            const flipQuad = (aoColor[0] + aoColor[2] < aoColor[1] + aoColor[3]);
 
                                 for (let i = 0; i < 4; i++) {
                                     const v = face.v[i];
@@ -1867,7 +1876,7 @@ export class Chunk {
             if (this.endPortalMesh.parent) this.endPortalMesh.parent.remove(this.endPortalMesh);
             this.endPortalMesh.geometry.dispose();
             this.endPortalMesh = null;
-        }
+        }
         this._inBuildQueue = false;
         this._inGenQueue = false;
         this._generated = false;
@@ -2836,7 +2845,7 @@ export class World {
                 }
                 if (chunk.endPortalMesh && !chunk.endPortalMesh.parent) {
                     this.scene.add(chunk.endPortalMesh);
-                }
+                }
                 buildsThisFrame++;
             }
         }
@@ -3380,14 +3389,36 @@ export class World {
                 return false;
             };
 
-            // Sneak edge detection
-            if (isSneaking && checkCollision(position.x, position.y - 0.1, position.z)) {
-                if (!checkCollision(targetX, position.y - 0.1, position.z)) {
+            const hasGroundBelow = (px, py, pz) => {
+                const minX = Math.floor(px - hw + 0.05);
+                const maxX = Math.floor(px + hw - 0.05);
+                const minZ = Math.floor(pz - hw + 0.05);
+                const maxZ = Math.floor(pz + hw - 0.05);
+                const checkY = Math.floor(py - 0.1);
+                for (let x = minX; x <= maxX; x++) {
+                    for (let z = minZ; z <= maxZ; z++) {
+                        const block = this.getBlock(x, checkY, z);
+                        const bProps = getBlockProperties(block);
+                        if (bProps && bProps.solid) return true;
+                    }
+                }
+                return false;
+            };
+
+            // Sneak edge detection (prevents walking off ledges in all directions, immune to ceilings)
+            if (isSneaking && (grounded || hasGroundBelow(position.x, position.y, position.z))) {
+                if (!hasGroundBelow(targetX, position.y, position.z)) {
                     velocity.x = 0;
                     targetX = position.x;
                 }
-                if (!checkCollision(targetX, position.y - 0.1, targetZ)) { // Use targetX because it might have been reset
+                if (!hasGroundBelow(position.x, position.y, targetZ)) {
                     velocity.z = 0;
+                    targetZ = position.z;
+                }
+                if (!hasGroundBelow(targetX, position.y, targetZ)) {
+                    velocity.x = 0;
+                    velocity.z = 0;
+                    targetX = position.x;
                     targetZ = position.z;
                 }
             }
@@ -3418,10 +3449,12 @@ export class World {
                                     else if (bProps.isStair) {
                                         const sFacing = (this.getData ? this.getData(x, y, z) : 0) & 3;
                                         let isHigh = false;
-                                        if (sFacing === 0 && (position.z - Math.floor(position.z)) < 0.5) isHigh = true;
-                                        else if (sFacing === 1 && (position.x - Math.floor(position.x)) >= 0.5) isHigh = true;
-                                        else if (sFacing === 2 && (position.z - Math.floor(position.z)) >= 0.5) isHigh = true;
-                                        else if (sFacing === 3 && (position.x - Math.floor(position.x)) < 0.5) isHigh = true;
+                                        const relX = Math.max(0, Math.min(1, position.x - x));
+                                        const relZ = Math.max(0, Math.min(1, position.z - z));
+                                        if (sFacing === 0 && relZ < 0.5) isHigh = true;
+                                        else if (sFacing === 1 && relX >= 0.5) isHigh = true;
+                                        else if (sFacing === 2 && relZ >= 0.5) isHigh = true;
+                                        else if (sFacing === 3 && relX < 0.5) isHigh = true;
                                         surfH = isHigh ? 1.0 : 0.5;
                                     }
                                     else if (bProps.isBed || bProps.isBedHead || bProps.isStonecutter || block === window.BLOCKS.STONECUTTER) surfH = 0.5625;
@@ -3462,7 +3495,7 @@ export class World {
                     if (lowestCeilingY !== null) break;
                 }
                 const ceilingBlockY = lowestCeilingY !== null ? lowestCeilingY : Math.floor(targetY + entityHeight - 0.01);
-                targetY = Math.min(position.y, ceilingBlockY - entityHeight - 0.001);
+                targetY = Math.max(position.y, ceilingBlockY - entityHeight - 0.001);
             }
         }
 
@@ -3480,8 +3513,8 @@ export class World {
             else if (bProps.isStair) {
                 const sFacing = (this.getData ? this.getData(x, y, z) : 0) & 3;
                 let isHigh = false;
-                const fracX = px - Math.floor(px);
-                const fracZ = pz - Math.floor(pz);
+                const fracX = Math.max(0, Math.min(1, px - x));
+                const fracZ = Math.max(0, Math.min(1, pz - z));
                 if (sFacing === 0 && fracZ < 0.5) isHigh = true;
                 else if (sFacing === 1 && fracX >= 0.5) isHigh = true;
                 else if (sFacing === 2 && fracZ >= 0.5) isHigh = true;
@@ -3542,7 +3575,17 @@ export class World {
             }
             if (!stepped) {
                 velocity.x = 0;
-                targetX = position.x;
+                const vx = targetX - position.x;
+                if (vx > 0) {
+                    const wallBlockX = Math.floor(targetX + hw);
+                    targetX = Math.max(position.x, wallBlockX - hw - 0.001);
+                } else if (vx < 0) {
+                    const wallBlockX = Math.floor(targetX - hw);
+                    targetX = Math.min(position.x, wallBlockX + 1.0 + hw + 0.001);
+                } else {
+                    targetX = position.x;
+                }
+                if (checkCollision(targetX, targetY, position.z)) targetX = position.x;
             }
         }
 
@@ -3564,7 +3607,17 @@ export class World {
             }
             if (!stepped) {
                 velocity.z = 0;
-                targetZ = position.z;
+                const vz = targetZ - position.z;
+                if (vz > 0) {
+                    const wallBlockZ = Math.floor(targetZ + hw);
+                    targetZ = Math.max(position.z, wallBlockZ - hw - 0.001);
+                } else if (vz < 0) {
+                    const wallBlockZ = Math.floor(targetZ - hw);
+                    targetZ = Math.min(position.z, wallBlockZ + 1.0 + hw + 0.001);
+                } else {
+                    targetZ = position.z;
+                }
+                if (checkCollision(targetX, targetY, targetZ)) targetZ = position.z;
             }
         }
 

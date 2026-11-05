@@ -37,6 +37,7 @@ export const FOOD_DATA = {
     'cookie':           { hunger: 2, saturation: 0.4, heal: 0 },
     'pumpkin_pie':      { hunger: 8, saturation: 4.8, heal: 0 },
     'mushroom_stew':    { hunger: 6, saturation: 7.2, heal: 0 },
+    'beetroot_soup':    { hunger: 6, saturation: 7.2, heal: 0 },
     'raw_beef':         { hunger: 3, saturation: 1.8, heal: 0 },
     'raw_porkchop':     { hunger: 3, saturation: 1.8, heal: 0 },
     'raw_mutton':       { hunger: 2, saturation: 1.2, heal: 0 },
@@ -84,15 +85,20 @@ export class Inventory {
     }
     
     addItem(item, count = 1) {
-        // Stackable items (not unique like wands)
+        return this.addItemCount(item, count) === count;
+    }
+
+    addItemCount(item, count = 1) {
+        let remaining = count;
+        const maxSt = item.maxStack || 64;
         if (item.stackable) {
             for (let i = 0; i < this.slots.length; i++) {
                 if (this.slots[i] && this.slots[i].item.type === item.type && this.slots[i].item.subtype === item.subtype) {
-                    if (this.slots[i].count < item.maxStack) {
-                        const add = Math.min(count, item.maxStack - this.slots[i].count);
+                    if (this.slots[i].count < maxSt) {
+                        const add = Math.min(remaining, maxSt - this.slots[i].count);
                         this.slots[i].count += add;
-                        count -= add;
-                        if (count <= 0) return true;
+                        remaining -= add;
+                        if (remaining <= 0) return count;
                     }
                 }
             }
@@ -100,11 +106,13 @@ export class Inventory {
         // Find empty slot
         for (let i = 0; i < this.slots.length; i++) {
             if (!this.slots[i]) {
-                this.slots[i] = { item, count };
-                return true;
+                const take = item.stackable ? Math.min(remaining, maxSt) : 1;
+                this.slots[i] = { item: Object.assign({}, item), count: take };
+                remaining -= take;
+                if (remaining <= 0) return count;
             }
         }
-        return false;
+        return count - remaining;
     }
 }
 
@@ -366,7 +374,9 @@ export class Player {
         this.inWater = inWater;
         const inLava = blockIn === BLOCKS.LAVA;
         const inFire = blockIn === BLOCKS.FIRE;
-        const onLadder = blockIn === BLOCKS.LADDER;
+        const isClimbable = (b) => (b === BLOCKS.LADDER || (BLOCKS.VINES && b === BLOCKS.VINES) || (BLOCKS.TWISTING_VINES && b === BLOCKS.TWISTING_VINES) || (BLOCKS.CAVE_VINES && b === BLOCKS.CAVE_VINES));
+        const blockInMid = world.getBlock(this.position.x, this.position.y + 0.8, this.position.z);
+        const onLadder = isClimbable(blockIn) || isClimbable(blockInMid);
 
         if (inWater) {
             this.burnTimer = 0;
@@ -420,6 +430,9 @@ export class Player {
         const friction = Math.exp(-drag * dt);
         this.velocity.x *= friction;
         this.velocity.z *= friction;
+        if (inWater || inLava) {
+            this.velocity.y *= Math.exp(-4.5 * dt);
+        }
 
         // Y velocity update (gravity & slow fall effects)
         if (hasGoldenFeather) {
@@ -462,7 +475,7 @@ export class Player {
             if (keys.jump) {
                 this.velocity.y = 3.5;
             } else if (keys.crouch) {
-                this.velocity.y = -3.5;
+                this.velocity.y = 0; // In Minecraft, crouching on a ladder or vine locks the player in place
             } else {
                 this.velocity.y *= friction; // Stop vertical movement if not climbing
             }
@@ -490,6 +503,14 @@ export class Player {
                 this.velocity.y += 18 * dt;
                 // Cap upward velocity so we don't shoot out of the water like a rocket
                 if (this.velocity.y > 4.5) this.velocity.y = 4.5;
+                // Water jump vault: boost upward to climb out onto land when jumping near a shoreline block
+                const frontX = this.position.x + moveDir.x * 0.45;
+                const frontZ = this.position.z + moveDir.z * 0.45;
+                const blockAhead = world.getBlock(Math.floor(frontX), Math.floor(this.position.y + 0.5), Math.floor(frontZ));
+                const blockAheadProps = getBlockProperties(blockAhead);
+                if (blockAheadProps && blockAheadProps.solid) {
+                    this.velocity.y = Math.max(this.velocity.y, 6.0);
+                }
             }
         }
 
@@ -2278,8 +2299,10 @@ export const MOB_TYPES = {
                 if (world) {
                     for (let y = Math.min(CHUNK_HEIGHT - 2, ty + 5); y >= Math.max(1, ty - 10); y--) {
                         const b = world.getBlock(Math.floor(tx), y, Math.floor(tz));
-                        const bAbove = world.getBlock(Math.floor(tx), y + 1, Math.floor(tz));
-                        if (getBlockProperties(b).solid && bAbove === BLOCKS.AIR) {
+                        const bAbove1 = world.getBlock(Math.floor(tx), y + 1, Math.floor(tz));
+                        const bAbove2 = world.getBlock(Math.floor(tx), y + 2, Math.floor(tz));
+                        const bAbove3 = world.getBlock(Math.floor(tx), y + 3, Math.floor(tz));
+                        if (getBlockProperties(b).solid && bAbove1 === BLOCKS.AIR && bAbove2 === BLOCKS.AIR && bAbove3 === BLOCKS.AIR) {
                             mob.position.set(tx, y + 1, tz);
                             mob.velocity.set(0, 0, 0);
                             break;
@@ -5008,6 +5031,7 @@ export class Mob {
                 this.velocity.z *= Math.pow(0.85, dt * 20);
             } else {
                 this.velocity.y -= 25 * dt; // gravity
+                if (this.velocity.y < -50) this.velocity.y = -50;
             }
         }
         
@@ -5258,7 +5282,10 @@ export class Mob {
         }
 
         const velStep = this.velocity.clone().multiplyScalar(dt);
-        const col = world.collide(this.position, velStep, this.size * 0.8, this.size);
+        const scale = this.isBoss ? 2.0 : 1.0;
+        const colW = (this.width || (this.size * 0.8)) * scale;
+        const colH = (this.height || this.size) * scale;
+        const col = world.collide(this.position, velStep, colW, colH);
         this.position.copy(col.position);
         
         if (col.velocity.x === 0) {
@@ -5279,6 +5306,25 @@ export class Mob {
                 this.position.y = 0;
                 this.velocity.y *= -0.5;
             }
+        }
+
+        // Void death check for all mobs falling out of the world
+        if (this.position.y < -15) {
+            this.health = 0;
+            this.alive = false;
+        }
+
+        // Mob suffocation check when head is inside solid block
+        const headY = Math.floor(this.position.y + colH * 0.8);
+        const headBlock = world.getBlock(Math.floor(this.position.x), headY, Math.floor(this.position.z));
+        if (getBlockProperties(headBlock).solid) {
+            this.suffocateTimer = (this.suffocateTimer || 0) + dt;
+            if (this.suffocateTimer >= 1.0) {
+                this.suffocateTimer = 0;
+                this.takeDamage(2);
+            }
+        } else {
+            this.suffocateTimer = 0;
         }
         
         if (this.mesh) {

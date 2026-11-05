@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PONG MOD</title>
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Main Game Canvas (960x540 Crisp 1-Bit Pixel) -->
+    <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+    <!-- Main Menu Overlay: 6x5 Grid + Difficulty + Pagination -->
+    <div id="menu-overlay" class="overlay active">
+      <div class="menu-box">
+        <div class="menu-title">PONG MOD</div>
+
+        <!-- Difficulty Selector -->
+        <div class="difficulty-row">
+          <span class="diff-label">DIFFICULTY:</span>
+          <button class="diff-btn" data-diff="easy">EASY</button>
+          <button class="diff-btn active" data-diff="normal">NORMAL</button>
+          <button class="diff-btn" data-diff="hard">HARD</button>
+          <button class="diff-btn" data-diff="impossible">IMPOSSIBLE</button>
+        </div>
+
+        <!-- Level Name Preview Banner -->
+        <div id="level-name-display" class="level-name-banner">SELECT A LEVEL</div>
+
+        <!-- 6x5 Grid (30 level slots) -->
+        <div id="level-grid" class="level-grid"></div>
+
+        <!-- Page Navigation Arrows -->
+        <div class="pagination-row">
+          <button id="btn-prev-page" class="nav-arrow">&lt;</button>
+          <span id="page-indicator" class="page-text">PAGE 1 / 1</span>
+          <button id="btn-next-page" class="nav-arrow">&gt;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimal Pause Overlay (ESC / P) -->
+    <div id="pause-overlay" class="overlay">
+      <div class="modal-box">
+        <div class="modal-title">PAUSED</div>
+        <div class="modal-buttons">
+          <button id="btn-resume" class="modal-btn">RESUME</button>
+          <button id="btn-pause-menu" class="modal-btn">MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win / Game Over Overlay -->
+    <div id="result-overlay" class="overlay">
+      <div class="modal-box">
+        <div id="result-title" class="modal-title">VICTORY</div>
+        <div id="result-sub" class="modal-sub">LEVEL CLEARED!</div>
+        <div class="modal-buttons">
+          <button id="btn-next-level" class="modal-btn">NEXT LEVEL</button>
+          <button id="btn-retry" class="modal-btn">RETRY</button>
+          <button id="btn-result-menu" class="modal-btn">MENU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/audio.js?v=23"></script>
+  <script src="js/levels.js?v=23"></script>
+  <script src="js/game.js?v=23"></script>
+  <script type="module" src="../js/firebase-config.js"></script>
+  <script type="module" src="../js/tracker.js"></script>
+</body>
+</html>

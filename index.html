@@ -147,6 +147,7 @@
         }
 
         .project-card {
+            box-sizing: border-box;
             width: calc(20% - 1.2rem); /* 5 columns */
             min-width: 220px;
             background-color: var(--card-bg);
@@ -424,11 +425,12 @@
             </div>
         </a>
 
-        <a href="excavator/index.html" class="project-card">
-            <img src="screenshot_excavator.png" alt="The DOM Excavator" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23e4e4e7%22/%3E%3C/svg%3E'">
+        <a href="pong-mod/index.html" class="project-card">
+            <img src="screenshot_pong_mod.png" alt="PONG Mod" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23e4e4e7%22/%3E%3C/svg%3E'">
             <div class="project-content">
-                <h2 class="project-title">The DOM Excavator</h2>
-                <p class="project-desc">A WebGL mining idle game. Dig through the geological strata of the internet.</p>
+                <h2 class="project-title">PONG Mod</h2>
+                <p class="project-desc">A fast-paced, multi-level reimagining of classic Pong with custom modifiers, dynamic obstacles, and escalating difficulty.</p>
+                <div class="project-arrow">&rarr;</div>
             </div>
         </a>
 
@@ -464,6 +466,15 @@
             <div class="project-content">
                 <h2 class="project-title">Dev Snake</h2>
                 <p class="project-desc">A developer-themed snake game where you eat code snippets. Levels up and speeds up the more you eat. How long can you survive?</p>
+                <div class="project-arrow">&rarr;</div>
+            </div>
+        </a>
+
+        <a href="excavator/index.html" class="project-card">
+            <img src="screenshot_excavator.png" alt="The DOM Excavator" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23e4e4e7%22/%3E%3C/svg%3E'">
+            <div class="project-content">
+                <h2 class="project-title">The DOM Excavator</h2>
+                <p class="project-desc">A WebGL mining idle game. Dig through the geological strata of the internet.</p>
                 <div class="project-arrow">&rarr;</div>
             </div>
         </a>
@@ -614,265 +625,259 @@
     <span style="opacity: 0.5; font-size: 0.8rem;">v1.3.26</span>
 </footer>
 
-<!-- Three.js for WebGL Parallax Background -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- Interactive Tactile Confetti Background -->
 <script>
-    function isWebGLAvailable() {
-        try {
-            const testCanvas = document.createElement('canvas');
-            return !!(window.WebGLRenderingContext && (testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')));
-        } catch (e) {
-            return false;
-        }
-    }
-
-    if (isWebGLAvailable()) {
+    (function() {
         const canvas = document.getElementById('bg-canvas');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x09090b);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 4.2;
+        let width = 0;
+        let height = 0;
+        let dpr = 1;
+        let isDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        function resize() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
-        // Soft Studio Lighting so 3D confetti faces catch realistic glints & specular sheen
-        const ambientLight = new THREE.AmbientLight(0x777788, 0.85);
-        scene.add(ambientLight);
+        window.addEventListener('resize', resize);
+        resize();
 
-        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.95);
-        dirLight1.position.set(-2, 4, 3);
-        scene.add(dirLight1);
-
-        const dirLight2 = new THREE.DirectionalLight(0xaabbdd, 0.55);
-        dirLight2.position.set(3, -2, 2);
-        scene.add(dirLight2);
-
-        // --- 3D Fluttering White Confetti Geometry & Instanced Mesh ---
-        const confettiCount = 650;
-        // Rectangular paper slip geometry
-        const slipGeo = new THREE.PlaneGeometry(0.065, 0.038);
-        
-        // Double-sided clean white paper material with realistic shading
-        const confettiMat = new THREE.MeshLambertMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.88
-        });
-
-        const instancedMesh = new THREE.InstancedMesh(slipGeo, confettiMat, confettiCount);
-        instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-        scene.add(instancedMesh);
-
-        // Individual physics & animation state for each confetti piece
-        const dummy = new THREE.Object3D();
-        const confettiData = [];
-
-        for (let i = 0; i < confettiCount; i++) {
-            // Distributed across 3D space
-            const x = (Math.random() - 0.5) * 16;
-            const y = (Math.random() - 0.5) * 14;
-            const z = (Math.random() - 0.5) * 8 - 0.5;
-
-            // Random initial 3D orientation
-            const rx = Math.random() * Math.PI * 2;
-            const ry = Math.random() * Math.PI * 2;
-            const rz = Math.random() * Math.PI * 2;
-
-            // Varied scales (tiny distant flakes to crisp foreground slips)
-            const scale = 0.6 + Math.random() * 0.9;
-
-            confettiData.push({
-                baseX: x, baseY: y, baseZ: z,
-                x: x, y: y, z: z,
-                vx: 0, vy: 0, vz: 0,
-                rx: rx, ry: ry, rz: rz,
-                // Gentle zero-G tumbling speeds
-                spinX: (Math.random() - 0.5) * 0.025,
-                spinY: (Math.random() - 0.5) * 0.035,
-                spinZ: (Math.random() - 0.5) * 0.02,
-                // Harmonic sway properties
-                swaySpeed: 0.5 + Math.random() * 1.0,
-                swayRadius: 0.08 + Math.random() * 0.15,
-                phase: Math.random() * Math.PI * 2,
-                scale: scale
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                isDark = e.matches;
             });
         }
 
-        // --- Mouse Interaction & Parallax ---
-        let mouseX = 0, mouseY = 0;
-        let targetRotX = 0, targetRotY = 0;
-        let scrollYProgress = 0;
-        let prevMouseX = 0, prevMouseY = 0;
+        // Confetti pieces
+        const BASE_COUNT = 200;
+        const confetti = [];
 
-        const halfW = window.innerWidth / 2;
-        const halfH = window.innerHeight / 2;
+        function createFlake(x, y, isBurst = false) {
+            const aspect = 0.35 + Math.random() * 0.45;
+            const baseSize = 4 + Math.random() * 6.5; // width 4px to 10.5px
+            const w = baseSize;
+            const h = Math.max(2, baseSize * aspect);
+
+            let vx, vy, vAngle, vFlip;
+
+            if (isBurst) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 4 + Math.random() * 8.5;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed - 1.5;
+                vAngle = (Math.random() - 0.5) * 0.35;
+                vFlip = (Math.random() - 0.5) * 0.4;
+            } else {
+                vx = (Math.random() - 0.5) * 0.5;
+                vy = 0.45 + Math.random() * 0.75; // gentle natural descent
+                vAngle = (Math.random() - 0.5) * 0.05;
+                vFlip = (Math.random() - 0.5) * 0.08;
+            }
+
+            return {
+                x: x !== undefined ? x : Math.random() * width,
+                y: y !== undefined ? y : Math.random() * height,
+                w: w,
+                h: h,
+                vx: vx,
+                vy: vy,
+                angle: Math.random() * Math.PI * 2,
+                vAngle: vAngle,
+                flip: Math.random() * Math.PI * 2,
+                vFlip: vFlip,
+                swayPhase: Math.random() * Math.PI * 2,
+                swaySpeed: 1.2 + Math.random() * 1.5,
+                swayAmp: 0.35 + Math.random() * 0.5,
+                opacity: 0.4 + Math.random() * 0.55,
+                isBurst: isBurst,
+                life: isBurst ? 220 + Math.random() * 100 : 0
+            };
+        }
+
+        for (let i = 0; i < BASE_COUNT; i++) {
+            confetti.push(createFlake());
+        }
+
+        // Mouse interaction: crisp air draft
+        let lastMouseX = -1000;
+        let lastMouseY = -1000;
 
         window.addEventListener('mousemove', e => {
-            const mX = (e.clientX - halfW) / halfW;
-            const mY = (e.clientY - halfH) / halfH;
-            mouseX = mX;
-            mouseY = mY;
+            const mx = e.clientX;
+            const my = e.clientY;
+            if (lastMouseX > -500) {
+                const mouseVx = mx - lastMouseX;
+                const mouseVy = my - lastMouseY;
+                const mSpeed = Math.hypot(mouseVx, mouseVy);
 
-            // Mouse breeze: gently push confetti in cursor's wake
-            const worldMouseX = mX * 7.0;
-            const worldMouseY = -mY * 5.0;
-            const deltaX = mX - prevMouseX;
-            const deltaY = mY - prevMouseY;
+                if (mSpeed > 1.2) {
+                    const kickRadius = Math.min(130, 55 + mSpeed * 2.2);
+                    const kickRadiusSq = kickRadius * kickRadius;
 
-            for (let i = 0; i < confettiCount; i++) {
-                const c = confettiData[i];
-                const dx = c.x - worldMouseX;
-                const dy = c.y - worldMouseY;
-                const distSq = dx * dx + dy * dy;
+                    for (let i = 0; i < confetti.length; i++) {
+                        const p = confetti[i];
+                        const dx = p.x - mx;
+                        const dy = p.y - my;
+                        const dSq = dx * dx + dy * dy;
 
-                if (distSq < 2.5) {
-                    const dist = Math.sqrt(distSq);
-                    const force = (1.0 - dist / 1.6) * 0.035;
-                    c.vx += (dx / dist) * force + deltaX * 0.08;
-                    c.vy += (dy / dist) * force - deltaY * 0.08;
-                    // Additional flutter spin when mouse passes by
-                    c.rx += deltaY * 0.4;
-                    c.ry += deltaX * 0.4;
-                }
-            }
-            prevMouseX = mX;
-            prevMouseY = mY;
-        });
-
-        // Click scatter burst: energetic confetti pop that springs back gracefully
-        window.addEventListener('mousedown', e => {
-            if (e.target.tagName === 'CANVAS' || e.target.classList.contains('container') || e.target.classList.contains('header-bar')) {
-                const mX = (e.clientX - halfW) / halfW;
-                const mY = (e.clientY - halfH) / halfH;
-                const clickX = mX * 7.0;
-                const clickY = -mY * 5.0;
-
-                for (let i = 0; i < confettiCount; i++) {
-                    const c = confettiData[i];
-                    const dx = c.x - clickX;
-                    const dy = c.y - clickY;
-                    const distSq = dx * dx + dy * dy;
-
-                    if (distSq < 16.0) {
-                        const dist = Math.sqrt(distSq) + 0.1;
-                        const force = (1.0 - Math.min(1.0, dist / 4.0)) * 0.45;
-                        c.vx += (dx / dist) * force * (0.8 + Math.random() * 0.6);
-                        c.vy += (dy / dist) * force * (0.8 + Math.random() * 0.6);
-                        c.vz += (Math.random() - 0.5) * force * 1.2;
-                        c.spinX += (Math.random() - 0.5) * 0.15;
-                        c.spinY += (Math.random() - 0.5) * 0.15;
+                        if (dSq < kickRadiusSq && dSq > 1) {
+                            const d = Math.sqrt(dSq);
+                            const factor = (1 - d / kickRadius) * Math.min(mSpeed * 0.12, 3.8);
+                            p.vx += (dx / d) * factor + mouseVx * 0.08;
+                            p.vy += (dy / d) * factor + mouseVy * 0.08;
+                            p.vAngle += (Math.random() - 0.5) * 0.14;
+                            p.vFlip += (Math.random() - 0.5) * 0.18;
+                        }
                     }
                 }
             }
-        });
+            lastMouseX = mx;
+            lastMouseY = my;
+        }, { passive: true });
 
-        function updateScroll() {
-            const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-            scrollYProgress = window.scrollY / maxScroll;
-        }
-        window.addEventListener('scroll', updateScroll, { passive: true });
-        updateScroll();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        });
-
-        // Dynamic theme match
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            scene.background.setHex(e.matches ? 0x09090b : 0xf4f4f5);
-            confettiMat.color.setHex(e.matches ? 0xffffff : 0x27272a);
-        });
-
-        // --- Render & Physics Loop ---
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsed = clock.getElapsedTime();
-
-            // Update each individual confetti piece
-            for (let i = 0; i < confettiCount; i++) {
-                const c = confettiData[i];
-
-                // Harmonic zero-G air sway
-                const swayX = Math.sin(elapsed * c.swaySpeed + c.phase) * c.swayRadius;
-                const swayY = Math.cos(elapsed * (c.swaySpeed * 0.8) + c.phase) * (c.swayRadius * 0.7);
-
-                // Spring physics back to base position
-                const targetX = c.baseX + swayX;
-                const targetY = c.baseY + swayY;
-                const targetZ = c.baseZ;
-
-                const fx = (targetX - c.x) * 0.035;
-                const fy = (targetY - c.y) * 0.035;
-                const fz = (targetZ - c.z) * 0.035;
-
-                c.vx = (c.vx + fx) * 0.90; // air damping
-                c.vy = (c.vy + fy) * 0.90;
-                c.vz = (c.vz + fz) * 0.90;
-
-                c.x += c.vx;
-                c.y += c.vy;
-                c.z += c.vz;
-
-                // Tumble and spin
-                c.rx += c.spinX;
-                c.ry += c.spinY;
-                c.rz += c.spinZ;
-
-                // Damp excess spin back to ambient tumble
-                c.spinX *= 0.985;
-                c.spinY *= 0.985;
-                c.spinZ *= 0.985;
-
-                // Update transformation matrix
-                dummy.position.set(c.x, c.y, c.z);
-                dummy.rotation.set(c.rx, c.ry, c.rz);
-                dummy.scale.set(c.scale, c.scale, c.scale);
-                dummy.updateMatrix();
-
-                instancedMesh.setMatrixAt(i, dummy.matrix);
+        // Click burst: energetic confetti pop
+        function triggerBurst(x, y) {
+            const burstCount = 36;
+            for (let i = 0; i < burstCount; i++) {
+                confetti.push(createFlake(x, y, true));
             }
-            instancedMesh.instanceMatrix.needsUpdate = true;
-
-            // Camera Parallax & Subtle Flight
-            targetRotX = -mouseY * 0.05;
-            targetRotY = mouseX * 0.06;
-
-            camera.rotation.y += (targetRotY - camera.rotation.y) * 0.05;
-            camera.rotation.x += (targetRotX - camera.rotation.x) * 0.05;
-
-            // Scroll parallax: camera glides gently through confetti
-            const targetCamY = -scrollYProgress * 2.5;
-            const targetCamZ = 4.2 - scrollYProgress * 1.2;
-            camera.position.y += (targetCamY - camera.position.y) * 0.06;
-            camera.position.z += (targetCamZ - camera.position.z) * 0.06;
-
-            renderer.render(scene, camera);
+            const burstRadius = 180;
+            const burstRadiusSq = burstRadius * burstRadius;
+            for (let i = 0; i < confetti.length; i++) {
+                const p = confetti[i];
+                if (p.isBurst) continue;
+                const dx = p.x - x;
+                const dy = p.y - y;
+                const dSq = dx * dx + dy * dy;
+                if (dSq < burstRadiusSq && dSq > 1) {
+                    const d = Math.sqrt(dSq);
+                    const force = (1 - d / burstRadius) * 5.5;
+                    p.vx += (dx / d) * force;
+                    p.vy += (dy / d) * force - 2.2;
+                    p.vAngle += (Math.random() - 0.5) * 0.25;
+                    p.vFlip += (Math.random() - 0.5) * 0.3;
+                }
+            }
         }
 
-        animate();
+        window.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'CANVAS' || e.target.classList.contains('container') || e.target.classList.contains('header-bar') || e.target.tagName === 'BODY') {
+                triggerBurst(e.clientX, e.clientY);
+            }
+        });
 
-        // Share functionality
-        window.shareSite = function(btn) {
-            const originalText = btn ? btn.innerText : 'Share';
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                if (btn) {
-                    btn.innerText = 'Copied!';
-                    setTimeout(() => btn.innerText = originalText, 2000);
+        // Scroll parallax
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const deltaY = window.scrollY - lastScrollY;
+            lastScrollY = window.scrollY;
+            for (let i = 0; i < confetti.length; i++) {
+                confetti[i].y -= deltaY * (0.2 + (confetti[i].w / 10) * 0.3);
+            }
+        }, { passive: true });
+
+        // Animation Loop
+        let lastTime = performance.now();
+
+        function render(now) {
+            requestAnimationFrame(render);
+            const dt = Math.min((now - lastTime) / 1000, 0.05);
+            lastTime = now;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const baseColor = isDark ? '255, 255, 255' : '24, 24, 27';
+            const shadowColor = isDark ? '203, 213, 225' : '71, 85, 105';
+
+            for (let i = confetti.length - 1; i >= 0; i--) {
+                const p = confetti[i];
+
+                p.swayPhase += p.swaySpeed * dt;
+                const swayForce = Math.sin(p.swayPhase) * p.swayAmp;
+
+                if (p.isBurst) {
+                    p.life -= 1;
+                    p.vy += 9.8 * dt * 0.65;
+                    p.vx *= 0.965;
+                    p.vy *= 0.975;
+                    if (p.life <= 0) {
+                        confetti.splice(i, 1);
+                        continue;
+                    }
+                } else {
+                    p.vy = (p.vy - 0.6) * 0.95 + 0.6;
+                    p.vx = (p.vx - swayForce) * 0.92 + swayForce;
                 }
-            });
-        };
-    } else {
-        document.getElementById('bg-canvas').style.display = 'none';
-    }
+
+                p.x += p.vx * 60 * dt;
+                p.y += p.vy * 60 * dt;
+
+                p.angle += p.vAngle * 60 * dt;
+                p.flip += p.vFlip * 60 * dt;
+
+                p.vAngle *= 0.985;
+                p.vFlip *= 0.985;
+
+                if (!p.isBurst) {
+                    if (p.y > height + 20) {
+                        p.y = -15;
+                        p.x = Math.random() * width;
+                    } else if (p.y < -20) {
+                        p.y = height + 15;
+                        p.x = Math.random() * width;
+                    }
+                    if (p.x > width + 20) {
+                        p.x = -15;
+                    } else if (p.x < -20) {
+                        p.x = width + 15;
+                    }
+                }
+
+                const flipCos = Math.cos(p.flip);
+                const absFlip = Math.abs(flipCos);
+                if (absFlip < 0.05) continue;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle);
+                ctx.scale(1, flipCos);
+
+                const shade = 0.8 + 0.2 * absFlip;
+                const alpha = (p.isBurst ? Math.min(p.opacity, p.life / 60) : p.opacity) * shade;
+
+                ctx.fillStyle = flipCos >= 0
+                    ? `rgba(${baseColor}, ${alpha})`
+                    : `rgba(${shadowColor}, ${alpha * 0.85})`;
+
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            }
+        }
+
+        requestAnimationFrame(render);
+    })();
+
+    // Share functionality
+    window.shareSite = function(btn) {
+        const originalText = btn ? btn.innerText : 'Share';
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            if (btn) {
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            }
+        });
+    };
+</script>
 
     // === 3D Interactive Mouse Hover Cards ===
     window.addEventListener('load', () => {

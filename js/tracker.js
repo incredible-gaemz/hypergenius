@@ -93,7 +93,8 @@ const PROJECT_NAMES = {
     'excavator': 'The DOM Excavator',
     'genesis': 'Genesis Evolution',
     'raycaster': 'Wolfenstein 3D Raycaster',
-    'snake': 'Snake 3D'
+    'snake': 'Snake 3D',
+    'pong-mod': 'PONG Mod'
 };
 
 function getDisplayProjectName(rawName) {

@@ -359,6 +359,14 @@ export class AudioManager {
         this.playMC('random/splash', 0.6, position).then(s => { if(!s) doFallback(); });
     }
 
+    playItemBreak(position = null) {
+        const doFallback = () => {
+            this.playNoise(0.2, 0.5, position);
+            this.playTone(200, 'square', 0.1, 0.3, -120, position);
+        };
+        this.playMC('random/break', 0.8, position).then(s => { if(!s) doFallback(); });
+    }
+
     playBreak(blockType) {
         const doFallback = () => {
             this.playNoise(0.15, 0.3);

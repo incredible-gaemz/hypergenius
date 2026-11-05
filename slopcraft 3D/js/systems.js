@@ -1016,8 +1016,9 @@ class UISystem {
             // Return stonecutter input item to player inventory
             if (this.stonecutterSlot && this.currentPlayer) {
                 const added = this.currentPlayer.inventory.addItem(this.stonecutterSlot.item, this.stonecutterSlot.count);
-                if (!added && this.currentPlayer.manager) {
-                    this.currentPlayer.manager.spawnItem(this.stonecutterSlot.item, this.stonecutterSlot.count, this.currentPlayer.position);
+                const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                if (!added && em) {
+                    em.spawnItem(this.stonecutterSlot.item, this.stonecutterSlot.count, this.currentPlayer.position);
                 }
                 this.stonecutterSlot = null;
             }
@@ -1059,9 +1060,10 @@ class UISystem {
                 if (this.craftingSlots[i]) {
                     if (this.currentPlayer) {
                         const added = this.currentPlayer.inventory.addItem(this.craftingSlots[i].item, this.craftingSlots[i].count);
-                        if (!added && this.currentPlayer.manager) {
+                        const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                        if (!added && em) {
                             // Drop item at player feet if inventory full
-                            this.currentPlayer.manager.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
+                            em.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
                         }
                     }
                     this.craftingSlots[i] = null;
@@ -2691,9 +2693,12 @@ class UISystem {
 
         // Chest/Furnace/Crafting/Armor/Offhand to Inventory
         if (type === 'chest' || type === 'furnace' || type === 'crafting' || type === 'armor' || type === 'offhand') {
-            const added = inv.addItem(slot.item, slot.count);
-            if (added) {
-                this._setSlotData(type, index, null);
+            const addedCount = inv.addItemCount ? inv.addItemCount(slot.item, slot.count) : (inv.addItem(slot.item, slot.count) ? slot.count : 0);
+            if (addedCount > 0) {
+                slot.count -= addedCount;
+                if (slot.count <= 0) {
+                    this._setSlotData(type, index, null);
+                }
                 if (type === 'crafting') {
                     this._updateCraftingSlots();
                     this._updateCraftingOutput();
@@ -2740,8 +2745,15 @@ class UISystem {
         if (type === 'furnace' && index === 1) {
             if (!this.furnaceData) return false;
             const fs = this.dragState.itemData.item.subtype;
-            const isFuelItem = (fs === 'coal' || fs === 'stick' || (typeof BLOCKS !== 'undefined' && (fs === BLOCKS.PLANKS || fs === BLOCKS.COAL_BLOCK || fs === BLOCKS.WOOD)));
+            const isFuelItem = (fs === 'coal' || fs === 'charcoal' || fs === 'stick' || fs === 'lava_bucket' || (typeof BLOCKS !== 'undefined' && (fs === BLOCKS.PLANKS || fs === BLOCKS.COAL_BLOCK || fs === BLOCKS.WOOD || fs === BLOCKS.CRAFTING_TABLE || fs === BLOCKS.BOOKSHELF || fs === BLOCKS.LADDER || fs === BLOCKS.FENCE || fs === BLOCKS.GATE || fs === BLOCKS.TRAPDOOR || (typeof fs === 'string' && (fs.includes('plank') || fs.includes('wood') || fs.includes('log') || fs.includes('fence'))))));
             if (!isFuelItem) return false;
+        }
+        if (type === 'armor') {
+            const sub = (this.dragState.itemData.item.subtype || '').toLowerCase();
+            if (index === 0 && !(sub.includes('helmet') || sub.includes('head') || sub.includes('cap'))) return false;
+            if (index === 1 && !(sub.includes('chest') || sub.includes('tunic') || sub.includes('elytra'))) return false;
+            if (index === 2 && !(sub.includes('leg') || sub.includes('pants'))) return false;
+            if (index === 3 && !(sub.includes('boot'))) return false;
         }
 
         const existing = this._getSlotData(type, index);
@@ -2952,6 +2964,20 @@ class UISystem {
     _executeSingleClickPlacement(type, index, button) {
         const held = this.dragState.itemData;
         if (!held) return;
+        if (type === 'crafting_output' || type === 'stonecutter_output') return;
+        if (type === 'furnace' && index === 2) return;
+        if (type === 'furnace' && index === 1) {
+            const fs = held.item.subtype;
+            const isFuelItem = (fs === 'coal' || fs === 'charcoal' || fs === 'stick' || fs === 'lava_bucket' || (typeof BLOCKS !== 'undefined' && (fs === BLOCKS.PLANKS || fs === BLOCKS.COAL_BLOCK || fs === BLOCKS.WOOD || fs === BLOCKS.CRAFTING_TABLE || fs === BLOCKS.BOOKSHELF || fs === BLOCKS.LADDER || fs === BLOCKS.FENCE || fs === BLOCKS.GATE || fs === BLOCKS.TRAPDOOR || (typeof fs === 'string' && (fs.includes('plank') || fs.includes('wood') || fs.includes('log') || fs.includes('fence'))))));
+            if (!isFuelItem) return;
+        }
+        if (type === 'armor') {
+            const sub = (held.item.subtype || '').toLowerCase();
+            if (index === 0 && !(sub.includes('helmet') || sub.includes('head') || sub.includes('cap'))) return;
+            if (index === 1 && !(sub.includes('chest') || sub.includes('tunic') || sub.includes('elytra'))) return;
+            if (index === 2 && !(sub.includes('leg') || sub.includes('pants'))) return;
+            if (index === 3 && !(sub.includes('boot'))) return;
+        }
         const targetSlot = this._getSlotData(type, index);
 
         if (button === 2) {
@@ -3155,8 +3181,9 @@ class UISystem {
             const held = this.dragState.itemData;
             if (this.currentPlayer && this.currentPlayer.inventory) {
                 const added = this.currentPlayer.inventory.addItem(held.item, held.count);
-                if (!added && this.currentPlayer.manager) {
-                    this.currentPlayer.manager.spawnItem(held.item, held.count, this.currentPlayer.position);
+                const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                if (!added && em) {
+                    em.spawnItem(held.item, held.count, this.currentPlayer.position);
                 }
             }
             this._updateInventory();
@@ -3289,8 +3316,22 @@ class UISystem {
         const srcType = hoveredSlot.type;
         const srcIndex = hoveredSlot.index;
         if (srcType === 'crafting_output' || srcType === 'stonecutter_output') return;
+        if (srcType === 'furnace' && srcIndex === 2) return;
 
         const currentHotbarItem = inv[hotbarIdx];
+        if (srcType === 'armor' && currentHotbarItem) {
+            const sub = (currentHotbarItem.item?.subtype || '').toLowerCase();
+            if (srcIndex === 0 && !(sub.includes('helmet') || sub.includes('head') || sub.includes('cap'))) return;
+            if (srcIndex === 1 && !(sub.includes('chest') || sub.includes('tunic') || sub.includes('elytra'))) return;
+            if (srcIndex === 2 && !(sub.includes('leg') || sub.includes('pants'))) return;
+            if (srcIndex === 3 && !(sub.includes('boot'))) return;
+        }
+        if (srcType === 'furnace' && srcIndex === 1 && currentHotbarItem) {
+            const fs = currentHotbarItem.item?.subtype;
+            const isFuelItem = (fs === 'coal' || fs === 'charcoal' || fs === 'stick' || fs === 'lava_bucket' || (typeof BLOCKS !== 'undefined' && (fs === BLOCKS.PLANKS || fs === BLOCKS.COAL_BLOCK || fs === BLOCKS.WOOD || fs === BLOCKS.CRAFTING_TABLE || fs === BLOCKS.BOOKSHELF || fs === BLOCKS.LADDER || fs === BLOCKS.FENCE || fs === BLOCKS.GATE || fs === BLOCKS.TRAPDOOR || (typeof fs === 'string' && (fs.includes('plank') || fs.includes('wood') || fs.includes('log') || fs.includes('fence'))))));
+            if (!isFuelItem) return;
+        }
+
         const currentTargetItem = this._getSlotData(srcType, srcIndex);
 
         this._setSlotData(srcType, srcIndex, currentHotbarItem);
@@ -3308,6 +3349,32 @@ class UISystem {
     dropHoveredSlotItem(hoveredSlot, dropStack = false) {
         if (!this.currentPlayer && window.game) this.currentPlayer = window.game.player;
         if (!hoveredSlot || !this.currentPlayer) return;
+
+        const p = this.currentPlayer;
+        const lookDir = p.getLookDirection ? p.getLookDirection() : new THREE.Vector3(0, 0, -1);
+        const eyePos = p.getEyePosition ? p.getEyePosition() : p.position.clone().add(new THREE.Vector3(0, 1.6, 0));
+        const dropPos = eyePos.clone().add(lookDir.clone().multiplyScalar(0.5));
+        const velocity = lookDir.clone().multiplyScalar(8);
+        const em = (window.game && window.game.entityManager) || p.manager;
+
+        // If hovering over crafting or stonecutter output, actually consume the recipe ingredients before dropping!
+        if (hoveredSlot.type === 'crafting_output' || hoveredSlot.type === 'stonecutter_output') {
+            const res = (hoveredSlot.type === 'crafting_output') ? this._matchRecipe() : this._getSlotData('stonecutter_output', 0);
+            if (!res || !res.item) return;
+            const dropCount = dropStack ? res.count : 1;
+            if (hoveredSlot.type === 'crafting_output') {
+                this._consumeCraftingSlots(res);
+                this._updateCraftingSlots();
+                this._updateCraftingOutput();
+            } else {
+                this._setSlotData('stonecutter_output', 0, null);
+            }
+            if (em) em.spawnItem(res.item, dropCount, dropPos, velocity);
+            if (window.game && window.game.audio) window.game.audio.playClick();
+            this._updateInventory();
+            return;
+        }
+
         const slotData = this._getSlotData(hoveredSlot.type, hoveredSlot.index);
         if (!slotData || !slotData.item || slotData.count <= 0) return;
 
@@ -3317,14 +3384,8 @@ class UISystem {
             this._setSlotData(hoveredSlot.type, hoveredSlot.index, null);
         }
 
-        const p = this.currentPlayer;
-        const lookDir = p.getLookDirection ? p.getLookDirection() : new THREE.Vector3(0, 0, -1);
-        const eyePos = p.getEyePosition ? p.getEyePosition() : p.position.clone().add(new THREE.Vector3(0, 1.6, 0));
-        const dropPos = eyePos.clone().add(lookDir.clone().multiplyScalar(0.5));
-        const velocity = lookDir.clone().multiplyScalar(8);
-
-        if (window.game && window.game.entityManager) {
-            window.game.entityManager.spawnItem(slotData.item, dropCount, dropPos, velocity);
+        if (em) {
+            em.spawnItem(slotData.item, dropCount, dropPos, velocity);
         }
         if (window.game && window.game.audio) window.game.audio.playClick();
 
@@ -3451,8 +3512,9 @@ class UISystem {
         for (let i = 0; i < 9; i++) {
             if (this.craftingSlots[i]) {
                 const added = inv.addItem(this.craftingSlots[i].item, this.craftingSlots[i].count);
-                if (!added && this.currentPlayer.manager) {
-                    this.currentPlayer.manager.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
+                const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                if (!added && em) {
+                    em.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
                 }
                 this.craftingSlots[i] = null;
             }
@@ -3571,8 +3633,9 @@ class UISystem {
                 if (i >= 4 && this.craftingSlots[i]) {
                     if (this.currentPlayer) {
                         const added = this.currentPlayer.inventory.addItem(this.craftingSlots[i].item, this.craftingSlots[i].count);
-                        if (!added && this.currentPlayer.manager) {
-                            this.currentPlayer.manager.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
+                        const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                        if (!added && em) {
+                            em.spawnItem(this.craftingSlots[i].item, this.craftingSlots[i].count, this.currentPlayer.position);
                         }
                     }
                     this.craftingSlots[i] = null;
@@ -4683,11 +4746,32 @@ class UISystem {
     }
 
     _consumeCraftingSlots(result) {
-        // Remove 1 from each crafting slot
+        // Remove 1 from each crafting slot; return empty containers (e.g. buckets)
         for (let i = 0; i < 9; i++) {
-            if (this.craftingSlots[i]) {
-                this.craftingSlots[i].count -= 1;
-                if (this.craftingSlots[i].count <= 0) this.craftingSlots[i] = null;
+            const slot = this.craftingSlots[i];
+            if (slot) {
+                const sub = slot.item.subtype;
+                const isBucket = (sub === 'water_bucket' || sub === 'lava_bucket' || sub === 'milk_bucket');
+                slot.count -= 1;
+                if (slot.count <= 0) {
+                    if (isBucket) {
+                        this.craftingSlots[i] = {
+                            item: { type: 'equipment', subtype: 'bucket', name: 'Bucket', stackable: true, maxStack: 16, data: {} },
+                            count: 1
+                        };
+                    } else {
+                        this.craftingSlots[i] = null;
+                    }
+                } else if (isBucket) {
+                    const bucketItem = { type: 'equipment', subtype: 'bucket', name: 'Bucket', stackable: true, maxStack: 16, data: {} };
+                    if (this.currentPlayer && this.currentPlayer.inventory) {
+                        const added = this.currentPlayer.inventory.addItem(bucketItem, 1);
+                        if (!added) {
+                            const em = (window.game && window.game.entityManager) || this.currentPlayer.manager;
+                            if (em) em.spawnItem(bucketItem, 1, this.currentPlayer.position);
+                        }
+                    }
+                }
             }
         }
     }
