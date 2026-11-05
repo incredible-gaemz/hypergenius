@@ -429,7 +429,7 @@
             <img src="screenshot_pong_mod.png" alt="PONG Mod" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23e4e4e7%22/%3E%3C/svg%3E'">
             <div class="project-content">
                 <h2 class="project-title">PONG Mod</h2>
-                <p class="project-desc">A fast-paced, multi-level reimagining of classic Pong with custom modifiers, dynamic obstacles, and escalating difficulty.</p>
+                <p class="project-desc">Pure 1-bit arcade Pong with 23 game-changing twists, 50 levels, retro soundtrack, and customizable difficulty.</p>
                 <div class="project-arrow">&rarr;</div>
             </div>
         </a>
@@ -625,7 +625,7 @@
     <span style="opacity: 0.5; font-size: 0.8rem;">v1.3.26</span>
 </footer>
 
-<!-- Interactive Tactile Confetti Background -->
+<!-- Ambient Space Dust & Confetti Particles -->
 <script>
     (function() {
         const canvas = document.getElementById('bg-canvas');
@@ -658,57 +658,60 @@
             });
         }
 
-        // Confetti pieces
-        const BASE_COUNT = 200;
-        const confetti = [];
+        // Ambient suspended particles (the classic hypergenius dark dust/confetti field)
+        const PARTICLE_COUNT = 220;
+        const particles = [];
 
-        function createFlake(x, y, isBurst = false) {
-            const aspect = 0.35 + Math.random() * 0.45;
-            const baseSize = 4 + Math.random() * 6.5; // width 4px to 10.5px
-            const w = baseSize;
-            const h = Math.max(2, baseSize * aspect);
+        function createParticle(x, y, isBurst = false) {
+            const isSlip = Math.random() > 0.45;
+            const size = isSlip ? (3 + Math.random() * 4) : (1.5 + Math.random() * 2.5);
+            const w = size;
+            const h = isSlip ? Math.max(1.5, size * (0.35 + Math.random() * 0.35)) : size;
 
             let vx, vy, vAngle, vFlip;
 
             if (isBurst) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 4 + Math.random() * 8.5;
+                const speed = 3.5 + Math.random() * 7;
                 vx = Math.cos(angle) * speed;
-                vy = Math.sin(angle) * speed - 1.5;
-                vAngle = (Math.random() - 0.5) * 0.35;
-                vFlip = (Math.random() - 0.5) * 0.4;
+                vy = Math.sin(angle) * speed;
+                vAngle = (Math.random() - 0.5) * 0.3;
+                vFlip = (Math.random() - 0.5) * 0.35;
             } else {
-                vx = (Math.random() - 0.5) * 0.5;
-                vy = 0.45 + Math.random() * 0.75; // gentle natural descent
-                vAngle = (Math.random() - 0.5) * 0.05;
-                vFlip = (Math.random() - 0.5) * 0.08;
+                // Subtle ambient drift in all directions (suspended space dust)
+                const driftAngle = Math.random() * Math.PI * 2;
+                const driftSpeed = 0.08 + Math.random() * 0.22;
+                vx = Math.cos(driftAngle) * driftSpeed;
+                vy = Math.sin(driftAngle) * driftSpeed;
+                vAngle = (Math.random() - 0.5) * 0.02;
+                vFlip = (Math.random() - 0.5) * 0.03;
             }
 
             return {
+                baseX: x !== undefined ? x : Math.random() * width,
+                baseY: y !== undefined ? y : Math.random() * height,
                 x: x !== undefined ? x : Math.random() * width,
                 y: y !== undefined ? y : Math.random() * height,
                 w: w,
                 h: h,
+                isSlip: isSlip,
                 vx: vx,
                 vy: vy,
                 angle: Math.random() * Math.PI * 2,
                 vAngle: vAngle,
                 flip: Math.random() * Math.PI * 2,
                 vFlip: vFlip,
-                swayPhase: Math.random() * Math.PI * 2,
-                swaySpeed: 1.2 + Math.random() * 1.5,
-                swayAmp: 0.35 + Math.random() * 0.5,
-                opacity: 0.4 + Math.random() * 0.55,
+                opacity: 0.3 + Math.random() * 0.55,
                 isBurst: isBurst,
-                life: isBurst ? 220 + Math.random() * 100 : 0
+                life: isBurst ? 180 + Math.random() * 90 : 0
             };
         }
 
-        for (let i = 0; i < BASE_COUNT; i++) {
-            confetti.push(createFlake());
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(createParticle());
         }
 
-        // Mouse interaction: crisp air draft
+        // Mouse displacement breeze
         let lastMouseX = -1000;
         let lastMouseY = -1000;
 
@@ -720,23 +723,23 @@
                 const mouseVy = my - lastMouseY;
                 const mSpeed = Math.hypot(mouseVx, mouseVy);
 
-                if (mSpeed > 1.2) {
-                    const kickRadius = Math.min(130, 55 + mSpeed * 2.2);
-                    const kickRadiusSq = kickRadius * kickRadius;
+                if (mSpeed > 1.0) {
+                    const radius = Math.min(120, 50 + mSpeed * 2);
+                    const radiusSq = radius * radius;
 
-                    for (let i = 0; i < confetti.length; i++) {
-                        const p = confetti[i];
+                    for (let i = 0; i < particles.length; i++) {
+                        const p = particles[i];
                         const dx = p.x - mx;
                         const dy = p.y - my;
                         const dSq = dx * dx + dy * dy;
 
-                        if (dSq < kickRadiusSq && dSq > 1) {
+                        if (dSq < radiusSq && dSq > 1) {
                             const d = Math.sqrt(dSq);
-                            const factor = (1 - d / kickRadius) * Math.min(mSpeed * 0.12, 3.8);
-                            p.vx += (dx / d) * factor + mouseVx * 0.08;
-                            p.vy += (dy / d) * factor + mouseVy * 0.08;
-                            p.vAngle += (Math.random() - 0.5) * 0.14;
-                            p.vFlip += (Math.random() - 0.5) * 0.18;
+                            const factor = (1 - d / radius) * Math.min(mSpeed * 0.08, 3.0);
+                            p.vx += (dx / d) * factor + mouseVx * 0.05;
+                            p.vy += (dy / d) * factor + mouseVy * 0.05;
+                            p.vAngle += (Math.random() - 0.5) * 0.1;
+                            p.vFlip += (Math.random() - 0.5) * 0.12;
                         }
                     }
                 }
@@ -745,27 +748,27 @@
             lastMouseY = my;
         }, { passive: true });
 
-        // Click burst: energetic confetti pop
+        // Click scatter burst
         function triggerBurst(x, y) {
-            const burstCount = 36;
+            const burstCount = 28;
             for (let i = 0; i < burstCount; i++) {
-                confetti.push(createFlake(x, y, true));
+                particles.push(createParticle(x, y, true));
             }
-            const burstRadius = 180;
+            const burstRadius = 160;
             const burstRadiusSq = burstRadius * burstRadius;
-            for (let i = 0; i < confetti.length; i++) {
-                const p = confetti[i];
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
                 if (p.isBurst) continue;
                 const dx = p.x - x;
                 const dy = p.y - y;
                 const dSq = dx * dx + dy * dy;
                 if (dSq < burstRadiusSq && dSq > 1) {
                     const d = Math.sqrt(dSq);
-                    const force = (1 - d / burstRadius) * 5.5;
+                    const force = (1 - d / burstRadius) * 4.5;
                     p.vx += (dx / d) * force;
-                    p.vy += (dy / d) * force - 2.2;
-                    p.vAngle += (Math.random() - 0.5) * 0.25;
-                    p.vFlip += (Math.random() - 0.5) * 0.3;
+                    p.vy += (dy / d) * force;
+                    p.vAngle += (Math.random() - 0.5) * 0.15;
+                    p.vFlip += (Math.random() - 0.5) * 0.2;
                 }
             }
         }
@@ -776,17 +779,17 @@
             }
         });
 
-        // Scroll parallax
+        // Parallax with scroll
         let lastScrollY = window.scrollY;
         window.addEventListener('scroll', () => {
             const deltaY = window.scrollY - lastScrollY;
             lastScrollY = window.scrollY;
-            for (let i = 0; i < confetti.length; i++) {
-                confetti[i].y -= deltaY * (0.2 + (confetti[i].w / 10) * 0.3);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].y -= deltaY * 0.15;
             }
         }, { passive: true });
 
-        // Animation Loop
+        // Render loop
         let lastTime = performance.now();
 
         function render(now) {
@@ -797,26 +800,22 @@
             ctx.clearRect(0, 0, width, height);
 
             const baseColor = isDark ? '255, 255, 255' : '24, 24, 27';
-            const shadowColor = isDark ? '203, 213, 225' : '71, 85, 105';
 
-            for (let i = confetti.length - 1; i >= 0; i--) {
-                const p = confetti[i];
-
-                p.swayPhase += p.swaySpeed * dt;
-                const swayForce = Math.sin(p.swayPhase) * p.swayAmp;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
 
                 if (p.isBurst) {
                     p.life -= 1;
-                    p.vy += 9.8 * dt * 0.65;
-                    p.vx *= 0.965;
-                    p.vy *= 0.975;
+                    p.vx *= 0.95;
+                    p.vy *= 0.95;
                     if (p.life <= 0) {
-                        confetti.splice(i, 1);
+                        particles.splice(i, 1);
                         continue;
                     }
                 } else {
-                    p.vy = (p.vy - 0.6) * 0.95 + 0.6;
-                    p.vx = (p.vx - swayForce) * 0.92 + swayForce;
+                    // Gentle air damping back to slow ambient drift
+                    p.vx *= 0.985;
+                    p.vy *= 0.985;
                 }
 
                 p.x += p.vx * 60 * dt;
@@ -825,39 +824,28 @@
                 p.angle += p.vAngle * 60 * dt;
                 p.flip += p.vFlip * 60 * dt;
 
-                p.vAngle *= 0.985;
-                p.vFlip *= 0.985;
+                p.vAngle *= 0.99;
+                p.vFlip *= 0.99;
 
+                // Seamless boundary wrap
                 if (!p.isBurst) {
-                    if (p.y > height + 20) {
-                        p.y = -15;
-                        p.x = Math.random() * width;
-                    } else if (p.y < -20) {
-                        p.y = height + 15;
-                        p.x = Math.random() * width;
-                    }
-                    if (p.x > width + 20) {
-                        p.x = -15;
-                    } else if (p.x < -20) {
-                        p.x = width + 15;
-                    }
+                    if (p.y > height + 10) p.y = -10;
+                    else if (p.y < -10) p.y = height + 10;
+                    if (p.x > width + 10) p.x = -10;
+                    else if (p.x < -10) p.x = width + 10;
                 }
 
-                const flipCos = Math.cos(p.flip);
+                const flipCos = p.isSlip ? Math.cos(p.flip) : 1;
                 const absFlip = Math.abs(flipCos);
                 if (absFlip < 0.05) continue;
 
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.rotate(p.angle);
-                ctx.scale(1, flipCos);
+                if (p.isSlip) ctx.scale(1, flipCos);
 
-                const shade = 0.8 + 0.2 * absFlip;
-                const alpha = (p.isBurst ? Math.min(p.opacity, p.life / 60) : p.opacity) * shade;
-
-                ctx.fillStyle = flipCos >= 0
-                    ? `rgba(${baseColor}, ${alpha})`
-                    : `rgba(${shadowColor}, ${alpha * 0.85})`;
+                const alpha = (p.isBurst ? Math.min(p.opacity, p.life / 50) : p.opacity) * (0.7 + 0.3 * absFlip);
+                ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
 
                 ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
                 ctx.restore();
@@ -877,41 +865,36 @@
             }
         });
     };
-</script>
 
-    // === 3D Interactive Mouse Hover Cards ===
+    // === Interactive Mouse Hover Cards (Clean, Subtle Tilt) ===
     window.addEventListener('load', () => {
         const cards = document.querySelectorAll('.project-card');
         
         cards.forEach(card => {
             card.addEventListener('mouseenter', () => {
-                card.style.transition = 'none'; // Disable transition for instant mouse tracking
+                card.style.transition = 'none';
             });
             
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left; // x position within the element.
-                const y = e.clientY - rect.top;  // y position within the element.
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
 
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
 
-                // Max rotation 10deg
-                const rotateX = ((y - centerY) / centerY) * -10; 
-                const rotateY = ((x - centerX) / centerX) * 10;
+                // Subtle natural rotation (max 5deg) without harsh flashlight glare
+                const rotateX = ((y - centerY) / centerY) * -5; 
+                const rotateY = ((x - centerX) / centerX) * 5;
 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02) translateY(-4px)`;
-                
-                // Add a shine effect using radial gradient
-                card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.15) 0%, transparent 60%), var(--card-bg)`;
-                card.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
-                card.style.borderColor = 'transparent';
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015) translateY(-3px)`;
+                card.style.boxShadow = '0 12px 28px -6px rgba(0, 0, 0, 0.45)';
+                card.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             });
 
             card.addEventListener('mouseleave', () => {
-                card.style.transition = 'all 0.4s ease-out';
+                card.style.transition = 'all 0.35s ease-out';
                 card.style.transform = '';
-                card.style.background = '';
                 card.style.boxShadow = '';
                 card.style.borderColor = '';
             });
