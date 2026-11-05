@@ -7,6 +7,24 @@ class SoundManager {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.isMuted = false;
+    this.bgMusic = null;
+    this.musicPlaying = false;
+    this.musicVolume = 0.40;
+
+    this.initMusic();
+
+    // Auto-unlock WebAudio and start BGM on first user interaction
+    const unlock = () => {
+      this.init();
+      this.playMusic();
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+    window.addEventListener('click', unlock);
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('touchstart', unlock);
   }
 
   init() {
@@ -16,6 +34,54 @@ class SoundManager {
         this.ctx = new AudioContext();
       }
     }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  initMusic() {
+    try {
+      this.bgMusic = new Audio();
+      this.bgMusic.src = 'assets/music/bgm.mp3';
+      this.bgMusic.loop = true;
+      this.bgMusic.volume = this.musicVolume;
+      this.bgMusic.addEventListener('error', () => {
+        if (this.bgMusic.src.includes('assets/music/bgm.mp3')) {
+          this.bgMusic.src = '8-Bit Fantasy & Adventure Music [no AI].mp3';
+        }
+      });
+    } catch (e) {
+      console.warn('BGM Audio init error:', e);
+    }
+  }
+
+  playMusic() {
+    if (!this.bgMusic) this.initMusic();
+    if (!this.bgMusic || !this.enabled || this.isMuted) return;
+    this.bgMusic.volume = this.musicVolume;
+    const playPromise = this.bgMusic.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.musicPlaying = true;
+      }).catch(err => {
+        this.musicPlaying = false;
+      });
+    }
+  }
+
+  pauseMusic() {
+    if (this.bgMusic && this.musicPlaying) {
+      this.bgMusic.pause();
+      this.musicPlaying = false;
+    }
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    if (this.bgMusic) {
+      this.bgMusic.muted = this.isMuted;
+    }
+    return this.isMuted;
   }
 
   play(type) {
@@ -52,6 +118,25 @@ class SoundManager {
       gain.connect(this.ctx.destination);
       osc.start(t);
       osc.stop(t + 0.05);
+    } else if (type === 'portal') {
+      const osc = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc2.type = 'triangle';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(880, t + 0.12);
+      osc2.frequency.setValueAtTime(440, t);
+      osc2.frequency.exponentialRampToValueAtTime(1320, t + 0.12);
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+      osc.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc2.start(t);
+      osc.stop(t + 0.18);
+      osc2.stop(t + 0.18);
     } else if (type === 'score') {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();

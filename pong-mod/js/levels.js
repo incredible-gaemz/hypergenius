@@ -367,6 +367,111 @@ const LEVELS = [
     mode: 'roguelike',
     targetScore: 5,
     desc: 'Survive 5 floors of escalating opponents. Pick 1 of 3 retro upgrades between floors.'
+  },
+  {
+    id: 53,
+    name: 'SUPERHOT PONG',
+    mode: 'superhot',
+    targetScore: 5,
+    desc: 'Time moves only when you move! Stop moving to slow time to a crawl, then strike at full speed.'
+  },
+  {
+    id: 54,
+    name: 'PORTAL PONG',
+    mode: 'portal',
+    targetScore: 5,
+    desc: 'Quantum wormholes bridge the court! Bank the ball through drifting portals to bypass the net and score trick shots.'
+  },
+  {
+    id: 55,
+    name: 'TETRIS PONG',
+    mode: 'tetris',
+    targetScore: 5,
+    desc: 'Tetrominoes drop down the center net in real-time! Bank off falling blocks, chip through stacks, and clear lines.'
+  },
+  {
+    id: 56,
+    name: 'SINGULARITY PONG',
+    mode: 'singularity',
+    targetScore: 5,
+    desc: 'A gravitational black hole warps the center court! Execute curved orbital slingshots around the event horizon.'
+  },
+  {
+    id: 57,
+    name: 'EXCAVATOR PONG',
+    mode: 'excavator',
+    targetScore: 5,
+    desc: 'Both sides launch drill balls into a central mountain of solid earth! Burrow tunnels from both ends to break through and score.'
+  },
+  {
+    id: 58,
+    name: 'SPACE INVADERS PONG',
+    mode: 'invaders',
+    targetScore: 5,
+    desc: 'Classic alien invaders march across the midfield! Bank the ball into the descending swarm to blast through.'
+  },
+  {
+    id: 59,
+    name: 'AIR HOCKEY PONG',
+    mode: 'airhockey',
+    targetScore: 5,
+    desc: 'Free 2D half-court mallet movement! Skate forward, charge the puck, and bank cross-court shots at lightning speed.'
+  },
+  {
+    id: 60,
+    name: 'LIGHT CYCLE PONG',
+    mode: 'lightcycle',
+    targetScore: 5,
+    desc: 'The ball leaves solid laser trails in its wake! Every volley etches a maze of reflective light walls across the court.'
+  },
+  {
+    id: 61,
+    name: 'GRAVITY FLIP PONG',
+    mode: 'gravity_flip',
+    targetScore: 5,
+    desc: 'Vertical gravity warps the ball into parabolic arcs! Every paddle hit flips gravity upside-down between ceiling and floor.'
+  },
+  {
+    id: 62,
+    name: 'POLARITY PONG',
+    mode: 'polarity',
+    targetScore: 5,
+    desc: 'Electromagnetic polarities! Press SPACE to toggle your paddle between Attractor (curves ball inward) and Repulsor (magnetic kinetic blast).'
+  },
+  {
+    id: 63,
+    name: 'SNAKE PONG',
+    mode: 'snake_pong',
+    targetScore: 5,
+    desc: 'The ball is an undulating 8-bit retro snake! Eat glowing food pellets on the court to grow longer and overwhelm your opponent.'
+  },
+  {
+    id: 64,
+    name: 'CHRONO PONG',
+    mode: 'chrono',
+    targetScore: 5,
+    desc: 'Hold SPACE to rewind time! Step backwards up to 2 seconds to undo missed shots and launch lethal counter-attacks.'
+  },
+  {
+    id: 65,
+    name: 'ASTEROIDS PONG',
+    mode: 'asteroids_pong',
+    targetScore: 5,
+    desc: 'Lethal micro-gravity asteroid field! Asteroid hits instantly destroy paddles. Higher difficulty spawns denser asteroid swarms.'
+  },
+  {
+    id: 66,
+    name: 'TIME BOMB PONG',
+    mode: 'time_bomb',
+    targetScore: 5,
+    desc: 'The ball is an armed time bomb with an unpredictable randomized fuse! Every paddle hit accelerates the countdown.'
+  },
+  {
+    id: 67,
+    name: 'BULLET HELL PONG',
+    mode: 'bullet_hell',
+    targetScore: 5,
+    desc: 'Midfield Danmaku sentinel pulses geometric bullet spirals! Dodge bullet waves with your paddle and smash the ball through bullet curtains.'
   }
 ];
 

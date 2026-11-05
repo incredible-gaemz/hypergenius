@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+:root {
+  --fg: #ffffff;
+  --bg: #000000;
+  --dim: #555555;
+  --dim-border: #333333;
+  --hover-bg: #222222;
+  --badge-bg: #ffffff;
+}
+
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,8 +20,8 @@
 }
 
 body {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--bg);
+  color: var(--fg);
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
   line-height: 1.5;
@@ -27,8 +37,8 @@ body {
   position: relative;
   width: 960px;
   height: 540px;
-  background: #000000;
-  border: 3px solid #ffffff;
+  background: var(--bg);
+  border: 3px solid var(--fg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -37,9 +47,9 @@ body {
 
 /* Inverted Mode (Level 7) */
 #game-container.inverted-theme {
-  background: #ffffff;
-  border-color: #000000;
-  color: #000000;
+  background: var(--fg);
+  border-color: var(--bg);
+  color: var(--bg);
 }
 
 #gameCanvas {
@@ -48,11 +58,11 @@ body {
   height: 540px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  background: #000000;
+  background: var(--bg);
 }
 
 #game-container.inverted-theme #gameCanvas {
-  background: #ffffff;
+  background: var(--fg);
 }
 
 /* Overlays */
@@ -81,15 +91,15 @@ body {
   align-items: center;
   width: 680px;
   padding: 18px 24px;
-  border: 2px solid #ffffff;
-  background: #000000;
+  border: 2px solid var(--fg);
+  background: var(--bg);
   gap: 12px;
 }
 
 .menu-title {
   font-size: 18px;
   letter-spacing: 3px;
-  color: #ffffff;
+  color: var(--fg);
 }
 
 /* Difficulty Selector */
@@ -101,14 +111,14 @@ body {
 
 .diff-label {
   font-size: 8px;
-  color: #888888;
+  color: var(--dim);
   margin-right: 4px;
 }
 
 .diff-btn {
-  background: #000000;
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+  color: var(--fg);
   font-family: inherit;
   font-size: 7px;
   padding: 4px 10px;
@@ -116,24 +126,24 @@ body {
 }
 
 .diff-btn:hover {
-  background: #222222;
+  background: var(--hover-bg);
 }
 
 .diff-btn.active {
-  background: #ffffff;
-  color: #000000;
+  background: var(--fg);
+  color: var(--bg);
 }
 
 /* Level Name Banner */
 .level-name-banner {
   font-size: 9px;
-  color: #ffffff;
+  color: var(--fg);
   letter-spacing: 1px;
   height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #333333;
+  border-bottom: 1px solid var(--dim-border);
   width: 100%;
   padding-bottom: 4px;
 }
@@ -149,9 +159,9 @@ body {
 }
 
 .level-cell {
-  background: #000000;
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+  color: var(--fg);
   font-family: inherit;
   font-size: 11px;
   height: 44px;
@@ -165,21 +175,21 @@ body {
 }
 
 .level-cell:hover:not(.locked) {
-  background: #ffffff;
-  color: #000000;
+  background: var(--fg);
+  color: var(--bg);
 }
 
 .level-cell.locked {
-  border-color: #333333;
-  color: #444444;
+  border-color: var(--dim-border);
+  color: var(--dim);
   cursor: default;
 }
 
 .level-cell.active-playing {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--fg);
 }
 
-/* Level Completion Difficulty Badge (1: Easy, 2: Normal, 3: Hard, 4: Impossible) */
+/* Level Completion Difficulty Badge */
 .level-diff-badge {
   position: absolute;
   top: 3px;
@@ -193,12 +203,12 @@ body {
 .diff-box {
   width: 4px;
   height: 4px;
-  background-color: #ffffff;
+  background-color: var(--badge-bg);
   display: inline-block;
 }
 
 .level-cell:hover:not(.locked) .diff-box {
-  background-color: #000000;
+  background-color: var(--bg);
 }
 
 /* Pagination Row */
@@ -210,9 +220,9 @@ body {
 }
 
 .nav-arrow {
-  background: #000000;
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+  color: var(--fg);
   font-family: inherit;
   font-size: 12px;
   padding: 4px 12px;
@@ -220,31 +230,31 @@ body {
 }
 
 .nav-arrow:hover {
-  background: #ffffff;
-  color: #000000;
+  background: var(--fg);
+  color: var(--bg);
 }
 
 .nav-arrow:disabled {
-  border-color: #333333;
-  color: #333333;
+  border-color: var(--dim-border);
+  color: var(--dim-border);
   cursor: default;
-  background: #000000;
+  background: var(--bg);
 }
 
 .page-text {
   font-size: 8px;
-  color: #888888;
+  color: var(--dim);
 }
 
-/* Modals (Pause & Result) */
+/* Modals (Pause, Result & Settings) */
 .modal-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 380px;
   padding: 24px;
-  border: 2px solid #ffffff;
-  background: #000000;
+  border: 2px solid var(--fg);
+  background: var(--bg);
   gap: 16px;
   text-align: center;
 }
@@ -252,11 +262,12 @@ body {
 .modal-title {
   font-size: 16px;
   letter-spacing: 2px;
+  color: var(--fg);
 }
 
 .modal-sub {
   font-size: 8px;
-  color: #888888;
+  color: var(--dim);
 }
 
 .modal-buttons {
@@ -267,9 +278,9 @@ body {
 }
 
 .modal-btn {
-  background: #000000;
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  background: var(--bg);
+  border: 1px solid var(--fg);
+  color: var(--fg);
   font-family: inherit;
   font-size: 9px;
   padding: 8px;
@@ -277,6 +288,8 @@ body {
 }
 
 .modal-btn:hover {
-  background: #ffffff;
-  color: #000000;
+  background: var(--fg);
+  color: var(--bg);
 }
+
+

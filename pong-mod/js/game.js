@@ -17,7 +17,7 @@ class PongModGame {
     this.difficulty = 'normal'; // 'easy', 'normal', 'hard', 'impossible'
     this.currentPage = 1;
     this.currentLevel = null;
-    this.unlockedLevel = 52; // Levels 1-52 unlocked
+    this.unlockedLevel = 67; // Levels 1-67 unlocked
 
     // Saved Completed Levels with highest beaten difficulty tier:
     // 1: Easy, 2: Normal, 3: Hard, 4: Impossible
@@ -494,6 +494,12 @@ class PongModGame {
       });
     });
 
+    try {
+      localStorage.removeItem('pong_mod_style');
+      document.getElementById('game-container')?.removeAttribute('data-theme');
+      document.body?.removeAttribute('data-theme');
+    } catch (e) {}
+
     // Pause Modal Buttons
     document.getElementById('btn-resume').addEventListener('click', () => {
       this.togglePause();
@@ -603,6 +609,7 @@ class PongModGame {
     this.currentLevel = lvl;
     this.state = 'PLAYING';
     this.modeState = {};
+    window.Sound?.playMusic();
 
     // Inverted theme check
     const container = document.getElementById('game-container');
@@ -1413,6 +1420,36 @@ class PongModGame {
       this.initSecondPerson(aiCfg);
     } else if (mode === 'roguelike') {
       this.initRoguelike(aiCfg);
+    } else if (mode === 'superhot') {
+      this.initSuperhot(aiCfg);
+    } else if (mode === 'portal') {
+      this.initPortal(aiCfg);
+    } else if (mode === 'tetris') {
+      this.initTetris(aiCfg);
+    } else if (mode === 'singularity') {
+      this.initSingularity(aiCfg);
+    } else if (mode === 'excavator') {
+      this.initExcavator(aiCfg);
+    } else if (mode === 'invaders') {
+      this.initInvaders(aiCfg);
+    } else if (mode === 'airhockey') {
+      this.initAirHockey(aiCfg);
+    } else if (mode === 'lightcycle') {
+      this.initLightCycle(aiCfg);
+    } else if (mode === 'gravity_flip') {
+      this.initGravityFlip(aiCfg);
+    } else if (mode === 'polarity') {
+      this.initPolarity(aiCfg);
+    } else if (mode === 'snake_pong') {
+      this.initSnakePong(aiCfg);
+    } else if (mode === 'prism' || mode === 'chrono') {
+      this.initChrono(aiCfg);
+    } else if (mode === 'asteroids_pong') {
+      this.initAsteroidsPong(aiCfg);
+    } else if (mode === 'tractor_beam' || mode === 'time_bomb') {
+      this.initTimeBomb(aiCfg);
+    } else if (mode === 'bullet_hell') {
+      this.initBulletHell(aiCfg);
     }
   }
 
@@ -1550,6 +1587,36 @@ class PongModGame {
       this.updateSecondPerson(dt);
     } else if (mode === 'roguelike') {
       this.updateRoguelike(dt);
+    } else if (mode === 'superhot') {
+      this.updateSuperhot(dt);
+    } else if (mode === 'portal') {
+      this.updatePortal(dt);
+    } else if (mode === 'tetris') {
+      this.updateTetris(dt);
+    } else if (mode === 'singularity') {
+      this.updateSingularity(dt);
+    } else if (mode === 'excavator') {
+      this.updateExcavator(dt);
+    } else if (mode === 'invaders') {
+      this.updateInvaders(dt);
+    } else if (mode === 'airhockey') {
+      this.updateAirHockey(dt);
+    } else if (mode === 'lightcycle') {
+      this.updateLightCycle(dt);
+    } else if (mode === 'gravity_flip') {
+      this.updateGravityFlip(dt);
+    } else if (mode === 'polarity') {
+      this.updatePolarity(dt);
+    } else if (mode === 'snake_pong') {
+      this.updateSnakePong(dt);
+    } else if (mode === 'prism' || mode === 'chrono') {
+      this.updateChrono(dt);
+    } else if (mode === 'asteroids_pong') {
+      this.updateAsteroidsPong(dt);
+    } else if (mode === 'tractor_beam' || mode === 'time_bomb') {
+      this.updateTimeBomb(dt);
+    } else if (mode === 'bullet_hell') {
+      this.updateBulletHell(dt);
     } else {
       this.updateNormal(dt);
     }
@@ -3140,6 +3207,36 @@ class PongModGame {
       this.renderSecondPerson(ctx, colWhite, colBlack);
     } else if (mode === 'roguelike') {
       this.renderRoguelike(ctx, colWhite, colBlack);
+    } else if (mode === 'superhot') {
+      this.renderSuperhot(ctx, colWhite, colBlack);
+    } else if (mode === 'portal') {
+      this.renderPortal(ctx, colWhite, colBlack);
+    } else if (mode === 'tetris') {
+      this.renderTetris(ctx, colWhite, colBlack);
+    } else if (mode === 'singularity') {
+      this.renderSingularity(ctx, colWhite, colBlack);
+    } else if (mode === 'excavator') {
+      this.renderExcavator(ctx, colWhite, colBlack);
+    } else if (mode === 'invaders') {
+      this.renderInvaders(ctx, colWhite, colBlack);
+    } else if (mode === 'airhockey') {
+      this.renderAirHockey(ctx, colWhite, colBlack);
+    } else if (mode === 'lightcycle') {
+      this.renderLightCycle(ctx, colWhite, colBlack);
+    } else if (mode === 'gravity_flip') {
+      this.renderGravityFlip(ctx, colWhite, colBlack);
+    } else if (mode === 'polarity') {
+      this.renderPolarity(ctx, colWhite, colBlack);
+    } else if (mode === 'snake_pong') {
+      this.renderSnakePong(ctx, colWhite, colBlack);
+    } else if (mode === 'prism' || mode === 'chrono') {
+      this.renderChrono(ctx, colWhite, colBlack);
+    } else if (mode === 'asteroids_pong') {
+      this.renderAsteroidsPong(ctx, colWhite, colBlack);
+    } else if (mode === 'tractor_beam' || mode === 'time_bomb') {
+      this.renderTimeBomb(ctx, colWhite, colBlack);
+    } else if (mode === 'bullet_hell') {
+      this.renderBulletHell(ctx, colWhite, colBlack);
     } else {
       this.renderNormal(ctx, colWhite, colBlack);
     }
@@ -11004,18 +11101,18 @@ class PongModGame {
     this.modeState = {
       floor: 1,
       maxFloors: 5,
-      playerHp: 3,
-      playerMaxHp: 3,
+      playerHp: 4,
+      playerMaxHp: 4,
       enemyHp: 2,
       enemyMaxHp: 2,
       state: 'PLAYING',
       pauseTimer: 0,
       playerW: 12,
-      playerH: 70,
-      playerSpeed: 7.2,
+      playerH: 72,
+      playerSpeed: 8.5,
       enemyW: 12,
       enemyH: 50,
-      enemySpeed: 5.5,
+      enemySpeed: 2.8,
       floorTitle: 'SPEEDSTER',
       upgrades: [],
       offeredUpgrades: [],
@@ -11029,13 +11126,13 @@ class PongModGame {
       lasers: [],
       particles: [],
       shake: 0,
-      twinY1: 120,
-      twinY2: 380,
-      twinH: 36,
+      twinY1: 80,
+      twinY2: 410,
+      twinH: 32,
       shieldHp: 0,
       shieldX: 840,
-      shieldY: 190,
-      shieldH: 160,
+      shieldY: 205,
+      shieldH: 110,
       shadowGlitchTimer: 0,
       shadowGlitchY: 0
     };
@@ -11055,49 +11152,56 @@ class PongModGame {
       s.playerShieldActive = true;
     }
 
+    const diff = this.difficulty;
+    let speedMult = 0.72; // normal
+    if (diff === 'easy') speedMult = 0.58;
+    else if (diff === 'hard') speedMult = 0.88;
+    else if (diff === 'impossible') speedMult = 1.05;
+
     if (floorNum === 1) {
       s.floorTitle = 'SPEEDSTER';
       s.enemyHp = 2;
       s.enemyMaxHp = 2;
-      s.enemyH = 46;
+      s.enemyH = 48;
       s.enemyW = 12;
-      s.enemySpeed = 5.8;
+      s.enemySpeed = 3.4 * speedMult;
     } else if (floorNum === 2) {
       s.floorTitle = 'TWIN BLADES';
-      s.enemyHp = 2;
-      s.enemyMaxHp = 2;
-      s.twinH = 36;
+      s.enemyHp = 3;
+      s.enemyMaxHp = 3;
+      s.twinH = 40;
       s.enemyW = 12;
-      s.enemySpeed = 4.8;
+      s.enemySpeed = 3.6 * speedMult;
       s.twinY1 = 120;
-      s.twinY2 = 380;
+      s.twinY2 = 360;
     } else if (floorNum === 3) {
       s.floorTitle = 'ENERGY SHIELD';
-      s.enemyHp = 2;
-      s.enemyMaxHp = 2;
-      s.enemyH = 65;
+      s.enemyHp = 4;
+      s.enemyMaxHp = 4;
+      s.enemyH = 62;
       s.enemyW = 12;
-      s.enemySpeed = 5.0;
-      s.shieldHp = 2;
+      s.enemySpeed = 3.8 * speedMult;
+      s.shieldHp = 2; // 2 solid hits to shatter
       s.shieldX = 840;
       s.shieldY = 190;
       s.shieldH = 160;
     } else if (floorNum === 4) {
       s.floorTitle = 'SHADOW WARP';
-      s.enemyHp = 2;
-      s.enemyMaxHp = 2;
-      s.enemyH = 58;
+      s.enemyHp = 4;
+      s.enemyMaxHp = 4;
+      s.enemyH = 56;
       s.enemyW = 12;
-      s.enemySpeed = 5.4;
+      s.enemySpeed = 4.1 * speedMult;
       s.shadowGlitchTimer = 0;
       s.shadowGlitchY = 0;
+      s.shadowWarpTimer = 0;
     } else {
-      s.floorTitle = 'MECHA BOSS';
-      s.enemyHp = 3;
-      s.enemyMaxHp = 3;
-      s.enemyH = 92;
+      s.floorTitle = 'MECHA CORE';
+      s.enemyHp = 5;
+      s.enemyMaxHp = 5;
+      s.enemyH = 75;
       s.enemyW = 16;
-      s.enemySpeed = 5.8;
+      s.enemySpeed = 4.4 * speedMult;
     }
 
     this.player.w = s.playerW;
@@ -11115,8 +11219,8 @@ class PongModGame {
 
   serveRoguelikeBall(serveToPlayer = true) {
     const s = this.modeState;
-    const angle = (Math.random() - 0.5) * 0.7;
-    const speed = 5.8;
+    const angle = (Math.random() - 0.5) * 0.65;
+    const speed = 5.6;
     const dir = serveToPlayer ? -1 : 1;
     s.balls = [{
       x: CANVAS_WIDTH / 2,
@@ -11134,7 +11238,7 @@ class PongModGame {
       { id: 'speed_boost', name: 'OVERDRIVE', desc: '+30% SPEED' },
       { id: 'shield_barrier', name: 'SAFETY SHIELD', desc: 'ABSORBS 1 MISS' },
       { id: 'multiball', name: 'TWIN BALL', desc: 'EXTRA BALL ON HIT' },
-      { id: 'repair_kit', name: 'REPAIR KIT', desc: '+1 MAX HP & HEAL' },
+      { id: 'repair_kit', name: 'REPAIR KIT', desc: '+1 MAX HP & +2 HEAL' },
       { id: 'laser_strike', name: 'LASER BEAM', desc: 'STUNS FOE ON HIT' },
       { id: 'crit_return', name: 'TURBO CRIT', desc: '+40% SPEED ON CORNERS' },
       { id: 'slow_field', name: 'CHRONO FIELD', desc: 'SLOWS BALL ON YOUR SIDE' }
@@ -11171,7 +11275,7 @@ class PongModGame {
       s.hasMultiball = true;
     } else if (up.id === 'repair_kit') {
       s.playerMaxHp++;
-      s.playerHp = Math.min(s.playerMaxHp, s.playerHp + 1);
+      s.playerHp = Math.min(s.playerMaxHp, s.playerHp + 2);
     } else if (up.id === 'laser_strike') {
       s.hasLaserStrike = true;
     } else if (up.id === 'crit_return') {
@@ -11231,6 +11335,8 @@ class PongModGame {
             this.showResult(true, 'ROGUELIKE RUN COMPLETE!');
             return;
           }
+          // Heal 1 HP on clearing a floor!
+          s.playerHp = Math.min(s.playerMaxHp, s.playerHp + 1);
           s.state = 'UPGRADE';
           s.offeredUpgrades = this.rollRoguelikeUpgrades();
           return;
@@ -11245,14 +11351,17 @@ class PongModGame {
       return;
     }
 
-    // 1. Player Paddle Movement
+    // 1. Player Paddle Movement: KEYBOARD ONLY (W/S or Up/Down arrows)
     let dir = 0;
     if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
     if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
     this.player.y += dir * s.playerSpeed;
     this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
 
-    // 2. Opponent AI Movement
+    // 2. Opponent AI Movement with Fair Reaction Range & Deadzone
+    const diffSetting = this.difficulty;
+    const deadzone = diffSetting === 'easy' ? 22 : (diffSetting === 'hard' ? 7 : (diffSetting === 'impossible' ? 2 : 14));
+
     let activeBall = null;
     let closestDist = Infinity;
     for (const b of s.balls) {
@@ -11264,35 +11373,62 @@ class PongModGame {
     }
     if (!activeBall && s.balls.length > 0) activeBall = s.balls[0];
 
+    // Bot only tracks when ball is on opponent half (x >= 380) and approaching!
+    const isBallApproaching = activeBall && activeBall.vx > 0 && activeBall.x >= 380;
+
     if (s.floor === 2) {
-      // Twin Blades
-      if (activeBall) {
+      // Twin Blades with fair center gap
+      if (isBallApproaching) {
         const t1 = activeBall.y - s.twinH / 2;
         const diff1 = t1 - s.twinY1;
-        s.twinY1 += Math.sign(diff1) * Math.min(Math.abs(diff1), s.enemySpeed);
-        s.twinY1 = Math.max(38, Math.min(235, s.twinY1));
+        if (Math.abs(diff1) > deadzone) {
+          s.twinY1 += Math.sign(diff1) * Math.min(Math.abs(diff1), s.enemySpeed);
+        }
+        s.twinY1 = Math.max(38, Math.min(230, s.twinY1));
 
         const t2 = activeBall.y - s.twinH / 2;
         const diff2 = t2 - s.twinY2;
-        s.twinY2 += Math.sign(diff2) * Math.min(Math.abs(diff2), s.enemySpeed);
-        s.twinY2 = Math.max(265, Math.min(CANVAS_HEIGHT - 38 - s.twinH, s.twinY2));
+        if (Math.abs(diff2) > deadzone) {
+          s.twinY2 += Math.sign(diff2) * Math.min(Math.abs(diff2), s.enemySpeed);
+        }
+        s.twinY2 = Math.max(270, Math.min(CANVAS_HEIGHT - 38 - s.twinH, s.twinY2));
+      } else {
+        // Return toward resting positions
+        s.twinY1 += Math.sign(120 - s.twinY1) * Math.min(Math.abs(120 - s.twinY1), 1.5);
+        s.twinY2 += Math.sign(360 - s.twinY2) * Math.min(Math.abs(360 - s.twinY2), 1.5);
       }
     } else {
       if (this.enemy.stunTimer && this.enemy.stunTimer > 0) {
         this.enemy.stunTimer -= dt;
-      } else if (activeBall) {
+      } else if (isBallApproaching) {
         let targetY = activeBall.y - this.enemy.h / 2;
         if (s.floor === 4) {
-          s.shadowGlitchTimer += dt;
-          if (s.shadowGlitchTimer > 0.45) {
-            s.shadowGlitchTimer = 0;
-            s.shadowGlitchY = (Math.random() - 0.5) * 36;
+          s.shadowWarpTimer = (s.shadowWarpTimer || 0) + dt;
+          if (s.shadowWarpTimer > 1.6 && activeBall.x > 450 && activeBall.x < 700) {
+            s.shadowWarpTimer = 0;
+            const warpDiff = targetY - this.enemy.y;
+            this.enemy.y += Math.sign(warpDiff) * Math.min(Math.abs(warpDiff), 42);
+            for (let k = 0; k < 6; k++) {
+              s.particles.push({
+                x: this.enemy.x + 6, y: this.enemy.y + this.enemy.h / 2,
+                vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5,
+                life: 0.25, maxLife: 0.25
+              });
+            }
           }
-          targetY += s.shadowGlitchY;
         }
         const diff = targetY - this.enemy.y;
-        this.enemy.y += Math.sign(diff) * Math.min(Math.abs(diff), s.enemySpeed);
+        if (Math.abs(diff) > deadzone) {
+          this.enemy.y += Math.sign(diff) * Math.min(Math.abs(diff), s.enemySpeed);
+        }
         this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+      } else {
+        // Idle drift toward center
+        const centerY = (CANVAS_HEIGHT - this.enemy.h) / 2;
+        const diffCenter = centerY - this.enemy.y;
+        if (Math.abs(diffCenter) > 10) {
+          this.enemy.y += Math.sign(diffCenter) * Math.min(Math.abs(diffCenter), 1.2);
+        }
       }
     }
 
@@ -11364,13 +11500,13 @@ class PongModGame {
             b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
           b.x = this.player.x + this.player.w + r;
           const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
-          const angle = offset * 0.92;
+          const angle = offset * 0.98;
           let curSpd = Math.hypot(b.vx, b.vy);
           if (s.hasCrit && Math.abs(offset) > 0.6) {
-            curSpd = Math.min(14, curSpd * 1.38);
+            curSpd = Math.min(14.5, curSpd * 1.38 + 0.5);
             s.shake = 4;
           } else {
-            curSpd = Math.min(12, curSpd * 1.05);
+            curSpd = Math.min(13.0, curSpd * 1.08 + 0.4);
           }
           b.vx = Math.abs(Math.cos(angle) * curSpd);
           b.vy = Math.sin(angle) * curSpd;
@@ -11432,13 +11568,20 @@ class PongModGame {
           window.Sound?.play('hit');
         }
 
-        // Goal Past Opponent (Score for Player)
+        // Goal Past Opponent (Score for Player - every ball scored damages enemy!)
         if (b.x - r >= CANVAS_WIDTH) {
           s.balls.splice(i, 1);
-          if (s.balls.length === 0) {
-            s.enemyHp--;
-            window.Sound?.play('score');
-            s.shake = 6;
+          s.enemyHp--;
+          window.Sound?.play('score');
+          s.shake = 6;
+          for (let k = 0; k < 8; k++) {
+            s.particles.push({
+              x: CANVAS_WIDTH - 12, y: b.y,
+              vx: -(Math.random() * 4 + 1), vy: (Math.random() - 0.5) * 6,
+              life: 0.35, maxLife: 0.35
+            });
+          }
+          if (s.enemyHp <= 0 || s.balls.length === 0) {
             s.state = 'GOAL_PAUSE';
             s.pauseTimer = 0.6;
             break;
@@ -11461,10 +11604,17 @@ class PongModGame {
             }
           } else {
             s.balls.splice(i, 1);
-            if (s.balls.length === 0) {
-              s.playerHp--;
-              window.Sound?.play('wall');
-              s.shake = 8;
+            s.playerHp--;
+            window.Sound?.play('wall');
+            s.shake = 8;
+            for (let k = 0; k < 10; k++) {
+              s.particles.push({
+                x: 16, y: b.y,
+                vx: (Math.random() * 4) + 1, vy: (Math.random() - 0.5) * 6,
+                life: 0.35, maxLife: 0.35
+              });
+            }
+            if (s.playerHp <= 0 || s.balls.length === 0) {
               s.state = 'GOAL_PAUSE';
               s.pauseTimer = 0.6;
               break;
@@ -11647,7 +11797,4791 @@ class PongModGame {
       ctx.restore();
     }
   }
+
+
+  // ========================================================
+  // SUPERHOT PONG (Level 53)
+  // "Time moves only when you move!"
+  // ========================================================
+  initSuperhot(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 70;
+    this.enemy.w = 12;
+    this.enemy.h = 70;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      timeScale: 1.0,
+      targetTimeScale: 1.0,
+      prevPlayerY: this.player.y,
+      playerMoveDist: 0,
+      smashCooldown: 0,
+      afterImages: [],
+      particles: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetSuperhotBall(true);
+  }
+
+  resetSuperhotBall(serveToPlayer = true) {
+    this.ball.x = CANVAS_WIDTH / 2;
+    this.ball.y = CANVAS_HEIGHT / 2;
+    this.ball.size = 10;
+    const angle = (Math.random() - 0.5) * 0.7;
+    const speed = 12.0; // Faster high-speed ball
+    const dir = serveToPlayer ? -1 : 1;
+    this.ball.vx = dir * Math.cos(angle) * speed;
+    this.ball.vy = Math.sin(angle) * speed;
+    if (this.modeState) {
+      this.modeState.serveTimer = 0.4;
+    }
+  }
+
+  updateSuperhot(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    if (s.smashCooldown > 0) s.smashCooldown -= dt;
+
+    // Particles
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    // 1. Player Paddle Movement: KEYBOARD ONLY (W/S or Up/Down arrows)
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+
+    if (dir !== 0) {
+      this.player.y += dir * 10.5;
+      s.targetTimeScale = 1.0;
+    } else {
+      s.targetTimeScale = 0.04;
+    }
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Smooth exponential time dilation
+    s.timeScale += (s.targetTimeScale - s.timeScale) * Math.min(1, 28 * dt);
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt * s.timeScale;
+      return;
+    }
+
+    // Record motion blur after-images when moving fast
+    if (s.timeScale > 0.65) {
+      s.afterImages.push({
+        px: this.player.x, py: this.player.y, pw: this.player.w, ph: this.player.h,
+        bx: b.x, by: b.y, bsize: b.size,
+        life: 0.18, maxLife: 0.18
+      });
+      if (s.afterImages.length > 8) s.afterImages.shift();
+    }
+    for (let i = s.afterImages.length - 1; i >= 0; i--) {
+      s.afterImages[i].life -= dt;
+      if (s.afterImages[i].life <= 0) s.afterImages.splice(i, 1);
+    }
+
+    // 2. Opponent AI Movement (Scaled strictly by timeScale!)
+    const diffSetting = this.difficulty;
+    let aiSpeed = 4.8;
+    let deadzone = 8;
+    if (diffSetting === 'easy') { aiSpeed = 3.5; deadzone = 16; }
+    else if (diffSetting === 'hard') { aiSpeed = 5.8; deadzone = 5; }
+    else if (diffSetting === 'impossible') { aiSpeed = 7.2; deadzone = 2; }
+
+    const targetEnemyY = b.y - this.enemy.h / 2;
+    const enemyDiff = targetEnemyY - this.enemy.y;
+    if (Math.abs(enemyDiff) > deadzone && b.vx > 0) {
+      this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed * s.timeScale);
+      this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+    }
+
+    // 3. Sub-stepping Ball Physics (Scaled strictly by timeScale!)
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub * s.timeScale;
+      b.y += b.vy * dtSub * s.timeScale;
+
+      // Top / Bottom wall bounce
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Player Paddle Collision
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.95;
+
+        let curSpd = Math.hypot(b.vx, b.vy);
+        // Kinetic smash boost if player struck while moving
+        if (dir !== 0) {
+          curSpd = Math.min(22.0, curSpd * 1.35 + 2.0);
+          s.shake = 6;
+          for (let k = 0; k < 12; k++) {
+            s.particles.push({
+              x: b.x, y: b.y,
+              vx: (Math.random() * 8) + 3, vy: (Math.random() - 0.5) * 8,
+              life: 0.35, maxLife: 0.35
+            });
+          }
+        } else {
+          curSpd = Math.min(16.0, curSpd * 1.08 + 0.8);
+        }
+
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Enemy Paddle Collision
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.95;
+        const curSpd = Math.min(18.0, Math.hypot(b.vx, b.vy) * 1.05);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Goal detection
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'SUPERHOT MASTER!');
+          return;
+        }
+        this.resetSuperhotBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'SUPERHOT DEFEAT');
+          return;
+        }
+        this.resetSuperhotBall(true);
+        break;
+      }
+    }
+  }
+
+  renderSuperhot(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Court Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Dashed Net
+    for (let y = 44; y < CANVAS_HEIGHT - 38; y += 26) {
+      ctx.fillRect(CANVAS_WIDTH / 2 - 2, y, 4, 14);
+    }
+
+    // 3. Scoreboard (Clean retro top display)
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, CANVAS_WIDTH / 2 - 80, 80);
+    ctx.fillText(`${this.enemy.score}`, CANVAS_WIDTH / 2 + 80, 80);
+
+    // 4. Trajectory Echo Pips when Time is Frozen
+    if (s.timeScale < 0.22 && s.serveTimer <= 0) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      for (let step = 1; step <= 5; step++) {
+        const predX = b.x + b.vx * step * 4;
+        let predY = b.y + b.vy * step * 4;
+        if (predY < 42 || predY > CANVAS_HEIGHT - 42) {
+          predY = (predY < 42) ? 84 - predY : 2 * (CANVAS_HEIGHT - 42) - predY;
+        }
+        ctx.fillRect(Math.round(predX - 2), Math.round(predY - 2), 4, 4);
+      }
+      ctx.restore();
+    }
+
+    // 5. High-speed Motion Blur After-Images
+    for (const img of s.afterImages) {
+      const alpha = (img.life / img.maxLife) * 0.35;
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.fillRect(Math.round(img.px), Math.round(img.py), img.pw, img.ph);
+      ctx.fillRect(Math.round(img.bx - img.bsize / 2), Math.round(img.by - img.bsize / 2), img.bsize, img.bsize);
+    }
+
+    // 6. Particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 7. Paddles
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 8. Ball
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // PORTAL PONG (Level 54)
+  // "Quantum wormholes bridge the court!"
+  // ========================================================
+  initPortal(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 72;
+    this.enemy.w = 12;
+    this.enemy.h = 72;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      time: 0,
+      portalA: { x: 290, y: 270, w: 20, h: 64, cooldown: 0 },
+      portalB: { x: 670, y: 270, w: 20, h: 64, cooldown: 0 },
+      warpRipples: [],
+      particles: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetPortalBall(true);
+  }
+
+  resetPortalBall(serveToPlayer = true) {
+    this.ball.x = CANVAS_WIDTH / 2;
+    this.ball.y = CANVAS_HEIGHT / 2;
+    this.ball.size = 10;
+    const angle = (Math.random() - 0.5) * 0.65;
+    const speed = 7.5;
+    const dir = serveToPlayer ? -1 : 1;
+    this.ball.vx = dir * Math.cos(angle) * speed;
+    this.ball.vy = Math.sin(angle) * speed;
+    if (this.modeState) {
+      this.modeState.serveTimer = 0.5;
+      this.modeState.portalA.cooldown = 0;
+      this.modeState.portalB.cooldown = 0;
+    }
+  }
+
+  updatePortal(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    s.time += dt;
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    if (s.portalA.cooldown > 0) s.portalA.cooldown -= dt;
+    if (s.portalB.cooldown > 0) s.portalB.cooldown -= dt;
+
+    // Drifting portal positions
+    s.portalA.y = 270 + Math.sin(s.time * 1.3) * 125;
+    s.portalB.y = 270 - Math.cos(s.time * 1.3) * 125;
+
+    // Warp ripple animations
+    for (let i = s.warpRipples.length - 1; i >= 0; i--) {
+      const rip = s.warpRipples[i];
+      rip.radius += dt * 70;
+      rip.life -= dt;
+      if (rip.life <= 0) s.warpRipples.splice(i, 1);
+    }
+
+    // Particles
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    // 1. Player Paddle Movement: KEYBOARD ONLY (W/S or Up/Down arrows)
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // 2. Enemy AI Movement
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    const isBallHeadingToEnemy = b.vx > 0;
+    if (isBallHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      // Idle toward center
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // 3. Sub-stepping Ball Physics & Portal Teleportation
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      // Top / Bottom rail bounce
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Portal A Teleportation Check (Inbound -> Outbound to Portal B)
+      const pa = s.portalA;
+      const pb = s.portalB;
+      if (s.portalA.cooldown <= 0 &&
+          b.x + r >= pa.x - pa.w / 2 && b.x - r <= pa.x + pa.w / 2 &&
+          b.y + r >= pa.y - pa.h / 2 && b.y - r <= pa.y + pa.h / 2) {
+        // Warp from A to B!
+        b.x = (b.vx >= 0) ? (pb.x + pb.w / 2 + r + 4) : (pb.x - pb.w / 2 - r - 4);
+        b.y = pb.y + (b.y - pa.y);
+        b.y = Math.max(45, Math.min(CANVAS_HEIGHT - 45, b.y));
+
+        s.portalA.cooldown = 0.35;
+        s.portalB.cooldown = 0.35;
+        s.shake = 4;
+        window.Sound?.play('portal');
+
+        s.warpRipples.push({ x: pa.x, y: pa.y, radius: 10, life: 0.3 });
+        s.warpRipples.push({ x: pb.x, y: pb.y, radius: 10, life: 0.3 });
+
+        for (let k = 0; k < 10; k++) {
+          s.particles.push({
+            x: pb.x, y: pb.y,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            life: 0.3, maxLife: 0.3
+          });
+        }
+      }
+      // Portal B Teleportation Check (Inbound -> Outbound to Portal A)
+      else if (s.portalB.cooldown <= 0 &&
+               b.x + r >= pb.x - pb.w / 2 && b.x - r <= pb.x + pb.w / 2 &&
+               b.y + r >= pb.y - pb.h / 2 && b.y - r <= pb.y + pb.h / 2) {
+        // Warp from B to A!
+        b.x = (b.vx >= 0) ? (pa.x + pa.w / 2 + r + 4) : (pa.x - pa.w / 2 - r - 4);
+        b.y = pa.y + (b.y - pb.y);
+        b.y = Math.max(45, Math.min(CANVAS_HEIGHT - 45, b.y));
+
+        s.portalA.cooldown = 0.35;
+        s.portalB.cooldown = 0.35;
+        s.shake = 4;
+        window.Sound?.play('portal');
+
+        s.warpRipples.push({ x: pb.x, y: pb.y, radius: 10, life: 0.3 });
+        s.warpRipples.push({ x: pa.x, y: pa.y, radius: 10, life: 0.3 });
+
+        for (let k = 0; k < 10; k++) {
+          s.particles.push({
+            x: pa.x, y: pa.y,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            life: 0.3, maxLife: 0.3
+          });
+        }
+      }
+
+      // Player Paddle Collision
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Enemy Paddle Collision
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Goal Past Opponent
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'PORTAL MASTER!');
+          return;
+        }
+        this.resetPortalBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'PORTAL DEFEAT');
+          return;
+        }
+        this.resetPortalBall(true);
+        break;
+      }
+    }
+  }
+
+  renderPortal(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Center Net
+    for (let y = 44; y < CANVAS_HEIGHT - 38; y += 26) {
+      ctx.fillRect(CANVAS_WIDTH / 2 - 2, y, 4, 14);
+    }
+
+    // 3. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 4. Warp Ripples
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 1.5;
+    for (const rip of s.warpRipples) {
+      ctx.beginPath();
+      ctx.ellipse(rip.x, rip.y, rip.radius * 0.45, rip.radius, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. Portals (Clean 1-Bit Geometric Wormholes)
+    const pa = s.portalA;
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(pa.x, pa.y, pa.w / 2, pa.h / 2, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.ellipse(pa.x, pa.y, (pa.w / 2) - 4, (pa.h / 2) - 8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const pb = s.portalB;
+    ctx.setLineDash([]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(pb.x, pb.y, pb.w / 2, pb.h / 2, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.ellipse(pb.x, pb.y, (pb.w / 2) - 4, (pb.h / 2) - 8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // 6. Particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 7. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 8. Ball
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // TETRIS PONG (Level 55)
+  // "Tetrominoes drop down the center net in real-time!"
+  // ========================================================
+  initTetris(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 72;
+    this.enemy.w = 12;
+    this.enemy.h = 72;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    const grid = [];
+    for (let r = 0; r < 24; r++) {
+      grid.push(new Array(6).fill(0));
+    }
+
+    this.modeState = {
+      grid: grid,
+      dropTimer: 1.0,
+      dropInterval: 2.8,
+      fallingPiece: null,
+      particles: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.spawnTetromino();
+    this.resetTetrisBall(true);
+  }
+
+  resetTetrisBall(serveToPlayer = true) {
+    this.ball.x = CANVAS_WIDTH / 2;
+    this.ball.y = CANVAS_HEIGHT / 2;
+    this.ball.size = 10;
+    const angle = (Math.random() - 0.5) * 0.65;
+    const speed = 7.5;
+    const dir = serveToPlayer ? -1 : 1;
+    this.ball.vx = dir * Math.cos(angle) * speed;
+    this.ball.vy = Math.sin(angle) * speed;
+    if (this.modeState) {
+      this.modeState.serveTimer = 0.5;
+    }
+  }
+
+  spawnTetromino() {
+    const s = this.modeState;
+    const shapes = [
+      [[0,0], [1,0], [0,1], [1,1]],
+      [[0,0], [1,0], [2,0], [3,0]],
+      [[1,0], [0,1], [1,1], [2,1]],
+      [[0,0], [0,1], [1,1], [2,1]],
+      [[2,0], [0,1], [1,1], [2,1]],
+      [[1,0], [2,0], [0,1], [1,1]],
+      [[0,0], [1,0], [1,1], [2,1]]
+    ];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    s.fallingPiece = {
+      shape: shape,
+      col: Math.floor(Math.random() * 3),
+      rowFloat: 0
+    };
+  }
+
+  updateTetris(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    if (s.fallingPiece) {
+      s.fallingPiece.rowFloat += dt * 2.8;
+      const currentRow = Math.floor(s.fallingPiece.rowFloat);
+
+      let shouldLock = false;
+      for (const [dc, dr] of s.fallingPiece.shape) {
+        const c = s.fallingPiece.col + dc;
+        const r = currentRow + dr;
+        if (r >= 23 || (r + 1 < 24 && s.grid[r + 1][c] === 1)) {
+          shouldLock = true;
+          break;
+        }
+      }
+
+      if (shouldLock) {
+        for (const [dc, dr] of s.fallingPiece.shape) {
+          const c = s.fallingPiece.col + dc;
+          const r = Math.min(23, currentRow + dr);
+          if (r >= 0 && r < 24 && c >= 0 && c < 6) {
+            s.grid[r][c] = 1;
+          }
+        }
+        s.fallingPiece = null;
+        window.Sound?.play('wall');
+
+        for (let r = 23; r >= 0; r--) {
+          if (s.grid[r].every(val => val === 1)) {
+            s.grid.splice(r, 1);
+            s.grid.unshift(new Array(6).fill(0));
+            s.shake = 6;
+            window.Sound?.play('score');
+            r++;
+          }
+        }
+      }
+    } else {
+      s.dropTimer -= dt;
+      if (s.dropTimer <= 0) {
+        s.dropTimer = s.dropInterval;
+        this.spawnTetromino();
+      }
+    }
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      if (b.x + r >= 426 && b.x - r <= 534 && b.y + r >= 38 && b.y - r <= 470) {
+        const col = Math.floor((b.x - 426) / 18);
+        const row = Math.floor((b.y - 38) / 18);
+
+        if (row >= 0 && row < 24 && col >= 0 && col < 6 && s.grid[row][col] === 1) {
+          s.grid[row][col] = 0;
+          b.vx = -b.vx;
+          window.Sound?.play('brick');
+          s.shake = 3;
+
+          for (let k = 0; k < 6; k++) {
+            s.particles.push({
+              x: 426 + col * 18 + 9,
+              y: 38 + row * 18 + 9,
+              vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+              life: 0.25, maxLife: 0.25
+            });
+          }
+        }
+      }
+
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'TETRIS MASTER!');
+          return;
+        }
+        this.resetTetrisBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'BLOCK OUT!');
+          return;
+        }
+        this.resetTetrisBall(true);
+        break;
+      }
+    }
+  }
+
+  renderTetris(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Center Net Boundary
+    ctx.save();
+    ctx.strokeStyle = '#222222';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(426, 38, 108, 432);
+    ctx.restore();
+
+    // 3. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 4. Grid Blocks
+    ctx.fillStyle = colWhite;
+    for (let r = 0; r < 24; r++) {
+      for (let c = 0; c < 6; c++) {
+        if (s.grid[r][c] === 1) {
+          const bx = 426 + c * 18;
+          const by = 38 + r * 18;
+          ctx.fillRect(bx + 1, by + 1, 16, 16);
+          ctx.fillStyle = colBlack;
+          ctx.fillRect(bx + 4, by + 4, 10, 10);
+          ctx.fillStyle = colWhite;
+          ctx.fillRect(bx + 7, by + 7, 4, 4);
+        }
+      }
+    }
+
+    // 5. Active Falling Piece
+    if (s.fallingPiece) {
+      const currentRow = Math.floor(s.fallingPiece.rowFloat);
+      for (const [dc, dr] of s.fallingPiece.shape) {
+        const c = s.fallingPiece.col + dc;
+        const r = currentRow + dr;
+        if (r >= 0 && r < 24 && c >= 0 && c < 6) {
+          const bx = 426 + c * 18;
+          const by = 38 + r * 18;
+          ctx.fillRect(bx + 1, by + 1, 16, 16);
+          ctx.fillStyle = colBlack;
+          ctx.fillRect(bx + 4, by + 4, 10, 10);
+          ctx.fillStyle = colWhite;
+          ctx.fillRect(bx + 7, by + 7, 4, 4);
+        }
+      }
+    }
+
+    // 6. Particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 7. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 8. Ball
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // SINGULARITY PONG (Level 56)
+  // "A gravitational black hole warps the center court!"
+  // ========================================================
+  initSingularity(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 72;
+    this.enemy.w = 12;
+    this.enemy.h = 72;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    const dust = [];
+    for (let i = 0; i < 16; i++) {
+      dust.push({
+        radius: 28 + Math.random() * 42,
+        angle: Math.random() * Math.PI * 2,
+        speed: 1.2 + Math.random() * 2.0
+      });
+    }
+
+    this.modeState = {
+      dust: dust,
+      trail: [],
+      ripples: [],
+      particles: [],
+      slingshotCooldown: 0,
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetSingularityBall(true);
+  }
+
+  resetSingularityBall(serveToPlayer = true) {
+    this.ball.x = CANVAS_WIDTH / 2 + (serveToPlayer ? 40 : -40);
+    this.ball.y = CANVAS_HEIGHT / 2 - 80;
+    this.ball.size = 10;
+    const angle = (Math.random() - 0.5) * 0.5;
+    const speed = 7.5;
+    const dir = serveToPlayer ? -1 : 1;
+    this.ball.vx = dir * Math.cos(angle) * speed;
+    this.ball.vy = Math.sin(angle) * speed;
+    if (this.modeState) {
+      this.modeState.serveTimer = 0.5;
+      this.modeState.slingshotCooldown = 0;
+      this.modeState.trail = [];
+    }
+  }
+
+  updateSingularity(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    if (s.slingshotCooldown > 0) s.slingshotCooldown -= dt;
+
+    for (const d of s.dust) {
+      d.angle += d.speed * dt;
+    }
+
+    for (let i = s.ripples.length - 1; i >= 0; i--) {
+      const rip = s.ripples[i];
+      rip.radius += dt * 80;
+      rip.life -= dt;
+      if (rip.life <= 0) s.ripples.splice(i, 1);
+    }
+
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    s.trail.push({ x: b.x, y: b.y, life: 0.16 });
+    for (let i = s.trail.length - 1; i >= 0; i--) {
+      s.trail[i].life -= dt;
+      if (s.trail[i].life <= 0) s.trail.splice(i, 1);
+    }
+
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    const diff = this.difficulty;
+    let aiSpeed = 4.4;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.5; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 7.0; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      const dx = 480 - b.x;
+      const dy = 270 - b.y;
+      const distSq = dx * dx + dy * dy;
+      const dist = Math.sqrt(distSq);
+
+      if (dist > 22) {
+        const force = 16000 / Math.max(distSq, 1000);
+        b.vx += (dx / dist) * force * dtSub;
+        b.vy += (dy / dist) * force * dtSub;
+      } else if (s.slingshotCooldown <= 0) {
+        s.slingshotCooldown = 0.4;
+        window.Sound?.play('portal');
+        s.shake = 5;
+        s.ripples.push({ radius: 10, life: 0.35 });
+
+        const escapeAngle = Math.atan2(b.vy, b.vx) + (Math.random() - 0.5) * 0.4;
+        const speed = Math.max(9.5, Math.hypot(b.vx, b.vy) * 1.05);
+        b.vx = Math.cos(escapeAngle) * speed;
+        b.vy = Math.sin(escapeAngle) * speed;
+        b.x = 480 + (b.vx > 0 ? 26 : -26);
+        b.y = 270 + Math.sin(escapeAngle) * 26;
+
+        for (let k = 0; k < 12; k++) {
+          s.particles.push({
+            x: 480, y: 270,
+            vx: (Math.random() - 0.5) * 7, vy: (Math.random() - 0.5) * 7,
+            life: 0.35, maxLife: 0.35
+          });
+        }
+      }
+
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'SINGULARITY MASTER!');
+          return;
+        }
+        this.resetSingularityBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'GRAVITY COLLAPSE');
+          return;
+        }
+        this.resetSingularityBall(true);
+        break;
+      }
+    }
+  }
+
+  renderSingularity(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Center Net
+    for (let y = 44; y < CANVAS_HEIGHT - 38; y += 26) {
+      ctx.fillRect(CANVAS_WIDTH / 2 - 2, y, 4, 14);
+    }
+
+    // 3. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 4. Slingshot Shockwave Ripples
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 1.5;
+    for (const rip of s.ripples) {
+      ctx.beginPath();
+      ctx.arc(480, 270, rip.radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. Singularity Vortex
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(480, 270, 22, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = colBlack;
+    ctx.fill();
+
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.arc(480, 270, 16, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = colWhite;
+    for (const d of s.dust) {
+      const px = 480 + Math.cos(d.angle) * d.radius;
+      const py = 270 + Math.sin(d.angle) * d.radius;
+      ctx.fillRect(Math.round(px), Math.round(py), 2, 2);
+    }
+    ctx.restore();
+
+    // 6. Orbital Trajectory Trail
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    for (const t of s.trail) {
+      ctx.fillRect(Math.round(t.x - 2), Math.round(t.y - 2), 4, 4);
+    }
+
+    // 7. Particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 8. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 9. Ball
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // EXCAVATOR PONG (Level 57)
+  // "Both sides launch drill balls to burrow through earth!"
+  // ========================================================
+  initExcavator(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 80;
+    this.enemy.w = 12;
+    this.enemy.h = 80;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    // 4 layers thinner: 20 columns instead of 24 (each layer 10px wide, total 200px)
+    const cols = 20;
+    const rows = 46;
+    const tiles = new Uint8Array(cols * rows);
+    tiles.fill(1);
+
+    const balls = [
+      {
+        id: 'player',
+        x: 210,
+        y: CANVAS_HEIGHT / 2 - 25,
+        vx: 7.5,
+        vy: 1.2,
+        size: 10
+      },
+      {
+        id: 'enemy',
+        x: 750,
+        y: CANVAS_HEIGHT / 2 + 25,
+        vx: -7.5,
+        vy: -1.2,
+        size: 10
+      }
+    ];
+
+    this.modeState = {
+      cols,
+      rows,
+      startX: 380, // Centered at 480: 480 - (20 * 10) / 2 = 380
+      startY: 38,
+      tiles,
+      balls,
+      debris: [],
+      shake: 0,
+      drillTimer: 0,
+      serveTimer: 0.6
+    };
+  }
+
+  resetExcavatorBalls() {
+    const s = this.modeState;
+    if (!s) return;
+    s.balls[0].x = 210;
+    s.balls[0].y = CANVAS_HEIGHT / 2 - 25;
+    s.balls[0].vx = 7.5;
+    s.balls[0].vy = (Math.random() - 0.5) * 2.2;
+
+    s.balls[1].x = 750;
+    s.balls[1].y = CANVAS_HEIGHT / 2 + 25;
+    s.balls[1].vx = -7.5;
+    s.balls[1].vy = (Math.random() - 0.5) * 2.2;
+
+    s.serveTimer = 0.6;
+  }
+
+  updateExcavator(dt) {
+    const s = this.modeState;
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    if (s.drillTimer > 0) s.drillTimer -= dt;
+
+    for (let i = s.debris.length - 1; i >= 0; i--) {
+      const p = s.debris[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.debris.splice(i, 1);
+    }
+
+    // Player keyboard controls
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // AI tracking
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    let targetBall = null;
+    let closestX = -Infinity;
+    for (const b of s.balls) {
+      if (b.vx > 0 && b.x > closestX) {
+        closestX = b.x;
+        targetBall = b;
+      }
+    }
+    if (!targetBall) {
+      for (const b of s.balls) {
+        if (b.vx > 0) targetBall = b;
+      }
+    }
+
+    if (targetBall) {
+      const targetEnemyY = targetBall.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.5);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // Physics sub-steps for both balls
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+
+    for (const b of s.balls) {
+      const r = b.size / 2;
+      for (let step = 0; step < subSteps; step++) {
+        b.x += b.vx * dtSub;
+        b.y += b.vy * dtSub;
+
+        // Rails bounce
+        if (b.y - r <= 38) {
+          b.y = 38 + r;
+          b.vy = Math.abs(b.vy);
+          window.Sound?.play('wall');
+        } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+          b.y = CANVAS_HEIGHT - 38 - r;
+          b.vy = -Math.abs(b.vy);
+          window.Sound?.play('wall');
+        }
+
+        // Earth mountain collision & 2-layer digging
+        const startX = s.startX;
+        const startY = s.startY;
+        const endX = startX + s.cols * 10;
+        const endY = startY + s.rows * 10;
+
+        if (b.x + r >= startX && b.x - r <= endX && b.y + r >= startY && b.y - r <= endY) {
+          const minCol = Math.max(0, Math.floor((b.x - r - startX) / 10));
+          const maxCol = Math.min(s.cols - 1, Math.floor((b.x + r - startX) / 10));
+          const minRow = Math.max(0, Math.floor((b.y - r - startY) / 10));
+          const maxRow = Math.min(s.rows - 1, Math.floor((b.y + r - startY) / 10));
+
+          let hitSolid = false;
+          let solidMinCol = 999;
+          let solidMaxCol = -1;
+
+          for (let c = minCol; c <= maxCol; c++) {
+            for (let row = minRow; row <= maxRow; row++) {
+              const idx = row * s.cols + c;
+              if (s.tiles[idx] === 1) {
+                hitSolid = true;
+                if (c < solidMinCol) solidMinCol = c;
+                if (c > solidMaxCol) solidMaxCol = c;
+              }
+            }
+          }
+
+          if (hitSolid) {
+            // Break 2 layers thick
+            let breakColStart = 0;
+            let breakColEnd = 0;
+
+            if (b.vx >= 0) {
+              // Heading east: break first solid layer hit and the layer behind it
+              breakColStart = solidMinCol;
+              breakColEnd = Math.min(s.cols - 1, solidMinCol + 1);
+            } else {
+              // Heading west: break rightmost solid layer hit and the layer behind it
+              breakColEnd = solidMaxCol;
+              breakColStart = Math.max(0, solidMaxCol - 1);
+            }
+
+            // Vertical tunnel height matching ball diameter with slight clearance
+            const breakRowStart = Math.max(0, Math.floor((b.y - r - 2 - startY) / 10));
+            const breakRowEnd = Math.min(s.rows - 1, Math.floor((b.y + r + 2 - startY) / 10));
+
+            for (let c = breakColStart; c <= breakColEnd; c++) {
+              for (let row = breakRowStart; row <= breakRowEnd; row++) {
+                const idx = row * s.cols + c;
+                if (s.tiles[idx] === 1) {
+                  s.tiles[idx] = 0;
+                  if (Math.random() < 0.5) {
+                    s.debris.push({
+                      x: startX + c * 10 + 5,
+                      y: startY + row * 10 + 5,
+                      vx: -Math.sign(b.vx) * (2.5 + Math.random() * 4.0),
+                      vy: (Math.random() - 0.5) * 5.0,
+                      life: 0.28,
+                      maxLife: 0.28
+                    });
+                  }
+                }
+              }
+            }
+
+            // Ricochet ball back so player/opponent can volley again
+            b.vx = -b.vx;
+            b.vy += (Math.random() - 0.5) * 1.5;
+            b.x += Math.sign(b.vx) * 4;
+
+            window.Sound?.play('brick');
+            s.shake = 3;
+          }
+        }
+
+        // Paddle collisions
+        if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+            b.x + r >= this.player.x &&
+            b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+          b.x = this.player.x + this.player.w + r;
+          const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+          const angle = offset * 0.92;
+          let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+          b.vx = Math.abs(Math.cos(angle) * curSpd);
+          b.vy = Math.sin(angle) * curSpd;
+          window.Sound?.play('hit');
+        }
+
+        if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+            b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+          b.x = this.enemy.x - r;
+          const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+          const angle = offset * 0.92;
+          let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+          b.vx = -Math.abs(Math.cos(angle) * curSpd);
+          b.vy = Math.sin(angle) * curSpd;
+          window.Sound?.play('hit');
+        }
+
+        // Goal detection
+        if (b.x >= CANVAS_WIDTH) {
+          this.player.score++;
+          window.Sound?.play('score');
+          s.shake = 6;
+          if (this.player.score >= 5) {
+            this.showResult(true, 'MINING VICTORY!');
+            return;
+          }
+          this.resetExcavatorBalls();
+          return;
+        } else if (b.x <= 0) {
+          this.enemy.score++;
+          window.Sound?.play('wall');
+          s.shake = 6;
+          if (this.enemy.score >= 5) {
+            this.showResult(false, 'CAVE-IN DEFEAT');
+            return;
+          }
+          this.resetExcavatorBalls();
+          return;
+        }
+      }
+    }
+  }
+
+  renderExcavator(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Destructible Earth Mountain (20 columns x 46 rows)
+    ctx.fillStyle = colWhite;
+    const startX = s.startX;
+    const startY = s.startY;
+    for (let row = 0; row < s.rows; row++) {
+      for (let c = 0; c < s.cols; c++) {
+        const idx = row * s.cols + c;
+        if (s.tiles[idx] === 1) {
+          const tx = startX + c * 10;
+          const ty = startY + row * 10;
+          ctx.fillRect(tx + 1, ty + 1, 8, 8);
+          if ((c + row) % 2 === 0) {
+            ctx.fillStyle = colBlack;
+            ctx.fillRect(tx + 3, ty + 3, 4, 4);
+            ctx.fillStyle = colWhite;
+          }
+        }
+      }
+    }
+
+    // 4. Debris particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.debris) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 5. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 6. Both Drill Balls
+    for (const b of s.balls) {
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+      if (b.id === 'enemy') {
+        ctx.fillStyle = colBlack;
+        ctx.fillRect(Math.round(b.x - 2), Math.round(b.y - 2), 4, 4);
+      }
+    }
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // SPACE INVADERS PONG (Level 58)
+  // "Classic alien invaders march across the midfield!"
+  // ========================================================
+  initInvaders(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 72;
+    this.enemy.w = 12;
+    this.enemy.h = 72;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    const invaders = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 8; c++) {
+        invaders.push({
+          row: r,
+          col: c,
+          x: 350 + c * 34,
+          y: 90 + r * 32,
+          w: 22,
+          h: 18,
+          alive: true
+        });
+      }
+    }
+
+    this.modeState = {
+      invaders,
+      fleetDir: 1,
+      stepTimer: 0.35,
+      stepInterval: 0.35,
+      bombs: [],
+      bombTimer: 2.2,
+      particles: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updateInvaders(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Particles
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    // Bombs
+    for (let i = s.bombs.length - 1; i >= 0; i--) {
+      const bm = s.bombs[i];
+      bm.y += bm.vy;
+      if (bm.y > CANVAS_HEIGHT - 38) {
+        s.bombs.splice(i, 1);
+        continue;
+      }
+      // Check collision with ball
+      if (Math.hypot(b.x - bm.x, b.y - bm.y) < b.size / 2 + 5) {
+        s.bombs.splice(i, 1);
+        b.vy = (b.vy > 0 ? -1 : 1) * Math.min(12, Math.abs(b.vy) + 2.5);
+        window.Sound?.play('laser');
+        s.shake = 4;
+      }
+    }
+
+    // Keyboard paddle control
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Enemy AI
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // Fleet stepping
+    s.stepTimer -= dt;
+    if (s.stepTimer <= 0) {
+      s.stepTimer = s.stepInterval;
+      let hitEdge = false;
+      for (const inv of s.invaders) {
+        if (!inv.alive) continue;
+        const nextX = inv.x + s.fleetDir * 10;
+        if (nextX < 260 || nextX + inv.w > 700) {
+          hitEdge = true;
+          break;
+        }
+      }
+      if (hitEdge) {
+        s.fleetDir = -s.fleetDir;
+        for (const inv of s.invaders) {
+          inv.y += 12;
+        }
+        s.stepInterval = Math.max(0.18, s.stepInterval * 0.96);
+      } else {
+        for (const inv of s.invaders) {
+          inv.x += s.fleetDir * 10;
+        }
+      }
+    }
+
+    // Bomb dropping
+    s.bombTimer -= dt;
+    if (s.bombTimer <= 0) {
+      s.bombTimer = 2.0;
+      const aliveList = s.invaders.filter(inv => inv.alive);
+      if (aliveList.length > 0) {
+        const shooter = aliveList[Math.floor(Math.random() * aliveList.length)];
+        s.bombs.push({
+          x: shooter.x + shooter.w / 2,
+          y: shooter.y + shooter.h,
+          vy: 2.6
+        });
+      }
+    }
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // Ball physics
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Invader collisions
+      for (const inv of s.invaders) {
+        if (!inv.alive) continue;
+        if (b.x + r >= inv.x && b.x - r <= inv.x + inv.w &&
+            b.y + r >= inv.y && b.y - r <= inv.y + inv.h) {
+          inv.alive = false;
+          b.vx = -b.vx;
+          window.Sound?.play('brick');
+          s.shake = 3;
+
+          for (let k = 0; k < 7; k++) {
+            s.particles.push({
+              x: inv.x + inv.w / 2,
+              y: inv.y + inv.h / 2,
+              vx: (Math.random() - 0.5) * 6,
+              vy: (Math.random() - 0.5) * 6,
+              life: 0.25, maxLife: 0.25
+            });
+          }
+
+          // Check if fleet cleared
+          if (s.invaders.every(i => !i.alive)) {
+            this.showResult(true, 'FLEET CLEARED!');
+            return;
+          }
+          break;
+        }
+      }
+
+      // Paddle collisions
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Goal lines
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'INVADER DEFEATED!');
+          return;
+        }
+        this.resetBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'INVASION LOST');
+          return;
+        }
+        this.resetBall(true);
+        break;
+      }
+    }
+  }
+
+  renderInvaders(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Invader Fleet
+    ctx.fillStyle = colWhite;
+    for (const inv of s.invaders) {
+      if (!inv.alive) continue;
+      const ix = Math.round(inv.x);
+      const iy = Math.round(inv.y);
+
+      if (inv.row === 0) {
+        // Squid
+        ctx.fillRect(ix + 6, iy, 10, 3);
+        ctx.fillRect(ix + 3, iy + 3, 16, 6);
+        ctx.fillRect(ix + 1, iy + 9, 20, 4);
+        ctx.fillRect(ix + 4, iy + 13, 4, 5);
+        ctx.fillRect(ix + 14, iy + 13, 4, 5);
+        ctx.fillStyle = colBlack;
+        ctx.fillRect(ix + 5, iy + 5, 3, 3);
+        ctx.fillRect(ix + 14, iy + 5, 3, 3);
+        ctx.fillStyle = colWhite;
+      } else if (inv.row === 1) {
+        // Crab
+        ctx.fillRect(ix + 4, iy, 14, 3);
+        ctx.fillRect(ix + 1, iy + 3, 20, 6);
+        ctx.fillRect(ix, iy + 9, 22, 4);
+        ctx.fillRect(ix + 2, iy + 13, 5, 5);
+        ctx.fillRect(ix + 15, iy + 13, 5, 5);
+        ctx.fillStyle = colBlack;
+        ctx.fillRect(ix + 5, iy + 5, 3, 3);
+        ctx.fillRect(ix + 14, iy + 5, 3, 3);
+        ctx.fillStyle = colWhite;
+      } else {
+        // Octopus
+        ctx.fillRect(ix + 3, iy, 16, 4);
+        ctx.fillRect(ix, iy + 4, 22, 6);
+        ctx.fillRect(ix + 2, iy + 10, 18, 4);
+        ctx.fillRect(ix + 1, iy + 14, 4, 4);
+        ctx.fillRect(ix + 9, iy + 14, 4, 4);
+        ctx.fillRect(ix + 17, iy + 14, 4, 4);
+        ctx.fillStyle = colBlack;
+        ctx.fillRect(ix + 4, iy + 6, 3, 3);
+        ctx.fillRect(ix + 15, iy + 6, 3, 3);
+        ctx.fillStyle = colWhite;
+      }
+    }
+
+    // 4. Kinetic EMP spark bombs
+    ctx.fillStyle = colWhite;
+    for (const bm of s.bombs) {
+      const bx = Math.round(bm.x);
+      const by = Math.round(bm.y);
+      ctx.fillRect(bx - 1, by, 3, 2);
+      ctx.fillRect(bx, by + 2, 3, 2);
+      ctx.fillRect(bx - 1, by + 4, 3, 2);
+    }
+
+    // 5. Particles
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 6. Paddles & Ball
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // AIR HOCKEY PONG (Level 59)
+  // "Free 2D half-court mallet movement & anti-softlock glide!"
+  // ========================================================
+  initAirHockey(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+
+    this.player = {
+      x: 120,
+      y: CANVAS_HEIGHT / 2,
+      vx: 0,
+      vy: 0,
+      r: 22,
+      score: 0
+    };
+
+    this.enemy = {
+      x: CANVAS_WIDTH - 120,
+      y: CANVAS_HEIGHT / 2,
+      vx: 0,
+      vy: 0,
+      r: 22,
+      score: 0
+    };
+
+    this.ball = {
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT / 2,
+      vx: (Math.random() > 0.5 ? 1 : -1) * 6.5,
+      vy: (Math.random() - 0.5) * 4.0,
+      r: 12,
+      trail: []
+    };
+
+    this.modeState = {
+      shake: 0,
+      serveTimer: 0.5
+    };
+  }
+
+  resetAirHockeyPuck(serveToPlayer = true) {
+    this.ball.x = CANVAS_WIDTH / 2;
+    this.ball.y = CANVAS_HEIGHT / 2;
+    const dir = serveToPlayer ? -1 : 1;
+    this.ball.vx = dir * 6.5;
+    this.ball.vy = (Math.random() - 0.5) * 4.0;
+    this.ball.trail = [];
+    if (this.modeState) {
+      this.modeState.serveTimer = 0.5;
+    }
+  }
+
+  updateAirHockey(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+    const p = this.player;
+    const e = this.enemy;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // 2D Player Mallet Movement
+    let dirX = 0, dirY = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dirY -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dirY += 1;
+    if (this.keys['a'] || this.keys['arrowleft']) dirX -= 1;
+    if (this.keys['d'] || this.keys['arrowright']) dirX += 1;
+
+    const moveSpd = 8.5;
+    if (dirX !== 0 && dirY !== 0) {
+      dirX *= 0.7071;
+      dirY *= 0.7071;
+    }
+    p.vx = dirX * moveSpd;
+    p.vy = dirY * moveSpd;
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Clamped within player's half-court
+    p.x = Math.max(34, Math.min(450, p.x));
+    p.y = Math.max(60, Math.min(CANVAS_HEIGHT - 60, p.y));
+
+    // 2D Enemy Mallet AI (Smart striking - never wedges puck into corners)
+    const diff = this.difficulty;
+    let aiSpeed = 4.6;
+    if (diff === 'easy') aiSpeed = 3.4;
+    else if (diff === 'hard') aiSpeed = 5.8;
+    else if (diff === 'impossible') aiSpeed = 7.4;
+
+    let targetX = CANVAS_WIDTH - 120;
+    let targetY = CANVAS_HEIGHT / 2;
+
+    if (b.x > 480) {
+      // Puck is in enemy half.
+      // Position BEHIND the puck (to its right) to drive it toward player's goal (to the left)
+      targetX = Math.min(CANVAS_WIDTH - 55, b.x + 32);
+
+      // Corner escape assistance: if puck is deep in the corner, approach from above/below to swipe it out
+      if (b.x > CANVAS_WIDTH - 110) {
+        if (b.y < 140) {
+          targetY = b.y + 32;
+          targetX = Math.min(CANVAS_WIDTH - 55, b.x + 20);
+        } else if (b.y > CANVAS_HEIGHT - 140) {
+          targetY = b.y - 32;
+          targetX = Math.min(CANVAS_WIDTH - 55, b.x + 20);
+        } else {
+          targetY = b.y;
+        }
+      } else {
+        targetY = b.y;
+      }
+    } else {
+      // Puck is in player half: guard goal slot
+      targetX = CANVAS_WIDTH - 100;
+      targetY = (CANVAS_HEIGHT / 2) * 0.4 + b.y * 0.6;
+    }
+
+    const aiDx = targetX - e.x;
+    const aiDy = targetY - e.y;
+    const aiDist = Math.hypot(aiDx, aiDy);
+    if (aiDist > 5) {
+      e.vx = (aiDx / aiDist) * Math.min(aiDist, aiSpeed);
+      e.vy = (aiDy / aiDist) * Math.min(aiDist, aiSpeed);
+    } else {
+      e.vx = 0;
+      e.vy = 0;
+    }
+    e.x += e.vx;
+    e.y += e.vy;
+    e.x = Math.max(510, Math.min(CANVAS_WIDTH - 34, e.x));
+    e.y = Math.max(60, Math.min(CANVAS_HEIGHT - 60, e.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // Puck Physics
+    b.trail.push({ x: b.x, y: b.y });
+    if (b.trail.length > 6) b.trail.shift();
+
+    b.vx *= 0.996;
+    b.vy *= 0.996;
+
+    const subSteps = 3;
+    const dtSub = 1 / subSteps;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      // Top/bottom rail bounce
+      if (b.y - b.r <= 38) {
+        b.y = 38 + b.r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + b.r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - b.r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Goal slot opening: y in [170, 370]
+      const inGoalSlot = (b.y >= 170 && b.y <= 370);
+
+      // Left perimeter cushion (outside goal slot)
+      if (!inGoalSlot && b.x - b.r <= 20) {
+        b.x = 20 + b.r;
+        b.vx = Math.abs(b.vx);
+        window.Sound?.play('wall');
+      }
+      // Right perimeter cushion (outside goal slot)
+      if (!inGoalSlot && b.x + b.r >= CANVAS_WIDTH - 20) {
+        b.x = CANVAS_WIDTH - 20 - b.r;
+        b.vx = -Math.abs(b.vx);
+        window.Sound?.play('wall');
+      }
+
+      // 45-degree Angled Corner Cushions (Rebound diagonally out)
+      // Top-Right Corner Chamfer: (CANVAS_WIDTH - 70, 38) to (CANVAS_WIDTH - 20, 88)
+      if (b.x + b.y >= (CANVAS_WIDTH - 20 + 88) - b.r * 1.414 && b.x > CANVAS_WIDTH - 90 && b.y < 110) {
+        b.vx = -Math.abs(b.vx || 6.0) - 2.0;
+        b.vy = Math.abs(b.vy || 4.0) + 2.0;
+        b.x -= 3;
+        b.y += 3;
+        window.Sound?.play('wall');
+      }
+      // Bottom-Right Corner Chamfer: (CANVAS_WIDTH - 20, CANVAS_HEIGHT - 88) to (CANVAS_WIDTH - 70, CANVAS_HEIGHT - 38)
+      if (b.x - b.y >= (CANVAS_WIDTH - 20 - (CANVAS_HEIGHT - 88)) - b.r * 1.414 && b.x > CANVAS_WIDTH - 90 && b.y > CANVAS_HEIGHT - 110) {
+        b.vx = -Math.abs(b.vx || 6.0) - 2.0;
+        b.vy = -Math.abs(b.vy || 4.0) - 2.0;
+        b.x -= 3;
+        b.y -= 3;
+        window.Sound?.play('wall');
+      }
+      // Top-Left Corner Chamfer: (20, 88) to (70, 38)
+      if (b.y - b.x >= (88 - 20) - b.r * 1.414 && b.x < 90 && b.y < 110) {
+        b.vx = Math.abs(b.vx || 6.0) + 2.0;
+        b.vy = Math.abs(b.vy || 4.0) + 2.0;
+        b.x += 3;
+        b.y += 3;
+        window.Sound?.play('wall');
+      }
+      // Bottom-Left Corner Chamfer: (20, CANVAS_HEIGHT - 88) to (70, CANVAS_HEIGHT - 38)
+      if (b.x + b.y <= (20 + (CANVAS_HEIGHT - 88)) + b.r * 1.414 && b.x < 90 && b.y > CANVAS_HEIGHT - 110) {
+        b.vx = Math.abs(b.vx || 6.0) + 2.0;
+        b.vy = -Math.abs(b.vy || 4.0) - 2.0;
+        b.x += 3;
+        b.y -= 3;
+        window.Sound?.play('wall');
+      }
+
+      // Corner Anti-Stuck Ejection Watchdog
+      const nearCornerX = (b.x < 100 || b.x > CANVAS_WIDTH - 100);
+      const nearCornerY = (b.y < 120 || b.y > CANVAS_HEIGHT - 120);
+      if (nearCornerX && nearCornerY && Math.hypot(b.vx, b.vy) < 2.5) {
+        b.vx = (b.x > 480 ? -7.5 : 7.5);
+        b.vy = (b.y > CANVAS_HEIGHT / 2 ? -5.0 : 5.0);
+        window.Sound?.play('wall');
+      }
+
+      // Mallet collisions (Circle-to-Circle with Pin Prevention)
+      for (const m of [p, e]) {
+        const dx = b.x - m.x;
+        const dy = b.y - m.y;
+        const dist = Math.hypot(dx, dy);
+        const minDist = m.r + b.r;
+
+        if (dist < minDist && dist > 0.001) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          // If puck is against right cushion (outside goal slot) and mallet is pressing it into the wall:
+          if (!inGoalSlot && b.x + b.r >= CANVAS_WIDTH - 26 && nx > 0) {
+            // Push mallet back away from wall and eject puck leftward
+            m.x = b.x - minDist;
+            b.vx = -Math.abs(b.vx || 7.0) - 2.5;
+            b.vy += (Math.random() - 0.5) * 4.0;
+            window.Sound?.play('hit');
+            continue;
+          }
+          // If puck is against left cushion (outside goal slot) and mallet is pressing it into the wall:
+          if (!inGoalSlot && b.x - b.r <= 26 && nx < 0) {
+            m.x = b.x + minDist;
+            b.vx = Math.abs(b.vx || 7.0) + 2.5;
+            b.vy += (Math.random() - 0.5) * 4.0;
+            window.Sound?.play('hit');
+            continue;
+          }
+
+          // Push puck out
+          b.x = m.x + nx * minDist;
+          b.y = m.y + ny * minDist;
+
+          // Impulse transfer
+          const mSpd = Math.hypot(m.vx, m.vy);
+          const currentSpd = Math.hypot(b.vx, b.vy);
+          const strikeSpd = Math.min(14.5, Math.max(8.0, currentSpd * 1.05 + mSpd * 0.65));
+
+          b.vx = nx * strikeSpd;
+          b.vy = ny * strikeSpd;
+
+          window.Sound?.play('hit');
+          s.shake = (strikeSpd > 11) ? 3 : 1;
+        }
+      }
+
+      // Goals
+      if (b.x >= CANVAS_WIDTH) {
+        p.score++;
+        window.Sound?.play('score');
+        s.shake = 6;
+        if (p.score >= 5) {
+          this.showResult(true, 'AIR HOCKEY CHAMPION!');
+          return;
+        }
+        this.resetAirHockeyPuck(false);
+        break;
+      } else if (b.x <= 0) {
+        e.score++;
+        window.Sound?.play('wall');
+        s.shake = 6;
+        if (e.score >= 5) {
+          this.showResult(false, 'AIR HOCKEY DEFEAT');
+          return;
+        }
+        this.resetAirHockeyPuck(true);
+        break;
+      }
+    }
+  }
+
+  renderAirHockey(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+    const p = this.player;
+    const e = this.enemy;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Table Borders & Goal Cushions
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // Left cushions
+    ctx.fillRect(16, 38, 4, 132);
+    ctx.fillRect(16, 370, 4, 132);
+    // Right cushions
+    ctx.fillRect(CANVAS_WIDTH - 20, 38, 4, 132);
+    ctx.fillRect(CANVAS_WIDTH - 20, 370, 4, 132);
+
+    // 45-degree Angled Corner Bumpers
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 3;
+    // Top-Left
+    ctx.beginPath(); ctx.moveTo(16, 92); ctx.lineTo(70, 38); ctx.stroke();
+    // Bottom-Left
+    ctx.beginPath(); ctx.moveTo(16, CANVAS_HEIGHT - 92); ctx.lineTo(70, CANVAS_HEIGHT - 38); ctx.stroke();
+    // Top-Right
+    ctx.beginPath(); ctx.moveTo(CANVAS_WIDTH - 20, 92); ctx.lineTo(CANVAS_WIDTH - 74, 38); ctx.stroke();
+    // Bottom-Right
+    ctx.beginPath(); ctx.moveTo(CANVAS_WIDTH - 20, CANVAS_HEIGHT - 92); ctx.lineTo(CANVAS_WIDTH - 74, CANVAS_HEIGHT - 38); ctx.stroke();
+
+    // Goal creases
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.arc(20, CANVAS_HEIGHT / 2, 70, -Math.PI / 2, Math.PI / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(CANVAS_WIDTH - 20, CANVAS_HEIGHT / 2, 70, Math.PI / 2, 3 * Math.PI / 2);
+    ctx.stroke();
+
+    // Center dividing line & center circle
+    ctx.beginPath();
+    ctx.moveTo(CANVAS_WIDTH / 2, 38);
+    ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 38);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 60, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${p.score}`, 240, 80);
+    ctx.fillText(`${e.score}`, 720, 80);
+
+    // 3. Puck Trail
+    ctx.fillStyle = colWhite;
+    for (let i = 0; i < b.trail.length; i++) {
+      const pt = b.trail[i];
+      const rad = (i / b.trail.length) * (b.r - 2);
+      ctx.beginPath();
+      ctx.arc(Math.round(pt.x), Math.round(pt.y), Math.max(1, rad), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 4. Puck
+    ctx.beginPath();
+    ctx.arc(Math.round(b.x), Math.round(b.y), b.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = colBlack;
+    ctx.beginPath();
+    ctx.arc(Math.round(b.x), Math.round(b.y), 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5. Mallets (Concentric retro rings)
+    for (const m of [p, e]) {
+      ctx.fillStyle = colWhite;
+      ctx.beginPath();
+      ctx.arc(Math.round(m.x), Math.round(m.y), m.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = colBlack;
+      ctx.beginPath();
+      ctx.arc(Math.round(m.x), Math.round(m.y), m.r - 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = colWhite;
+      ctx.beginPath();
+      ctx.arc(Math.round(m.x), Math.round(m.y), 7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // LIGHT CYCLE PONG (Level 60)
+  // "The ball leaves a reflective laser maze in its wake!"
+  // ========================================================
+  initLightCycle(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 72;
+    this.enemy.w = 12;
+    this.enemy.h = 72;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      segments: [],
+      lastNodeX: CANVAS_WIDTH / 2,
+      lastNodeY: CANVAS_HEIGHT / 2,
+      sparks: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updateLightCycle(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Sparks
+    for (let i = s.sparks.length - 1; i >= 0; i--) {
+      const sp = s.sparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.life -= dt;
+      if (sp.life <= 0) s.sparks.splice(i, 1);
+    }
+
+    // Laser trail decay
+    for (let i = s.segments.length - 1; i >= 0; i--) {
+      const seg = s.segments[i];
+      seg.life -= dt;
+      if (seg.life <= 0) s.segments.splice(i, 1);
+    }
+
+    // Player keyboard controls
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Enemy AI
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      s.lastNodeX = b.x;
+      s.lastNodeY = b.y;
+      return;
+    }
+
+    // Physics sub-steps
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      // Drop laser trail node every 20px
+      const distFromNode = Math.hypot(b.x - s.lastNodeX, b.y - s.lastNodeY);
+      if (distFromNode >= 20) {
+        s.segments.push({
+          x1: s.lastNodeX,
+          y1: s.lastNodeY,
+          x2: b.x,
+          y2: b.y,
+          life: 3.5,
+          maxLife: 3.5
+        });
+        s.lastNodeX = b.x;
+        s.lastNodeY = b.y;
+      }
+
+      // Rails bounce
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Laser wall collisions (older than 0.35s)
+      for (let i = s.segments.length - 1; i >= 0; i--) {
+        const seg = s.segments[i];
+        if (seg.life > seg.maxLife - 0.35) continue;
+
+        // Line segment distance
+        const dx = seg.x2 - seg.x1;
+        const dy = seg.y2 - seg.y1;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) continue;
+
+        let t = ((b.x - seg.x1) * dx + (b.y - seg.y1) * dy) / lenSq;
+        t = Math.max(0, Math.min(1, t));
+        const projX = seg.x1 + t * dx;
+        const projY = seg.y1 + t * dy;
+
+        const distToSeg = Math.hypot(b.x - projX, b.y - projY);
+        if (distToSeg < r + 3) {
+          // Reflect velocity across normal
+          const segLen = Math.hypot(dx, dy);
+          let nx = -dy / segLen;
+          let ny = dx / segLen;
+
+          // Align normal against incoming velocity
+          if (b.vx * nx + b.vy * ny > 0) {
+            nx = -nx;
+            ny = -ny;
+          }
+
+          const dot = b.vx * nx + b.vy * ny;
+          b.vx = b.vx - 2 * dot * nx;
+          b.vy = b.vy - 2 * dot * ny;
+
+          // Dissipate segment into sparks
+          for (let k = 0; k < 6; k++) {
+            s.sparks.push({
+              x: projX,
+              y: projY,
+              vx: (Math.random() - 0.5) * 6,
+              vy: (Math.random() - 0.5) * 6,
+              life: 0.22,
+              maxLife: 0.22
+            });
+          }
+          s.segments.splice(i, 1);
+          window.Sound?.play('laser');
+          s.shake = 3;
+          break;
+        }
+      }
+
+      // Paddle collisions
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Goal lines
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'LIGHT CYCLE MASTER!');
+          return;
+        }
+        s.segments = [];
+        this.resetBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'DEREZzED');
+          return;
+        }
+        s.segments = [];
+        this.resetBall(true);
+        break;
+      }
+    }
+  }
+
+  renderLightCycle(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Laser Grid Segments
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    for (const seg of s.segments) {
+      ctx.beginPath();
+      ctx.moveTo(Math.round(seg.x1), Math.round(seg.y1));
+      ctx.lineTo(Math.round(seg.x2), Math.round(seg.y2));
+      ctx.stroke();
+
+      // Laser joint node
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(seg.x2) - 2, Math.round(seg.y2) - 2, 4, 4);
+    }
+    ctx.restore();
+
+    // 4. Sparks
+    ctx.fillStyle = colWhite;
+    for (const sp of s.sparks) {
+      ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 2, 2);
+    }
+
+    // 5. Paddles & Ball
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // GRAVITY FLIP PONG (Level 61)
+  // "Predictable parabolic arcs with paddle/space flips!"
+  // ========================================================
+  initGravityFlip(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 88;
+    this.enemy.w = 12;
+    this.enemy.h = 88;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      gravityDir: 1, // 1 = down, -1 = up
+      gravityMag: 8.5, // gentle predictable parabolic arc
+      trail: [],
+      shake: 0,
+      spaceDebounce: false,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updateGravityFlip(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Player keyboard movement (fast & agile)
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 9.2;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Space key manual gravity flip
+    if (this.keys[' '] && !s.spaceDebounce) {
+      s.gravityDir = -s.gravityDir;
+      s.spaceDebounce = true;
+      s.shake = 2;
+      window.Sound?.play('flap');
+    }
+    if (!this.keys[' ']) s.spaceDebounce = false;
+
+    // Enemy AI
+    const diff = this.difficulty;
+    let aiSpeed = 4.4;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.4; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.8; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // Ball Physics with Ballistic Vertical Gravity
+    s.trail.push({ x: b.x, y: b.y });
+    if (s.trail.length > 8) s.trail.shift();
+
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      // Accelerate vertically under gentle gravity
+      b.vy += s.gravityDir * s.gravityMag * 0.016 * dtSub;
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      // Normal elastic rail bounces (NO chaotic gravity flip on rails!)
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Paddle collisions - Flip gravity on paddle return for rhythmic lobs!
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.90;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        s.gravityDir = -s.gravityDir; // Rhythmic alternation on paddle return
+        window.Sound?.play('hit');
+        s.shake = 2;
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.90;
+        let curSpd = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        s.gravityDir = -s.gravityDir; // Rhythmic alternation on paddle return
+        window.Sound?.play('hit');
+        s.shake = 2;
+      }
+
+      // Goal detection
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'GRAVITY CHAMPION!');
+          return;
+        }
+        s.trail = [];
+        this.resetBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'GRAVITY COLLAPSE');
+          return;
+        }
+        s.trail = [];
+        this.resetBall(true);
+        break;
+      }
+    }
+  }
+
+  renderGravityFlip(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Gravity Direction Chevrons along net line
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    for (let y = 60; y < CANVAS_HEIGHT - 60; y += 45) {
+      ctx.beginPath();
+      if (s.gravityDir > 0) {
+        ctx.moveTo(CANVAS_WIDTH / 2 - 8, y - 4);
+        ctx.lineTo(CANVAS_WIDTH / 2, y + 4);
+        ctx.lineTo(CANVAS_WIDTH / 2 + 8, y - 4);
+      } else {
+        ctx.moveTo(CANVAS_WIDTH / 2 - 8, y + 4);
+        ctx.lineTo(CANVAS_WIDTH / 2, y - 4);
+        ctx.lineTo(CANVAS_WIDTH / 2 + 8, y + 4);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 4. Parabolic trajectory trail
+    ctx.fillStyle = colWhite;
+    for (let i = 0; i < s.trail.length; i++) {
+      const pt = s.trail[i];
+      const sz = Math.max(1, Math.round((i / s.trail.length) * 4));
+      ctx.fillRect(Math.round(pt.x - sz / 2), Math.round(pt.y - sz / 2), sz, sz);
+    }
+
+    // 5. Paddles & Ball
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // POLARITY PONG (Level 62)
+  // "Electromagnetic polarities! Attract and repel the ball."
+  // ========================================================
+  initPolarity(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 14;
+    this.player.h = 76;
+    this.enemy.w = 14;
+    this.enemy.h = 76;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 44;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      playerPolarity: 1,  // 1 = Alpha (Solid White), -1 = Omega (Hollow)
+      enemyPolarity: -1,
+      ballPolarity: 1,
+      polarityTimer: 4.0,
+      spaceDebounce: false,
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updatePolarity(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Player keyboard movement
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // SPACE: Toggle player paddle polarity
+    if (this.keys[' '] && !s.spaceDebounce) {
+      s.playerPolarity = -s.playerPolarity;
+      s.spaceDebounce = true;
+      s.shake = 2;
+      window.Sound?.play('laser');
+    }
+    if (!this.keys[' ']) s.spaceDebounce = false;
+
+    // AI logic & Polarity switching
+    const diff = this.difficulty;
+    let aiSpeed = 4.4;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.4; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.8; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+      if (b.x > CANVAS_WIDTH - 220) {
+        s.enemyPolarity = s.ballPolarity;
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    s.polarityTimer -= dt;
+    if (s.polarityTimer <= 0) {
+      s.polarityTimer = 4.5;
+      s.ballPolarity = -s.ballPolarity;
+      window.Sound?.play('wall');
+    }
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // Magnetic Field Forces between ball and paddles
+    for (const [pad, pol] of [[this.player, s.playerPolarity], [this.enemy, s.enemyPolarity]]) {
+      const padCenterX = pad.x + pad.w / 2;
+      const padCenterY = pad.y + pad.h / 2;
+      const dx = b.x - padCenterX;
+      const dy = b.y - padCenterY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 95 && dist > 1) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const isSamePolarity = (pol === s.ballPolarity);
+
+        if (isSamePolarity) {
+          const force = (95 - dist) * 0.28;
+          b.vx += nx * force;
+          b.vy += ny * force * 0.4;
+        } else {
+          const force = (95 - dist) * 0.22;
+          b.vx -= nx * force;
+          b.vy -= ny * force;
+        }
+      }
+    }
+
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(14.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(14.0, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'POLARITY MASTER!');
+          return;
+        }
+        this.resetBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'POLARITY OVERLOAD');
+          return;
+        }
+        this.resetBall(true);
+        break;
+      }
+    }
+  }
+
+  renderPolarity(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Center Line
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(CANVAS_WIDTH / 2, 38);
+    ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 38);
+    ctx.stroke();
+
+    // 4. Magnetic Field Rings
+    ctx.setLineDash([3, 4]);
+    for (const [pad, pol] of [[this.player, s.playerPolarity], [this.enemy, s.enemyPolarity]]) {
+      ctx.beginPath();
+      ctx.arc(pad.x + pad.w / 2, pad.y + pad.h / 2, 85, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. Paddles
+    if (s.playerPolarity === 1) {
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    } else {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(this.player.x) + 1, Math.round(this.player.y) + 1, this.player.w - 2, this.player.h - 2);
+      ctx.fillStyle = colBlack;
+      ctx.fillRect(Math.round(this.player.x) + 3, Math.round(this.player.y) + 3, this.player.w - 6, this.player.h - 6);
+    }
+
+    if (s.enemyPolarity === 1) {
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    } else {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(this.enemy.x) + 1, Math.round(this.enemy.y) + 1, this.enemy.w - 2, this.enemy.h - 2);
+      ctx.fillStyle = colBlack;
+      ctx.fillRect(Math.round(this.enemy.x) + 3, Math.round(this.enemy.y) + 3, this.enemy.w - 6, this.enemy.h - 6);
+    }
+
+    // 6. Ball
+    if (s.ballPolarity === 1) {
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+      ctx.fillStyle = colBlack;
+      ctx.fillRect(Math.round(b.x - 1), Math.round(b.y - 1), 2, 2);
+    } else {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.round(b.x - b.size / 2) + 1, Math.round(b.y - b.size / 2) + 1, b.size - 2, b.size - 2);
+      ctx.fillStyle = colBlack;
+      ctx.fillRect(Math.round(b.x - b.size / 2) + 2, Math.round(b.y - b.size / 2) + 2, b.size - 4, b.size - 4);
+      ctx.fillStyle = colWhite;
+      ctx.fillRect(Math.round(b.x - 1), Math.round(b.y - 1), 2, 2);
+    }
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // SNAKE PONG (Level 63)
+  // "The ball is an undulating retro snake that grows with food!"
+  // ========================================================
+  initSnakePong(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 76;
+    this.enemy.w = 12;
+    this.enemy.h = 76;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    const startX = CANVAS_WIDTH / 2;
+    const startY = CANVAS_HEIGHT / 2;
+    const segments = [];
+    for (let i = 0; i < 5; i++) {
+      segments.push({ x: startX - i * 10, y: startY });
+    }
+
+    this.modeState = {
+      segments,
+      history: [],
+      vx: 7.5,
+      vy: 2.2,
+      food: { x: 480, y: 180, size: 20 }, // Big apple!
+      particles: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+  }
+
+  resetSnakePong(serveToPlayer = true) {
+    const s = this.modeState;
+    if (!s) return;
+    const startX = CANVAS_WIDTH / 2;
+    const startY = CANVAS_HEIGHT / 2;
+    s.segments = [];
+    for (let i = 0; i < 5; i++) {
+      s.segments.push({ x: startX - i * 10, y: startY });
+    }
+    s.history = [];
+    s.vx = (serveToPlayer ? -1 : 1) * 7.5;
+    s.vy = (Math.random() - 0.5) * 4.0;
+    s.serveTimer = 0.5;
+  }
+
+  updateSnakePong(dt) {
+    const s = this.modeState;
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    for (let i = s.particles.length - 1; i >= 0; i--) {
+      const p = s.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.particles.splice(i, 1);
+    }
+
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    const head = s.segments[0];
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    const isHeadingToEnemy = s.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = head.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    s.history.unshift({ x: head.x, y: head.y });
+    if (s.history.length > s.segments.length * 6) {
+      s.history.pop();
+    }
+
+    head.x += s.vx;
+    head.y += s.vy;
+
+    for (let i = 1; i < s.segments.length; i++) {
+      const histIndex = Math.min(s.history.length - 1, i * 5);
+      if (s.history[histIndex]) {
+        s.segments[i].x = s.history[histIndex].x;
+        s.segments[i].y = s.history[histIndex].y;
+      }
+    }
+
+    const r = 6;
+    if (head.y - r <= 38) {
+      head.y = 38 + r;
+      s.vy = Math.abs(s.vy);
+      window.Sound?.play('wall');
+    } else if (head.y + r >= CANVAS_HEIGHT - 38) {
+      head.y = CANVAS_HEIGHT - 38 - r;
+      s.vy = -Math.abs(s.vy);
+      window.Sound?.play('wall');
+    }
+
+    // Generous eating radius for the big apple
+    if (Math.hypot(head.x - s.food.x, head.y - s.food.y) < 22) {
+      if (s.segments.length < 18) {
+        const lastSeg = s.segments[s.segments.length - 1];
+        s.segments.push({ x: lastSeg.x, y: lastSeg.y });
+      }
+      s.food.x = 280 + Math.random() * 400;
+      s.food.y = 90 + Math.random() * 340;
+      window.Sound?.play('score');
+      s.shake = 3;
+
+      for (let k = 0; k < 8; k++) {
+        s.particles.push({
+          x: head.x, y: head.y,
+          vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+          life: 0.28, maxLife: 0.28
+        });
+      }
+    }
+
+    if (s.vx < 0 && head.x - r <= this.player.x + this.player.w &&
+        head.x + r >= this.player.x &&
+        head.y + r >= this.player.y && head.y - r <= this.player.y + this.player.h) {
+      head.x = this.player.x + this.player.w + r;
+      const offset = (head.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+      const angle = offset * 0.92;
+      let curSpd = Math.min(13.5, Math.hypot(s.vx, s.vy) * 1.05 + 0.2);
+      s.vx = Math.abs(Math.cos(angle) * curSpd);
+      s.vy = Math.sin(angle) * curSpd;
+      window.Sound?.play('hit');
+    }
+
+    if (s.vx > 0 && head.x + r >= this.enemy.x && head.x - r <= this.enemy.x + this.enemy.w &&
+        head.y + r >= this.enemy.y && head.y - r <= this.enemy.y + this.enemy.h) {
+      head.x = this.enemy.x - r;
+      const offset = (head.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+      const angle = offset * 0.92;
+      let curSpd = Math.min(13.5, Math.hypot(s.vx, s.vy) * 1.05 + 0.2);
+      s.vx = -Math.abs(Math.cos(angle) * curSpd);
+      s.vy = Math.sin(angle) * curSpd;
+      window.Sound?.play('hit');
+    }
+
+    if (head.x >= CANVAS_WIDTH) {
+      this.player.score++;
+      window.Sound?.play('score');
+      if (this.player.score >= 5) {
+        this.showResult(true, 'SNAKE MASTER!');
+        return;
+      }
+      this.resetSnakePong(false);
+    } else if (head.x <= 0) {
+      this.enemy.score++;
+      window.Sound?.play('wall');
+      if (this.enemy.score >= 5) {
+        this.showResult(false, 'SNAKE BITE');
+        return;
+      }
+      this.resetSnakePong(true);
+    }
+  }
+
+  renderSnakePong(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Big Chunky Retro Apple (20x20 pixel art)
+    ctx.fillStyle = colWhite;
+    const fx = Math.round(s.food.x);
+    const fy = Math.round(s.food.y);
+    // Apple main rounded body
+    ctx.fillRect(fx - 9, fy - 6, 18, 14);
+    ctx.fillRect(fx - 7, fy - 8, 14, 18);
+    // Curved stem and leaf at top
+    ctx.fillRect(fx - 1, fy - 12, 3, 5);
+    ctx.fillRect(fx + 2, fy - 11, 4, 3);
+    // Apple bottom indent & interior shading
+    ctx.fillStyle = colBlack;
+    ctx.fillRect(fx - 2, fy + 8, 4, 2);
+    // Shiny highlight on shoulder
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(fx - 6, fy - 5, 3, 3);
+
+    // 4. Snake Body
+    for (let i = s.segments.length - 1; i >= 1; i--) {
+      const seg = s.segments[i];
+      const sz = 9;
+      ctx.fillRect(Math.round(seg.x - sz / 2), Math.round(seg.y - sz / 2), sz, sz);
+      ctx.fillStyle = colBlack;
+      ctx.fillRect(Math.round(seg.x - 1), Math.round(seg.y - 1), 2, 2);
+      ctx.fillStyle = colWhite;
+    }
+
+    // 5. Snake Head with eyes
+    const head = s.segments[0];
+    ctx.fillRect(Math.round(head.x - 6), Math.round(head.y - 6), 12, 12);
+    ctx.fillStyle = colBlack;
+    if (s.vx >= 0) {
+      ctx.fillRect(Math.round(head.x + 2), Math.round(head.y - 4), 2, 2);
+      ctx.fillRect(Math.round(head.x + 2), Math.round(head.y + 2), 2, 2);
+    } else {
+      ctx.fillRect(Math.round(head.x - 4), Math.round(head.y - 4), 2, 2);
+      ctx.fillRect(Math.round(head.x - 4), Math.round(head.y + 2), 2, 2);
+    }
+
+    // 6. Particles
+    ctx.fillStyle = colWhite;
+    for (const p of s.particles) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 7. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // =========================================
+  // LEVEL 64: CHRONO PONG
+  // "Hold SPACE to rewind time! Step backwards up to 2.5 seconds to undo missed shots."
+  // =========================================
+  initChrono(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 80;
+    this.enemy.w = 12;
+    this.enemy.h = 80;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      history: [],        // circular buffer of past game states (up to 150 frames = 2.5s)
+      rewinding: false,   // true while holding SPACE with charges
+      rewindCharges: 3,   // 3 rewinds per point/round
+      maxCharges: 3,
+      rewindDuration: 0,  // seconds rewound in current sequence
+      ghosts: [],         // afterimage ghost frames
+      scanlineY: 0,
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updateChrono(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    s.scanlineY = (s.scanlineY + dt * 240) % CANVAS_HEIGHT;
+
+    // Decay ghost afterimages
+    for (let i = s.ghosts.length - 1; i >= 0; i--) {
+      s.ghosts[i].alpha -= dt * 2.5;
+      if (s.ghosts[i].alpha <= 0) s.ghosts.splice(i, 1);
+    }
+
+    // CHECK REWIND ACTIVATION (HOLD SPACE)
+    const wantsRewind = !!this.keys[' '];
+    if (wantsRewind && s.rewindCharges > 0 && s.history.length > 5 && s.serveTimer <= 0) {
+      if (!s.rewinding) {
+        s.rewinding = true;
+        s.rewindDuration = 0;
+        window.Sound?.play('wall');
+      }
+
+      // Step backwards through history at 2x rewind speed (pop 2 frames per tick)
+      for (let step = 0; step < 2; step++) {
+        if (s.history.length > 3) {
+          const snapshot = s.history.pop();
+          b.x = snapshot.bx;
+          b.y = snapshot.by;
+          b.vx = snapshot.bvx;
+          b.vy = snapshot.bvy;
+          this.player.y = snapshot.py;
+          this.enemy.y = snapshot.ey;
+          this.player.score = snapshot.pScore;
+          this.enemy.score = snapshot.eScore;
+
+          // Record ghost afterimage
+          if (step === 0 && Math.random() < 0.6) {
+            s.ghosts.push({
+              bx: b.x, by: b.y,
+              py: this.player.y, ey: this.enemy.y,
+              alpha: 0.5
+            });
+          }
+        } else {
+          // Reached beginning of recorded history
+          break;
+        }
+      }
+
+      s.rewindDuration += dt;
+      return; // Skip forward simulation while rewinding!
+    } else {
+      if (s.rewinding) {
+        // Rewind released!
+        s.rewinding = false;
+        s.rewindCharges = Math.max(0, s.rewindCharges - 1);
+        window.Sound?.play('portal');
+        s.shake = 4;
+      }
+    }
+
+    // RECORD FORWARD HISTORY
+    if (s.serveTimer <= 0) {
+      s.history.push({
+        bx: b.x,
+        by: b.y,
+        bvx: b.vx,
+        bvy: b.vy,
+        py: this.player.y,
+        ey: this.enemy.y,
+        pScore: this.player.score,
+        eScore: this.enemy.score
+      });
+      // Cap at 150 frames (2.5 seconds of rewindable buffer)
+      if (s.history.length > 150) {
+        s.history.shift();
+      }
+    }
+
+    // NORMAL PLAYER MOVEMENT (during forward time)
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // ENEMY AI MOVEMENT
+    const diff = this.difficulty;
+    let aiSpeed = 4.6;
+    let deadzone = 10;
+    if (diff === 'easy') { aiSpeed = 3.4; deadzone = 16; }
+    else if (diff === 'hard') { aiSpeed = 5.6; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 7.0; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.4);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // SERVE DELAY
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // BALL PHYSICS
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // Top / Bottom Rail Collisions
+    if (b.y - b.size / 2 <= 38) {
+      b.y = 38 + b.size / 2;
+      b.vy = Math.abs(b.vy);
+      window.Sound?.play('wall');
+    } else if (b.y + b.size / 2 >= CANVAS_HEIGHT - 38) {
+      b.y = CANVAS_HEIGHT - 38 - b.size / 2;
+      b.vy = -Math.abs(b.vy);
+      window.Sound?.play('wall');
+    }
+
+    // Player Paddle Collision
+    if (b.vx < 0 &&
+        b.x - b.size / 2 <= this.player.x + this.player.w &&
+        b.x + b.size / 2 >= this.player.x &&
+        b.y + b.size / 2 >= this.player.y &&
+        b.y - b.size / 2 <= this.player.y + this.player.h) {
+      b.x = this.player.x + this.player.w + b.size / 2;
+      const hitOffset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+      const speed = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05);
+      const angle = hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+      window.Sound?.play('hit');
+    }
+
+    // Enemy Paddle Collision
+    if (b.vx > 0 &&
+        b.x + b.size / 2 >= this.enemy.x &&
+        b.x - b.size / 2 <= this.enemy.x + this.enemy.w &&
+        b.y + b.size / 2 >= this.enemy.y &&
+        b.y - b.size / 2 <= this.enemy.y + this.enemy.h) {
+      b.x = this.enemy.x - b.size / 2;
+      const hitOffset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+      const speed = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05);
+      const angle = Math.PI - hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+      window.Sound?.play('hit');
+    }
+
+    // GOALS / SCORING
+    if (b.x < 10) {
+      this.enemy.score++;
+      window.Sound?.play('lose');
+      if (this.enemy.score >= 5) {
+        this.showResult(false);
+        return;
+      }
+      s.serveTimer = 0.6;
+      s.rewindCharges = 3; // Refill 3 charges on serve
+      s.history = [];
+      this.resetBall(true);
+    } else if (b.x > CANVAS_WIDTH - 10) {
+      this.player.score++;
+      window.Sound?.play('score');
+      if (this.player.score >= 5) {
+        this.showResult(true);
+        return;
+      }
+      s.serveTimer = 0.6;
+      s.rewindCharges = 3; // Refill 3 charges on serve
+      s.history = [];
+      this.resetBall(false);
+    }
+  }
+
+  renderChrono(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
+    }
+
+    // 1. Court Arena
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, CANVAS_WIDTH - 4, CANVAS_HEIGHT - 4);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(30, 36, CANVAS_WIDTH - 60, CANVAS_HEIGHT - 72);
+
+    // Center dashed line
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(CANVAS_WIDTH / 2, 38);
+    ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 38);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Chrono HUD (Charges indicator)
+    ctx.fillStyle = colWhite;
+    ctx.font = '10px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    let chargeStr = 'REWIND [';
+    for (let c = 0; c < s.maxCharges; c++) {
+      chargeStr += (c < s.rewindCharges) ? ' ■' : ' □';
+    }
+    chargeStr += ' ]  HOLD SPACE';
+    ctx.fillText(chargeStr, CANVAS_WIDTH / 2, 24);
+
+    // 4. Ghost Afterimages
+    for (const g of s.ghosts) {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 1;
+      // Stippled ghost paddles
+      ctx.setLineDash([2, 2]);
+      ctx.strokeRect(Math.round(this.player.x), Math.round(g.py), this.player.w, this.player.h);
+      ctx.strokeRect(Math.round(this.enemy.x), Math.round(g.ey), this.enemy.w, this.enemy.h);
+      ctx.strokeRect(Math.round(g.bx - b.size / 2), Math.round(g.by - b.size / 2), b.size, b.size);
+      ctx.setLineDash([]);
+    }
+
+    // 5. Paddles & Ball
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    // 6. VHS Rewind Overlay Effect (when rewinding)
+    if (s.rewinding) {
+      // Midfield HUD Glitch Text
+      ctx.fillStyle = colWhite;
+      ctx.font = 'bold 20px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('<<< REWINDING <<<', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
+
+      // Rewind tracking lines
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 3]);
+      const y1 = (s.scanlineY) % (CANVAS_HEIGHT - 80) + 40;
+      const y2 = (s.scanlineY + 140) % (CANVAS_HEIGHT - 80) + 40;
+      ctx.beginPath();
+      ctx.moveTo(32, y1);
+      ctx.lineTo(CANVAS_WIDTH - 32, y1);
+      ctx.moveTo(32, y2);
+      ctx.lineTo(CANVAS_WIDTH - 32, y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Corner Timecode
+      ctx.font = '12px "Courier New", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('<< REC -00:0' + Math.max(0, Math.floor(s.history.length / 15)), 44, 56);
+    }
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // ========================================================
+  // ASTEROIDS PONG (Level 65)
+  // "Lethal asteroids: Paddle touches die! Scaled by difficulty."
+  // ========================================================
+  initAsteroidsPong(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 76;
+    this.enemy.w = 12;
+    this.enemy.h = 76;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    // The higher the difficulty, the more asteroids!
+    const diff = this.difficulty;
+    let initialCount = 4; // Normal = 4
+    if (diff === 'easy') initialCount = 2;
+    else if (diff === 'hard') initialCount = 6;
+    else if (diff === 'impossible') initialCount = 8;
+
+    const asteroids = [];
+    for (let i = 0; i < initialCount; i++) {
+      const x = 330 + Math.random() * 300;
+      const y = 80 + (i / initialCount) * (CANVAS_HEIGHT - 160);
+      asteroids.push(this.createAsteroid(x, y, 24, 3));
+    }
+
+    this.modeState = {
+      asteroids,
+      debris: [],
+      shake: 0,
+      serveTimer: 0.6
+    };
+
+    this.resetBall(true);
+  }
+
+  createAsteroid(x, y, r, tier) {
+    const numVerts = 8;
+    const verts = [];
+    for (let i = 0; i < numVerts; i++) {
+      const angle = (i / numVerts) * Math.PI * 2;
+      const dist = r * (0.75 + Math.random() * 0.45);
+      verts.push({ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist });
+    }
+    const angle = Math.random() * Math.PI * 2;
+    const spd = 0.5 + Math.random() * 0.8;
+    return {
+      x, y, r, tier,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      rot: Math.random() * Math.PI * 2,
+      rotSpd: (Math.random() - 0.5) * 0.03,
+      verts
+    };
+  }
+
+  updateAsteroidsPong(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Debris
+    for (let i = s.debris.length - 1; i >= 0; i--) {
+      const p = s.debris[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= dt;
+      if (p.life <= 0) s.debris.splice(i, 1);
+    }
+
+    // Move asteroids
+    for (const ast of s.asteroids) {
+      ast.x += ast.vx;
+      ast.y += ast.vy;
+      ast.rot += ast.rotSpd;
+
+      // Bounce asteroids off rails
+      if (ast.y - ast.r <= 38) {
+        ast.y = 38 + ast.r;
+        ast.vy = Math.abs(ast.vy);
+      } else if (ast.y + ast.r >= CANVAS_HEIGHT - 38) {
+        ast.y = CANVAS_HEIGHT - 38 - ast.r;
+        ast.vy = -Math.abs(ast.vy);
+      }
+
+      // Keep asteroids in court
+      if (ast.x - ast.r <= 40) {
+        ast.x = 40 + ast.r;
+        ast.vx = Math.abs(ast.vx);
+      } else if (ast.x + ast.r >= CANVAS_WIDTH - 40) {
+        ast.x = CANVAS_WIDTH - 40 - ast.r;
+        ast.vx = -Math.abs(ast.vx);
+      }
+    }
+
+    // Player keyboard movement
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Enemy AI with Active Asteroid Dodging
+    const diff = this.difficulty;
+    let aiSpeed = 4.2;
+    let deadzone = 12;
+    if (diff === 'easy') { aiSpeed = 3.2; deadzone = 18; }
+    else if (diff === 'hard') { aiSpeed = 5.2; deadzone = 6; }
+    else if (diff === 'impossible') { aiSpeed = 6.6; deadzone = 2; }
+
+    // Check if an asteroid threatens enemy paddle
+    let threatY = null;
+    for (const ast of s.asteroids) {
+      if (ast.x > CANVAS_WIDTH - 160 && Math.abs(ast.y - (this.enemy.y + this.enemy.h / 2)) < ast.r + this.enemy.h / 2 + 10) {
+        threatY = ast.y;
+        break;
+      }
+    }
+
+    if (threatY !== null) {
+      // Dodge asteroid!
+      const dodgeDir = (threatY > this.enemy.y + this.enemy.h / 2) ? -1 : 1;
+      this.enemy.y += dodgeDir * aiSpeed;
+    } else {
+      const isHeadingToEnemy = b.vx > 0;
+      if (isHeadingToEnemy) {
+        const targetEnemyY = b.y - this.enemy.h / 2;
+        const enemyDiff = targetEnemyY - this.enemy.y;
+        if (Math.abs(enemyDiff) > deadzone) {
+          this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+        }
+      } else {
+        const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+        if (Math.abs(centerDiff) > 10) {
+          this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+        }
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // LETHAL ASTEROID COLLISION CHECK WITH PADDLES
+    if (s.serveTimer <= 0) {
+      // Player paddle lethal collision
+      for (let i = s.asteroids.length - 1; i >= 0; i--) {
+        const ast = s.asteroids[i];
+        if (ast.x + ast.r >= this.player.x && ast.x - ast.r <= this.player.x + this.player.w &&
+            ast.y + ast.r >= this.player.y && ast.y - ast.r <= this.player.y + this.player.h) {
+          // PLAYER DIES!
+          for (let k = 0; k < 12; k++) {
+            s.debris.push({
+              x: this.player.x + this.player.w / 2,
+              y: this.player.y + this.player.h / 2,
+              vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+              life: 0.35, maxLife: 0.35
+            });
+          }
+          window.Sound?.play('lose');
+          s.shake = 8;
+          this.enemy.score++;
+          if (this.enemy.score >= 5) {
+            this.showResult(false, 'ASTEROID COLLISION');
+            return;
+          }
+          s.serveTimer = 0.6;
+          this.resetBall(true);
+          // Push threatening asteroid away
+          ast.x = 240;
+          ast.vx = Math.abs(ast.vx) + 1;
+          break;
+        }
+
+        // Enemy paddle lethal collision
+        if (ast.x + ast.r >= this.enemy.x && ast.x - ast.r <= this.enemy.x + this.enemy.w &&
+            ast.y + ast.r >= this.enemy.y && ast.y - ast.r <= this.enemy.y + this.enemy.h) {
+          // ENEMY DIES!
+          for (let k = 0; k < 12; k++) {
+            s.debris.push({
+              x: this.enemy.x + this.enemy.w / 2,
+              y: this.enemy.y + this.enemy.h / 2,
+              vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+              life: 0.35, maxLife: 0.35
+            });
+          }
+          window.Sound?.play('score');
+          s.shake = 8;
+          this.player.score++;
+          if (this.player.score >= 5) {
+            this.showResult(true, 'ASTEROID SURVIVOR!');
+            return;
+          }
+          s.serveTimer = 0.6;
+          this.resetBall(false);
+          ast.x = CANVAS_WIDTH - 240;
+          ast.vx = -Math.abs(ast.vx) - 1;
+          break;
+        }
+      }
+    }
+
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // Ball physics
+    const subSteps = 2;
+    const dtSub = 1 / subSteps;
+    const r = b.size / 2;
+
+    for (let step = 0; step < subSteps; step++) {
+      b.x += b.vx * dtSub;
+      b.y += b.vy * dtSub;
+
+      // Rail bounces
+      if (b.y - r <= 38) {
+        b.y = 38 + r;
+        b.vy = Math.abs(b.vy);
+        window.Sound?.play('wall');
+      } else if (b.y + r >= CANVAS_HEIGHT - 38) {
+        b.y = CANVAS_HEIGHT - 38 - r;
+        b.vy = -Math.abs(b.vy);
+        window.Sound?.play('wall');
+      }
+
+      // Ball vs Asteroids collision & shatter
+      for (let i = s.asteroids.length - 1; i >= 0; i--) {
+        const ast = s.asteroids[i];
+        const dx = b.x - ast.x;
+        const dy = b.y - ast.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < ast.r + r) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          b.x = ast.x + nx * (ast.r + r);
+          b.y = ast.y + ny * (ast.r + r);
+
+          const dot = b.vx * nx + b.vy * ny;
+          b.vx = b.vx - 2 * dot * nx;
+          b.vy = b.vy - 2 * dot * ny;
+
+          window.Sound?.play('brick');
+          s.shake = 3;
+
+          for (let k = 0; k < 6; k++) {
+            s.debris.push({
+              x: ast.x, y: ast.y,
+              vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5,
+              life: 0.25, maxLife: 0.25
+            });
+          }
+
+          if (ast.tier === 3) {
+            s.asteroids.push(this.createAsteroid(ast.x - 8, ast.y - 8, 14, 2));
+            s.asteroids.push(this.createAsteroid(ast.x + 8, ast.y + 8, 14, 2));
+          } else if (ast.tier === 2) {
+            s.asteroids.push(this.createAsteroid(ast.x - 5, ast.y - 5, 8, 1));
+            s.asteroids.push(this.createAsteroid(ast.x + 5, ast.y + 5, 8, 1));
+          }
+          s.asteroids.splice(i, 1);
+          break;
+        }
+      }
+
+      // Paddle collisions
+      if (b.vx < 0 && b.x - r <= this.player.x + this.player.w &&
+          b.x + r >= this.player.x &&
+          b.y + r >= this.player.y && b.y - r <= this.player.y + this.player.h) {
+        b.x = this.player.x + this.player.w + r;
+        const offset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.5, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      if (b.vx > 0 && b.x + r >= this.enemy.x && b.x - r <= this.enemy.x + this.enemy.w &&
+          b.y + r >= this.enemy.y && b.y - r <= this.enemy.y + this.enemy.h) {
+        b.x = this.enemy.x - r;
+        const offset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+        const angle = offset * 0.92;
+        let curSpd = Math.min(13.5, Math.hypot(b.vx, b.vy) * 1.05 + 0.2);
+        b.vx = -Math.abs(Math.cos(angle) * curSpd);
+        b.vy = Math.sin(angle) * curSpd;
+        window.Sound?.play('hit');
+      }
+
+      // Goals
+      if (b.x >= CANVAS_WIDTH) {
+        this.player.score++;
+        window.Sound?.play('score');
+        if (this.player.score >= 5) {
+          this.showResult(true, 'ASTEROIDS ACE!');
+          return;
+        }
+        this.resetBall(false);
+        break;
+      } else if (b.x <= 0) {
+        this.enemy.score++;
+        window.Sound?.play('wall');
+        if (this.enemy.score >= 5) {
+          this.showResult(false, 'DRIFTED AWAY');
+          return;
+        }
+        this.resetBall(true);
+        break;
+      }
+    }
+  }
+
+  renderAsteroidsPong(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      const ox = (Math.random() - 0.5) * s.shake;
+      const oy = (Math.random() - 0.5) * s.shake;
+      ctx.translate(ox, oy);
+    }
+
+    // 1. Rails
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(0, 34, CANVAS_WIDTH, 4);
+    ctx.fillRect(0, CANVAS_HEIGHT - 34, CANVAS_WIDTH, 4);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Drifting Vector Asteroids
+    ctx.save();
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    for (const ast of s.asteroids) {
+      ctx.save();
+      ctx.translate(Math.round(ast.x), Math.round(ast.y));
+      ctx.rotate(ast.rot);
+      ctx.beginPath();
+      for (let i = 0; i < ast.verts.length; i++) {
+        const v = ast.verts[i];
+        if (i === 0) ctx.moveTo(v.x, v.y);
+        else ctx.lineTo(v.x, v.y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // 4. Debris
+    ctx.fillStyle = colWhite;
+    for (const p of s.debris) {
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+    }
+
+    // 5. Paddles & Ball
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // =========================================
+  // LEVEL 66: TIME BOMB PONG
+  // "The ball is an armed time bomb! Countdown accelerates on hits. Detonates in a shrapnel explosion."
+  // =========================================
+  getNewBombTimer() {
+    // Unpredictable randomized fuse between 3.5s and 8.5s
+    return Number((3.5 + Math.random() * 5.0).toFixed(1));
+  }
+
+  initTimeBomb(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 80;
+    this.enemy.w = 12;
+    this.enemy.h = 80;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    const initialFuse = this.getNewBombTimer();
+    this.modeState = {
+      bombTimer: initialFuse,
+      maxBombTime: initialFuse,
+      tickInterval: Math.max(0.18, initialFuse / 7.5),
+      tickElapsed: 0,
+      sparks: [],
+      debris: [],
+      shockwaves: [],
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+  }
+
+  updateTimeBomb(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+
+    // Shockwaves
+    for (let i = s.shockwaves.length - 1; i >= 0; i--) {
+      const sw = s.shockwaves[i];
+      sw.r += (sw.maxR - sw.r) * 12 * dt;
+      sw.life -= dt;
+      if (sw.life <= 0) s.shockwaves.splice(i, 1);
+    }
+
+    // Explosion Debris
+    for (let i = s.debris.length - 1; i >= 0; i--) {
+      const d = s.debris[i];
+      d.x += d.vx;
+      d.y += d.vy;
+      d.life -= dt;
+      if (d.life <= 0) s.debris.splice(i, 1);
+    }
+
+    // Spark particles from bomb fuse
+    for (let i = s.sparks.length - 1; i >= 0; i--) {
+      const sp = s.sparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.life -= dt;
+      if (sp.life <= 0) s.sparks.splice(i, 1);
+    }
+
+    // Player keyboard movement
+    let dir = 0;
+    if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+    if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+    this.player.y += dir * 8.5;
+    this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+
+    // Enemy AI Movement
+    const diff = this.difficulty;
+    let aiSpeed = 4.8;
+    let deadzone = 8;
+    if (diff === 'easy') { aiSpeed = 3.6; deadzone = 14; }
+    else if (diff === 'hard') { aiSpeed = 5.8; deadzone = 5; }
+    else if (diff === 'impossible') { aiSpeed = 7.4; deadzone = 2; }
+
+    const isHeadingToEnemy = b.vx > 0;
+    if (isHeadingToEnemy) {
+      const targetEnemyY = b.y - this.enemy.h / 2;
+      const enemyDiff = targetEnemyY - this.enemy.y;
+      if (Math.abs(enemyDiff) > deadzone) {
+        this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+      }
+    } else {
+      const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+      if (Math.abs(centerDiff) > 10) {
+        this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.4);
+      }
+    }
+    this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+
+    // SERVE DELAY
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // COUNTDOWN & FUSE SPARK TICKS
+    s.bombTimer -= dt;
+    s.tickElapsed += dt;
+
+    // Fuse spark emitting from bomb top
+    if (Math.random() < 0.6) {
+      s.sparks.push({
+        x: b.x + (Math.random() - 0.5) * 4,
+        y: b.y - 10 + (Math.random() - 0.5) * 4,
+        vx: (Math.random() - 0.5) * 3,
+        vy: -Math.random() * 3,
+        life: 0.18
+      });
+    }
+
+    if (s.tickElapsed >= s.tickInterval) {
+      s.tickElapsed = 0;
+      window.Sound?.play('wall');
+    }
+
+    // DETONATION (KABOOM!)
+    if (s.bombTimer <= 0) {
+      // Explode!
+      s.shockwaves.push({ x: b.x, y: b.y, r: 8, maxR: 70, life: 0.45 });
+      for (let k = 0; k < 28; k++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 9;
+        s.debris.push({
+          x: b.x, y: b.y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          life: 0.4
+        });
+      }
+      s.shake = 16;
+      window.Sound?.play('lose');
+
+      // Point awarded to side opposite the explosion!
+      if (b.x < CANVAS_WIDTH / 2) {
+        this.enemy.score++;
+        if (this.enemy.score >= 5) {
+          this.showResult(false);
+          return;
+        }
+      } else {
+        this.player.score++;
+        if (this.player.score >= 5) {
+          this.showResult(true);
+          return;
+        }
+      }
+
+      const nextFuse = this.getNewBombTimer();
+      s.serveTimer = 0.8;
+      s.bombTimer = nextFuse;
+      s.maxBombTime = nextFuse;
+      s.tickInterval = Math.max(0.18, nextFuse / 7.5);
+      this.resetBall(b.x < CANVAS_WIDTH / 2);
+      return;
+    }
+
+    // BALL PHYSICS
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // Top / Bottom Rail Collisions
+    if (b.y - b.size / 2 <= 38) {
+      b.y = 38 + b.size / 2;
+      b.vy = Math.abs(b.vy);
+      window.Sound?.play('wall');
+    } else if (b.y + b.size / 2 >= CANVAS_HEIGHT - 38) {
+      b.y = CANVAS_HEIGHT - 38 - b.size / 2;
+      b.vy = -Math.abs(b.vy);
+      window.Sound?.play('wall');
+    }
+
+    // Player Paddle Collision
+    if (b.vx < 0 &&
+        b.x - b.size / 2 <= this.player.x + this.player.w &&
+        b.x + b.size / 2 >= this.player.x &&
+        b.y + b.size / 2 >= this.player.y &&
+        b.y - b.size / 2 <= this.player.y + this.player.h) {
+      b.x = this.player.x + this.player.w + b.size / 2;
+      const hitOffset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+      const speed = Math.min(13.5, Math.hypot(b.vx, b.vy) * 1.06);
+      const angle = hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+
+      // Shave time off fuse and accelerate tick rate
+      s.bombTimer = Math.max(0.5, s.bombTimer - 0.45);
+      s.tickInterval = Math.max(0.12, s.bombTimer / 7.5);
+      s.shake = 3;
+      window.Sound?.play('hit');
+    }
+
+    // Enemy Paddle Collision
+    if (b.vx > 0 &&
+        b.x + b.size / 2 >= this.enemy.x &&
+        b.x - b.size / 2 <= this.enemy.x + this.enemy.w &&
+        b.y + b.size / 2 >= this.enemy.y &&
+        b.y - b.size / 2 <= this.enemy.y + this.enemy.h) {
+      b.x = this.enemy.x - b.size / 2;
+      const hitOffset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+      const speed = Math.min(13.5, Math.hypot(b.vx, b.vy) * 1.06);
+      const angle = Math.PI - hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+
+      // Shave time off fuse
+      s.bombTimer = Math.max(0.5, s.bombTimer - 0.45);
+      s.tickInterval = Math.max(0.12, s.bombTimer / 7.5);
+      s.shake = 3;
+      window.Sound?.play('hit');
+    }
+
+    // Normal out-of-bounds goal checks
+    if (b.x < 10) {
+      this.enemy.score++;
+      window.Sound?.play('lose');
+      if (this.enemy.score >= 5) {
+        this.showResult(false);
+        return;
+      }
+      const nextFuse = this.getNewBombTimer();
+      s.serveTimer = 0.6;
+      s.bombTimer = nextFuse;
+      s.maxBombTime = nextFuse;
+      s.tickInterval = Math.max(0.18, nextFuse / 7.5);
+      this.resetBall(true);
+    } else if (b.x > CANVAS_WIDTH - 10) {
+      this.player.score++;
+      window.Sound?.play('score');
+      if (this.player.score >= 5) {
+        this.showResult(true);
+        return;
+      }
+      const nextFuse = this.getNewBombTimer();
+      s.serveTimer = 0.6;
+      s.bombTimer = nextFuse;
+      s.maxBombTime = nextFuse;
+      s.tickInterval = Math.max(0.18, nextFuse / 7.5);
+      this.resetBall(false);
+    }
+  }
+
+  renderTimeBomb(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
+    }
+
+    // 1. Arena Borders (Flash in urgency if timer < 2.0s)
+    const isCritical = (s.bombTimer < 2.0 && Math.floor(performance.now() / 120) % 2 === 0);
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, CANVAS_WIDTH - 4, CANVAS_HEIGHT - 4);
+    ctx.lineWidth = 2;
+    if (isCritical) ctx.setLineDash([6, 6]);
+    ctx.strokeRect(30, 36, CANVAS_WIDTH - 60, CANVAS_HEIGHT - 72);
+    ctx.setLineDash([]);
+
+    // Center dashed line
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(CANVAS_WIDTH / 2, 38);
+    ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 38);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Digital Bomb Countdown HUD
+    ctx.font = 'bold 14px "Courier New", monospace';
+    const timerText = 'BOMB: ' + Math.max(0, s.bombTimer).toFixed(1) + 's';
+    ctx.fillText('[ ' + timerText + ' ]', CANVAS_WIDTH / 2, 60);
+
+    // 4. Shockwaves
+    for (const sw of s.shockwaves) {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // 5. Sparks and Debris
+    ctx.fillStyle = colWhite;
+    for (const d of s.debris) {
+      ctx.fillRect(Math.round(d.x), Math.round(d.y), 3, 3);
+    }
+    for (const sp of s.sparks) {
+      ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 2, 2);
+    }
+
+    // 6. Paddles
+    ctx.fillRect(Math.round(this.player.x), Math.round(this.player.y), this.player.w, this.player.h);
+    ctx.fillRect(Math.round(this.enemy.x), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+
+    // 7. Time Bomb Ball (1-bit round bomb with wick & spark)
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 8, 0, Math.PI * 2);
+    ctx.fillStyle = colWhite;
+    ctx.fill();
+
+    // Fuse Wick
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y - 7);
+    ctx.quadraticCurveTo(b.x + 4, b.y - 12, b.x + 2, b.y - 15);
+    ctx.stroke();
+
+    // Wick Spark Tip
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(Math.round(b.x + 1), Math.round(b.y - 17), 3, 3);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
+
+  // =========================================
+  // LEVEL 67: BULLET HELL PONG
+  // "Midfield Danmaku sentinel pulses geometric bullet spirals! Dodge bullet waves and smash the ball through bullet curtains."
+  // =========================================
+  initBulletHell(aiCfg) {
+    this.player.score = 0;
+    this.enemy.score = 0;
+    this.player.w = 12;
+    this.player.h = 80;
+    this.enemy.w = 12;
+    this.enemy.h = 80;
+
+    this.player.x = 30;
+    this.player.y = (CANVAS_HEIGHT - this.player.h) / 2;
+    this.enemy.x = CANVAS_WIDTH - 42;
+    this.enemy.y = (CANVAS_HEIGHT - this.enemy.h) / 2;
+
+    this.modeState = {
+      coreX: CANVAS_WIDTH / 2,
+      coreY: CANVAS_HEIGHT / 2,
+      coreAngle: 0,
+      coreCooldown: 0,
+      waveTimer: 0.2,
+      waveInterval: 0.65,
+      bullets: [],
+      sparks: [],
+      shockwaves: [],
+      playerStun: 0,
+      enemyStun: 0,
+      shake: 0,
+      serveTimer: 0.5
+    };
+
+    this.resetBall(true);
+    this.ball.x = 260;
+  }
+
+  updateBulletHell(dt) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 25);
+    if (s.playerStun > 0) s.playerStun = Math.max(0, s.playerStun - dt);
+    if (s.enemyStun > 0) s.enemyStun = Math.max(0, s.enemyStun - dt);
+    if (s.coreCooldown > 0) s.coreCooldown = Math.max(0, s.coreCooldown - dt);
+
+    // Danmaku Core continuous rotation
+    s.coreAngle += dt * 1.6;
+
+    // Pulse geometric bullet rings in unpredictable random directions
+    s.waveTimer -= dt;
+    if (s.waveTimer <= 0) {
+      s.waveTimer = 0.52; // slightly faster pulse cadence
+      const diff = this.difficulty;
+      const count = (diff === 'hard' ? 8 : (diff === 'impossible' ? 10 : (diff === 'easy' ? 4 : 6)));
+
+      // 1. Pattern ring with randomized angular drift and individual directional offsets
+      const baseJitter = (Math.random() - 0.5) * 1.4;
+      for (let i = 0; i < count; i++) {
+        const randOffset = (Math.random() - 0.5) * 0.7;
+        const ang = s.coreAngle + (i * Math.PI * 2 / count) + baseJitter + randOffset;
+        const spd = 1.6 + Math.random() * 1.5; // Randomized bullet speed
+        s.bullets.push({
+          x: s.coreX + Math.cos(ang) * 22,
+          y: s.coreY + Math.sin(ang) * 22,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          rot: ang,
+          life: 6.0
+        });
+      }
+
+      // 2. Extra wild stray bullets fired in completely random 360-degree directions
+      const extraWildCount = (diff === 'easy') ? 1 : (diff === 'hard' || diff === 'impossible' ? 3 : 2);
+      for (let k = 0; k < extraWildCount; k++) {
+        const wildAng = Math.random() * Math.PI * 2;
+        const wildSpd = 1.4 + Math.random() * 1.8;
+        s.bullets.push({
+          x: s.coreX + Math.cos(wildAng) * 20,
+          y: s.coreY + Math.sin(wildAng) * 20,
+          vx: Math.cos(wildAng) * wildSpd,
+          vy: Math.sin(wildAng) * wildSpd,
+          rot: Math.random() * Math.PI * 2,
+          life: 6.0
+        });
+      }
+    }
+
+    // Move bullets
+    for (let i = s.bullets.length - 1; i >= 0; i--) {
+      const bu = s.bullets[i];
+      bu.x += bu.vx;
+      bu.y += bu.vy;
+      bu.rot += dt * 3.5;
+      bu.life -= dt;
+      if (bu.x < 10 || bu.x > CANVAS_WIDTH - 10 || bu.y < 30 || bu.y > CANVAS_HEIGHT - 30 || bu.life <= 0) {
+        s.bullets.splice(i, 1);
+      }
+    }
+
+    // Shockwaves
+    for (let i = s.shockwaves.length - 1; i >= 0; i--) {
+      const sw = s.shockwaves[i];
+      sw.r += (sw.maxR - sw.r) * 12 * dt;
+      sw.life -= dt;
+      if (sw.life <= 0) s.shockwaves.splice(i, 1);
+    }
+
+    // Sparks
+    for (let i = s.sparks.length - 1; i >= 0; i--) {
+      const sp = s.sparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.life -= dt;
+      if (sp.life <= 0) s.sparks.splice(i, 1);
+    }
+
+    // Player keyboard movement (if not stunned)
+    if (s.playerStun <= 0) {
+      let dir = 0;
+      if (this.keys['w'] || this.keys['arrowup']) dir -= 1;
+      if (this.keys['s'] || this.keys['arrowdown']) dir += 1;
+      this.player.y += dir * 8.0;
+      this.player.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.player.h, this.player.y));
+    }
+
+    // Enemy AI Movement with bullet evasion
+    if (s.enemyStun <= 0) {
+      const diff = this.difficulty;
+      let aiSpeed = 4.6;
+      let deadzone = 8;
+      if (diff === 'easy') { aiSpeed = 3.2; deadzone = 16; }
+      else if (diff === 'hard') { aiSpeed = 5.6; deadzone = 5; }
+      else if (diff === 'impossible') { aiSpeed = 7.0; deadzone = 2; }
+
+      const isHeadingToEnemy = b.vx > 0;
+      if (isHeadingToEnemy) {
+        const targetEnemyY = b.y - this.enemy.h / 2;
+        const enemyDiff = targetEnemyY - this.enemy.y;
+        if (Math.abs(enemyDiff) > deadzone) {
+          this.enemy.y += Math.sign(enemyDiff) * Math.min(Math.abs(enemyDiff), aiSpeed);
+        }
+      } else {
+        const centerDiff = (CANVAS_HEIGHT - this.enemy.h) / 2 - this.enemy.y;
+        if (Math.abs(centerDiff) > 10) {
+          this.enemy.y += Math.sign(centerDiff) * Math.min(Math.abs(centerDiff), 1.2);
+        }
+      }
+      this.enemy.y = Math.max(38, Math.min(CANVAS_HEIGHT - 38 - this.enemy.h, this.enemy.y));
+    }
+
+    // BULLET vs PADDLE COLLISIONS (Stuns paddle)
+    for (let i = s.bullets.length - 1; i >= 0; i--) {
+      const bu = s.bullets[i];
+
+      // Player paddle collision
+      if (bu.x >= this.player.x && bu.x <= this.player.x + this.player.w &&
+          bu.y >= this.player.y && bu.y <= this.player.y + this.player.h) {
+        // Stun player!
+        s.playerStun = 0.36;
+        s.shake = 5;
+        for (let k = 0; k < 6; k++) {
+          s.sparks.push({
+            x: bu.x, y: bu.y,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            life: 0.2
+          });
+        }
+        s.bullets.splice(i, 1);
+        window.Sound?.play('wall');
+        continue;
+      }
+
+      // Enemy paddle collision
+      if (bu.x >= this.enemy.x && bu.x <= this.enemy.x + this.enemy.w &&
+          bu.y >= this.enemy.y && bu.y <= this.enemy.y + this.enemy.h) {
+        // Stun enemy!
+        s.enemyStun = 0.36;
+        s.shake = 5;
+        for (let k = 0; k < 6; k++) {
+          s.sparks.push({
+            x: bu.x, y: bu.y,
+            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+            life: 0.2
+          });
+        }
+        s.bullets.splice(i, 1);
+        window.Sound?.play('wall');
+        continue;
+      }
+    }
+
+    // SERVE DELAY
+    if (s.serveTimer > 0) {
+      s.serveTimer -= dt;
+      return;
+    }
+
+    // BALL vs BULLET COLLISIONS (Ball shatters bullets!)
+    for (let i = s.bullets.length - 1; i >= 0; i--) {
+      const bu = s.bullets[i];
+      if (Math.hypot(b.x - bu.x, b.y - bu.y) < b.size / 2 + 7) {
+        // Shatter bullet!
+        for (let k = 0; k < 5; k++) {
+          s.sparks.push({
+            x: bu.x, y: bu.y,
+            vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5,
+            life: 0.18
+          });
+        }
+        s.bullets.splice(i, 1);
+        window.Sound?.play('hit');
+      }
+    }
+
+    // BALL vs CENTER CORE COLLISION (EMP Shockwave!)
+    if (s.coreCooldown <= 0 && Math.hypot(b.x - s.coreX, b.y - s.coreY) < 24) {
+      s.coreCooldown = 0.6;
+      const nx = (b.x - s.coreX) / 24;
+      const ny = (b.y - s.coreY) / 24;
+      const curSpd = Math.hypot(b.vx, b.vy);
+      b.vx = nx * Math.max(6.5, curSpd);
+      b.vy = ny * Math.max(6.5, curSpd);
+
+      // EMP blast clears all active bullets!
+      s.shockwaves.push({ x: s.coreX, y: s.coreY, r: 16, maxR: 120, life: 0.35 });
+      for (const bu of s.bullets) {
+        s.sparks.push({ x: bu.x, y: bu.y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, life: 0.15 });
+      }
+      s.bullets = [];
+      s.shake = 6;
+      window.Sound?.play('portal');
+    }
+
+    // BALL PHYSICS
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // Top / Bottom Rail Collisions
+    if (b.y - b.size / 2 <= 38) {
+      b.y = 38 + b.size / 2;
+      b.vy = Math.abs(b.vy);
+      window.Sound?.play('wall');
+    } else if (b.y + b.size / 2 >= CANVAS_HEIGHT - 38) {
+      b.y = CANVAS_HEIGHT - 38 - b.size / 2;
+      b.vy = -Math.abs(b.vy);
+      window.Sound?.play('wall');
+    }
+
+    // Player Paddle Collision
+    if (b.vx < 0 &&
+        b.x - b.size / 2 <= this.player.x + this.player.w &&
+        b.x + b.size / 2 >= this.player.x &&
+        b.y + b.size / 2 >= this.player.y &&
+        b.y - b.size / 2 <= this.player.y + this.player.h) {
+      b.x = this.player.x + this.player.w + b.size / 2;
+      const hitOffset = (b.y - (this.player.y + this.player.h / 2)) / (this.player.h / 2);
+      const speed = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05);
+      const angle = hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+      window.Sound?.play('hit');
+    }
+
+    // Enemy Paddle Collision
+    if (b.vx > 0 &&
+        b.x + b.size / 2 >= this.enemy.x &&
+        b.x - b.size / 2 <= this.enemy.x + this.enemy.w &&
+        b.y + b.size / 2 >= this.enemy.y &&
+        b.y - b.size / 2 <= this.enemy.y + this.enemy.h) {
+      b.x = this.enemy.x - b.size / 2;
+      const hitOffset = (b.y - (this.enemy.y + this.enemy.h / 2)) / (this.enemy.h / 2);
+      const speed = Math.min(13.0, Math.hypot(b.vx, b.vy) * 1.05);
+      const angle = Math.PI - hitOffset * (Math.PI / 3.4);
+      b.vx = Math.cos(angle) * speed;
+      b.vy = Math.sin(angle) * speed;
+      window.Sound?.play('hit');
+    }
+
+    // Scoring
+    if (b.x < 10) {
+      this.enemy.score++;
+      window.Sound?.play('lose');
+      if (this.enemy.score >= 5) {
+        this.showResult(false);
+        return;
+      }
+      s.serveTimer = 0.6;
+      s.bullets = [];
+      this.resetBall(true);
+      this.ball.x = 260;
+    } else if (b.x > CANVAS_WIDTH - 10) {
+      this.player.score++;
+      window.Sound?.play('score');
+      if (this.player.score >= 5) {
+        this.showResult(true);
+        return;
+      }
+      s.serveTimer = 0.6;
+      s.bullets = [];
+      this.resetBall(false);
+      this.ball.x = CANVAS_WIDTH - 260;
+    }
+  }
+
+  renderBulletHell(ctx, colWhite, colBlack) {
+    const s = this.modeState;
+    const b = this.ball;
+
+    if (s.shake > 0) {
+      ctx.save();
+      ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
+    }
+
+    // 1. Arena Borders
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, CANVAS_WIDTH - 4, CANVAS_HEIGHT - 4);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(30, 36, CANVAS_WIDTH - 60, CANVAS_HEIGHT - 72);
+
+    // Center dashed line
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(CANVAS_WIDTH / 2, 38);
+    ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 38);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Scoreboard
+    ctx.font = '28px "Press Start 2P", monospace';
+    ctx.fillStyle = colWhite;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${this.player.score}`, 240, 80);
+    ctx.fillText(`${this.enemy.score}`, 720, 80);
+
+    // 3. Center Danmaku Guardian Core
+    ctx.save();
+    ctx.translate(s.coreX, s.coreY);
+    ctx.rotate(s.coreAngle);
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 2;
+    // Octagon outline
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI / 4);
+      const r = 16;
+      const x = Math.cos(a) * r;
+      const y = Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+
+    // Inner rotating crosshair
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-10, 0); ctx.lineTo(10, 0);
+    ctx.moveTo(0, -10); ctx.lineTo(0, 10);
+    ctx.stroke();
+    ctx.restore();
+
+    // 4. Bullets (1-bit rotating geometric diamonds)
+    ctx.fillStyle = colWhite;
+    ctx.strokeStyle = colWhite;
+    ctx.lineWidth = 1;
+    for (const bu of s.bullets) {
+      ctx.save();
+      ctx.translate(Math.round(bu.x), Math.round(bu.y));
+      ctx.rotate(bu.rot);
+      ctx.beginPath();
+      ctx.moveTo(0, -4);
+      ctx.lineTo(4, 0);
+      ctx.lineTo(0, 4);
+      ctx.lineTo(-4, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 5. EMP Shockwaves
+    for (const sw of s.shockwaves) {
+      ctx.strokeStyle = colWhite;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // 6. Sparks
+    for (const sp of s.sparks) {
+      ctx.fillRect(Math.round(sp.x), Math.round(sp.y), 2, 2);
+    }
+
+    // 7. Paddles (with Danmaku core hitbox dot and stun jitter)
+    const pStunned = (s.playerStun > 0);
+    const pJitterX = pStunned ? (Math.random() - 0.5) * 4 : 0;
+    if (pStunned && Math.floor(performance.now() / 60) % 2 === 0) {
+      // Flashing stun outline
+      ctx.strokeRect(Math.round(this.player.x + pJitterX), Math.round(this.player.y), this.player.w, this.player.h);
+    } else {
+      ctx.fillRect(Math.round(this.player.x + pJitterX), Math.round(this.player.y), this.player.w, this.player.h);
+    }
+    // Player Hitbox Dot
+    ctx.fillStyle = colBlack;
+    ctx.fillRect(Math.round(this.player.x + this.player.w / 2 - 2), Math.round(this.player.y + this.player.h / 2 - 2), 4, 4);
+
+    const eStunned = (s.enemyStun > 0);
+    const eJitterX = eStunned ? (Math.random() - 0.5) * 4 : 0;
+    ctx.fillStyle = colWhite;
+    if (eStunned && Math.floor(performance.now() / 60) % 2 === 0) {
+      ctx.strokeRect(Math.round(this.enemy.x + eJitterX), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    } else {
+      ctx.fillRect(Math.round(this.enemy.x + eJitterX), Math.round(this.enemy.y), this.enemy.w, this.enemy.h);
+    }
+    // Enemy Hitbox Dot
+    ctx.fillStyle = colBlack;
+    ctx.fillRect(Math.round(this.enemy.x + this.enemy.w / 2 - 2), Math.round(this.enemy.y + this.enemy.h / 2 - 2), 4, 4);
+
+    // 8. Ball
+    ctx.fillStyle = colWhite;
+    ctx.fillRect(Math.round(b.x - b.size / 2), Math.round(b.y - b.size / 2), b.size, b.size);
+
+    if (s.shake > 0) {
+      ctx.restore();
+    }
+  }
+
 }
+
 
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', () => {
