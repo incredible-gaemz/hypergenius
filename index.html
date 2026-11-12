@@ -303,83 +303,6 @@
             font-weight: 400;
         }
 
-        /* Filter Toolbar */
-        .filter-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            padding-bottom: 1.25rem;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .filter-pills {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 0.45rem 0.9rem;
-            border-radius: 6px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            transition: all 0.15s ease;
-        }
-
-        .filter-btn:hover {
-            background: var(--bg-surface-hover);
-            color: var(--text-main);
-            border-color: #3f3f4e;
-        }
-
-        .filter-btn.active {
-            background: var(--accent-purple);
-            border-color: var(--accent-purple);
-            color: #ffffff;
-        }
-
-        .pill-count {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            opacity: 0.85;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 0.1rem 0.35rem;
-            border-radius: 3px;
-        }
-
-        .filter-btn.active .pill-count {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .view-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            letter-spacing: 0.04em;
-        }
-
-        .pulse-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            box-shadow: 0 0 8px var(--accent-green);
-        }
-
         /* Projects Grid - Spacious Flat Architecture */
         .projects-grid {
             display: grid;
@@ -679,19 +602,6 @@
         <div class="hero-badge">EXPERIMENTAL WEB ARSENAL</div>
         <h1 class="hero-title">hypergenius 12</h1>
         <p class="hero-subtitle">A curated collection of standalone interactive web projects, games, 3D simulations, and creative tools.</p>
-        
-        <div class="filter-toolbar">
-            <div class="filter-pills">
-                <button class="filter-btn active" data-filter="all">All <span class="pill-count">25</span></button>
-                <button class="filter-btn" data-filter="games">Games <span class="pill-count">10</span></button>
-                <button class="filter-btn" data-filter="3d">3D &amp; WebGL <span class="pill-count">7</span></button>
-                <button class="filter-btn" data-filter="tools">Tools &amp; Labs <span class="pill-count">8</span></button>
-            </div>
-            <div class="view-indicator">
-                <span class="pulse-dot"></span>
-                <span id="active-count-label">SHOWING 25 PROJECTS</span>
-            </div>
-        </div>
     </section>
 
     <div class="projects-grid">
@@ -755,6 +665,21 @@
             </div>
         </a>
 
+        <a href="fun%20fishing/index.html" class="project-card" data-category="games">
+            <div class="card-media">
+                <img src="screenshot_fishing.png" alt="Fun Fishing" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
+                <span class="card-badge">Fishing Sim</span>
+            </div>
+            <div class="project-content">
+                <h2 class="project-title">Fun Fishing</h2>
+                <p class="project-desc">A cozy, classic retro fishing simulation with 105 species, rod &amp; reel progression, lively biomes, dynamic reeling, and a commercial fleet.</p>
+                <div class="card-footer">
+                    <span class="card-launch">Launch Project</span>
+                    <span class="project-arrow">&rarr;</span>
+                </div>
+            </div>
+        </a>
+
         <a href="cmd/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_cmd.png" alt="The Elias Thorne Mystery" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
@@ -763,21 +688,6 @@
             <div class="project-content">
                 <h2 class="project-title">The Elias Thorne Mystery</h2>
                 <p class="project-desc">Hacker-Sim: The Elias Thorne Mystery. A command prompt based puzzle and hacking simulation.</p>
-                <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
-                    <span class="project-arrow">&rarr;</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="pong-mod/index.html" class="project-card" data-category="games">
-            <div class="card-media">
-                <img src="screenshot_pong_mod.png" alt="PONG Mod" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">1-Bit Arcade</span>
-            </div>
-            <div class="project-content">
-                <h2 class="project-title">PONG Mod</h2>
-                <p class="project-desc">Pure 1-bit arcade Pong with 23 game-changing twists, 50 levels, retro soundtrack, and customizable difficulty.</p>
                 <div class="card-footer">
                     <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
@@ -1217,36 +1127,6 @@
 
         requestAnimationFrame(render);
     })();
-
-    // Category Filter Interaction
-    document.addEventListener('DOMContentLoaded', () => {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const cards = document.querySelectorAll('.project-card');
-        const countLabel = document.getElementById('active-count-label');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const filter = btn.getAttribute('data-filter');
-                let visibleCount = 0;
-
-                cards.forEach(card => {
-                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
-                        card.style.display = 'flex';
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                if (countLabel) {
-                    countLabel.textContent = `SHOWING ${visibleCount} PROJECT${visibleCount === 1 ? '' : 'S'}`;
-                }
-            });
-        });
-    });
 
     // Share functionality
     window.shareSite = function(btn) {

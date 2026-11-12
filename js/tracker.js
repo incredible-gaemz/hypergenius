@@ -94,7 +94,7 @@ const PROJECT_NAMES = {
     'genesis': 'Genesis Evolution',
     'raycaster': 'Wolfenstein 3D Raycaster',
     'snake': 'Snake 3D',
-    'pong-mod': 'PONG Mod'
+    'fun fishing': 'Fun Fishing'
 };
 
 function getDisplayProjectName(rawName) {

@@ -1,0 +1,6 @@
+{
+  "name": "Cozy Reel - Classic Fishing Game",
+  "description": "A simple, minimalist text-based fishing game with 105 species, rod, reel & lure progression, dynamic reeling mechanics, inventory, and fish catalog.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Global Authentic 16-Bit Pixel Art Theme */
+*, *::before, *::after {
+  font-family: 'Pixelify Sans', 'Silkscreen', monospace, system-ui;
+  border-radius: 0 !important;
+  letter-spacing: 0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body, html {
+  font-family: 'Pixelify Sans', 'Silkscreen', monospace, system-ui;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Pixel Titles & Headers */
+h1, h2, h3, .pixel-title {
+  font-family: 'Press Start 2P', 'Pixelify Sans', monospace;
+  letter-spacing: 0.04em;
+}
+
+/* Retro Beveled Pixel Buttons */
+button {
+  font-family: 'Pixelify Sans', 'Silkscreen', monospace;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+button[class*="border"],
+button[class*="bg-"] {
+  border-style: solid;
+}
+
+button[class*="border"]:not(:disabled),
+button[class*="bg-"]:not(:disabled) {
+  box-shadow: inset -2px -2px 0px 0px rgba(0, 0, 0, 0.75), inset 2px 2px 0px 0px rgba(255, 255, 255, 0.25);
+}
+
+button[class*="border"]:active:not(:disabled),
+button[class*="bg-"]:active:not(:disabled) {
+  box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.85), inset -1px -1px 0px 0px rgba(255, 255, 255, 0.15);
+  transform: translate(1px, 1px);
+}
+
+button:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Inset Pixel Form Controls (Inputs, Selects) */
+input, select, textarea {
+  font-family: 'Pixelify Sans', monospace;
+  box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.85), inset -2px -2px 0px 0px rgba(255, 255, 255, 0.1);
+  image-rendering: pixelated;
+}
+
+/* Pixel Graphics & Sprites */
+img, canvas, svg {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Chunky Pixel Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #384050 #0f1115;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0f12;
+  border: 1px solid #1a1e24;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #384050;
+  border: 2px solid #1a1e24;
+  box-shadow: inset 1px 1px 0 #56617a, inset -1px -1px 0 #1b1f28;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4c576d;
+}
