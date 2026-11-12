@@ -848,19 +848,28 @@ export function calculateTrapCatch(
 
     // Traps have a rare chance for trophy weight (1 in 400 ~0.25%, boosted to 1 in 120 with prime trophy bait)
     const trophyOdds = trap.baitCategory === 'rare' ? 120 : 400;
-    const isTrophy = (seed % trophyOdds) === 0;
+    const isTrophyCandidate = (seed % trophyOdds) === 0;
 
-    // Trapped fish are typically modest forage specimens unless a rare trophy miracle occurs
-    const minW = species.minWeight;
-    const maxW = isTrophy
-      ? species.trophyWeight
-      : species.minWeight + (species.maxWeight - species.minWeight) * 0.40;
-    const variance = ((seed % 97) / 97);
-    let rawWeight = minW + (maxW - minW) * Math.pow(variance, 1.6);
-    if (trap.baitWeightBonus && trap.baitWeightBonus > 1.0) {
-      rawWeight *= trap.baitWeightBonus;
+    let rawWeight: number;
+    if (isTrophyCandidate) {
+      const variance = ((seed % 97) / 97);
+      rawWeight = species.trophyWeight * (1.0 + Math.pow(variance, 2.2) * 0.14);
+    } else {
+      // Trapped fish are typically modest forage specimens unless a rare trophy occurs
+      const minW = species.minWeight;
+      const maxW = species.minWeight + (species.maxWeight - species.minWeight) * 0.40;
+      const variance = ((seed % 97) / 97);
+      rawWeight = minW + (maxW - minW) * Math.pow(variance, 1.6);
+      if (trap.baitWeightBonus && trap.baitWeightBonus > 1.0) {
+        rawWeight *= trap.baitWeightBonus;
+      }
+      // Non-trophy ceiling
+      rawWeight = Math.min(species.trophyWeight * 0.96, rawWeight);
     }
+
     const weight = Number(rawWeight.toFixed(2));
+    // A fish is strictly a Trophy if and only if its final weight meets or exceeds the species trophyWeight threshold
+    const isTrophy = weight >= species.trophyWeight;
     const weightRatio = Math.max(1, weight / species.minWeight);
     const trophyBonus = isTrophy ? 2.5 : 1.0;
     const value = Math.max(
@@ -1514,14 +1523,14 @@ export function rollHookedEncounter(
   const canLandTrophy = rod.power >= 1.4 && lure.id !== 'none';
   const trophyRoll = options?.trophyRoll ?? Math.random();
   const trophyThreshold = isLiveBait ? 0.08 : 0.04;
-  const isTrophy =
+  const isTrophyCandidate =
     canLandTrophy &&
     trophyRoll < trophyThreshold &&
     variance >= 0.70;
 
   let scaledWeight: number;
-  if (isTrophy) {
-    // True trophy catch: exceeds species trophy weight threshold
+  if (isTrophyCandidate) {
+    // True trophy catch attempt: exceeds species trophy weight threshold
     const trophySpike = species.trophyWeight * (1.0 + Math.pow(variance, 2.2) * 0.16);
     scaledWeight = Math.max(species.trophyWeight, trophySpike);
   } else {
@@ -1540,7 +1549,10 @@ export function rollHookedEncounter(
     scaledWeight = Math.min(maxRodWeight * 1.28, scaledWeight);
   }
 
-  const weightRatio = Math.max(1, scaledWeight / species.minWeight);
+  const finalWeight = Number(scaledWeight.toFixed(2));
+  // A fish is strictly a Trophy if and only if its final weight meets or exceeds the species trophyWeight threshold
+  const isTrophy = finalWeight >= species.trophyWeight;
+  const weightRatio = Math.max(1, finalWeight / species.minWeight);
   const trophyBonus = isTrophy ? 2.5 : 1.0;
 
   // Wild mutation roll: extremely rare 0.02% chance (breeding in Hatchery is the primary source)
@@ -1583,7 +1595,7 @@ export function rollHookedEncounter(
     fishId: species.id,
     name: mutationName ? `${mutationName} ${species.name}` : species.name,
     tier: species.tier,
-    weight: Number(scaledWeight.toFixed(2)),
+    weight: finalWeight,
     isTrophy,
     value,
     caughtAt: Date.now(),

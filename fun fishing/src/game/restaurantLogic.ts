@@ -139,8 +139,8 @@ export const RESTAURANT_STAFF_CANDIDATES: RestaurantStaff[] = [
     roleTitle: 'Prep Cook',
     wagePerService: 15,
     perkDescription: '20% chance to not consume fish when cooking, yielding extra portions',
-    automationTitle: 'Auto-Restock Kitchen',
-    automationDescription: 'Automatically transfers caught fish from Box to pantry when kitchen stock runs low.',
+    automationTitle: 'Portion Mastery',
+    automationDescription: 'Conserves kitchen stock by expertly butchering portions with zero waste.',
     bio: 'Fast with a fillet knife and careful with kitchen yields.',
   },
   {

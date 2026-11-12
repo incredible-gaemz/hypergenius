@@ -383,18 +383,11 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
               </div>
             )}
 
-            {(pendingCatch.isTrophy || isNewRecord) && (
+            {isNewRecord && (
               <div className="flex gap-2 text-xs">
-                {pendingCatch.isTrophy && (
-                  <span className="px-2 py-0.5 border border-amber-500/70 bg-amber-950/40 text-amber-300 font-bold" title="Trophy">
-                    Trophy
-                  </span>
-                )}
-                {isNewRecord && (
-                  <span className="px-2 py-0.5 border border-sky-500/70 bg-sky-950/40 text-sky-300 font-bold">
-                    New Record
-                  </span>
-                )}
+                <span className="px-2 py-0.5 border border-sky-500/70 bg-sky-950/40 text-sky-300 font-bold">
+                  New Record
+                </span>
               </div>
             )}
 

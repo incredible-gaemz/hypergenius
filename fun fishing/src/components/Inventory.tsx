@@ -291,11 +291,6 @@ export const Inventory: React.FC<InventoryProps> = ({
                                   >
                                     {sizeClass}
                                   </span>
-                                  {fish.isTrophy && (
-                                    <span className="text-[9px] px-1.5 py-0.2 border border-amber-500/80 bg-amber-950/60 text-amber-300 font-bold">
-                                      Trophy
-                                    </span>
-                                  )}
                                   {fish.mutation && fish.mutation !== 'normal' && (
                                     <span className="text-[9px] px-1.5 py-0.2 border border-cyan-500/60 bg-cyan-950/60 text-cyan-300 font-bold uppercase">
                                       {fish.mutationName || fish.mutation}

@@ -1030,11 +1030,9 @@ export function calculateExpeditionHaul(
 
     const sizeRoll = ((seed * 13 + i * 37) % 1000) / 1000;
     let weight: number;
-    let isTrophy = false;
 
     if (sizeRoll < monsterChance) {
       // Monster / Giant catch!
-      isTrophy = true;
       const monsterBase = species.trophyWeight;
       const monsterSpread = ((seed + i * 17) % 100) / 100;
       const monsterMultiplier = 1.0 + monsterSpread * 0.35; // 1.0x to 1.35x trophy weight
@@ -1046,12 +1044,15 @@ export function calculateExpeditionHaul(
       const runtMax = Number((species.minWeight * 0.98).toFixed(2));
       weight = Number((runtMin + runtSpread * Math.max(0.05, runtMax - runtMin)).toFixed(2));
     } else {
-      // Standard varied adult: full natural spread from minWeight to maxWeight
+      // Standard varied adult: full natural spread from minWeight to just under trophyWeight
       const adultSpread = ((seed + i * 43) % 100) / 100;
       const factor = Math.pow(adultSpread, 1.15);
-      weight = Number((species.minWeight + (species.maxWeight - species.minWeight) * factor).toFixed(2));
+      const nonTrophyMax = species.trophyWeight * 0.96;
+      weight = Number((species.minWeight + Math.max(0, nonTrophyMax - species.minWeight) * factor).toFixed(2));
     }
 
+    // Strict definition: a fish is a trophy if and only if weight >= species.trophyWeight
+    const isTrophy = weight >= species.trophyWeight;
     const weightRatio = Math.max(0.6, weight / species.minWeight);
     const trophyBonus = isTrophy ? 2.5 : 1.0;
 

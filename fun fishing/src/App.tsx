@@ -238,7 +238,16 @@ export default function App() {
   const [inventory, setInventory] = useState<CaughtFish[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved).inventory ?? [];
+      if (saved) {
+        const rawInventory: CaughtFish[] = JSON.parse(saved).inventory ?? [];
+        return rawInventory.map((f) => {
+          const sp = FISH_COLLECTION.find((s) => s.id === f.fishId);
+          if (sp && sp.trophyWeight) {
+            return { ...f, isTrophy: f.weight >= sp.trophyWeight };
+          }
+          return f;
+        });
+      }
     } catch {}
     return [];
   });
@@ -854,34 +863,9 @@ export default function App() {
         if (!curRest.unlocked) return curRest;
 
         const hasRosa = curRest.hiredStaffIds.includes('staff_chef_rosa');
-        const hasLeo = curRest.hiredStaffIds.includes('staff_prep_leo');
         const hasGenevieve = curRest.hiredStaffIds.includes('staff_host_genevieve');
 
-        // 1. Leo Miller Auto-Restock: Every ~8s if pantry is low (<6 fish), transfers up to 2 fish from Box
-        if (hasLeo && curRest.autoRestockFromBox !== false && tickCount % 8 === 0) {
-          const totalPantry = Object.values(curRest.pantry).reduce((s, c) => s + c, 0);
-          if (totalPantry < 6) {
-            setInventory((curInv) => {
-              if (curInv.length === 0) return curInv;
-              const toTransfer = curInv.slice(0, 2);
-              if (toTransfer.length === 0) return curInv;
-
-              setTimeout(() => {
-                setRestaurantState((prev) => {
-                  const np = { ...prev.pantry };
-                  toTransfer.forEach((f) => {
-                    np[f.fishId] = (np[f.fishId] || 0) + 1;
-                  });
-                  return { ...prev, pantry: np };
-                });
-              }, 0);
-
-              return curInv.slice(toTransfer.length);
-            });
-          }
-        }
-
-        // 2. Genevieve Dupond Auto-Procure Wholesale: Every ~12s if pantry is 0, auto-buys wholesale Yellow Perch at discount
+        // 1. Genevieve Dupond Auto-Procure Wholesale: Every ~12s if pantry is 0, auto-buys wholesale Yellow Perch at discount
         if (hasGenevieve && curRest.autoProcureWholesale !== false && tickCount % 12 === 0) {
           const totalPantry = Object.values(curRest.pantry).reduce((s, c) => s + c, 0);
           if (totalPantry === 0) {

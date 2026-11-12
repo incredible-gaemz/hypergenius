@@ -492,6 +492,39 @@ test('Intuitive fish size classifications and size range thresholds', async () =
   assert.ok(getSizeClassBadgeStyle('Average').includes('sky'));
   assert.ok(getSizeClassBadgeStyle('Lunker').includes('purple'));
   assert.ok(getSizeClassBadgeStyle('Trophy').includes('amber'));
+
+  // Strict trophy invariant: A fish is a trophy IF AND ONLY IF weight >= species.trophyWeight
+  const { rollHookedEncounter, RODS, REELS, LURES } = await import('./fishingLogic');
+  for (const rod of RODS) {
+    for (let i = 0; i < 20; i++) {
+      const enc = rollHookedEncounter('pond', rod, LURES[1], REELS[0], {
+        nothingRoll: 0.99,
+        trophyRoll: i % 2 === 0 ? 0.001 : 0.99,
+      });
+      if (enc.type === 'fish' && enc.caughtFish) {
+        const fish = enc.caughtFish;
+        const sp = FISH_COLLECTION.find((s) => s.id === fish.fishId)!;
+        const sizeClass = getFishSizeClassification(fish.weight, sp);
+        if (fish.isTrophy) {
+          assert.ok(
+            fish.weight >= sp.trophyWeight,
+            `Trophy fish must have weight >= trophyWeight (${fish.weight} vs ${sp.trophyWeight})`
+          );
+          assert.equal(
+            sizeClass,
+            'Trophy',
+            `Trophy fish must have sizeClass === 'Trophy', but got ${sizeClass}`
+          );
+        } else {
+          assert.notEqual(
+            sizeClass,
+            'Trophy',
+            `Non-trophy fish cannot have sizeClass === 'Trophy'`
+          );
+        }
+      }
+    }
+  }
 });
 
 test('Private and commercial contracts separation and generic sailor names', async () => {
