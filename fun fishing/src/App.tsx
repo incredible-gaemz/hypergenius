@@ -382,23 +382,65 @@ export default function App() {
   // Preload all game visual sprites and audio for instant web play
   const [isLoadingAssets, setIsLoadingAssets] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStatusText, setLoadingStatusText] = useState('Preparing rods, reels & lures...');
 
   useEffect(() => {
     let isMounted = true;
-    preloadCriticalGameAssets((pct) => {
-      if (isMounted) setLoadingProgress(pct);
-    }).then(() => {
-      setTimeout(() => {
-        if (isMounted) setIsLoadingAssets(false);
-      }, 120);
+    let actualAssetsDone = false;
+    let currentProgress = 0;
+
+    preloadCriticalGameAssets().then(() => {
+      actualAssetsDone = true;
     });
 
+    const startTime = Date.now();
+    const MINIMUM_LOADING_DURATION_MS = 3200; // Intentional 3.2s retro load duration
+
+    const interval = setInterval(() => {
+      if (!isMounted) return;
+      const elapsed = Date.now() - startTime;
+      const timeRatio = Math.min(1, elapsed / MINIMUM_LOADING_DURATION_MS);
+
+      let targetPct = Math.round(timeRatio * 100);
+
+      if (!actualAssetsDone && targetPct > 92) {
+        targetPct = 92;
+      }
+
+      currentProgress = Math.max(currentProgress, targetPct);
+      setLoadingProgress(currentProgress);
+
+      if (currentProgress < 25) {
+        setLoadingStatusText('Preparing rods, reels & lures...');
+      } else if (currentProgress < 50) {
+        setLoadingStatusText('Checking harbor tides & weather...');
+      } else if (currentProgress < 75) {
+        setLoadingStatusText('Stocking native fish waters...');
+      } else if (currentProgress < 100) {
+        setLoadingStatusText('Arranging the tackle box...');
+      } else {
+        setLoadingStatusText('Ready to cast!');
+      }
+
+      if (currentProgress >= 100 && actualAssetsDone) {
+        clearInterval(interval);
+        setTimeout(() => {
+          if (isMounted) setIsLoadingAssets(false);
+        }, 320);
+      }
+    }, 40);
+
     const fallbackTimer = setTimeout(() => {
-      if (isMounted) setIsLoadingAssets(false);
-    }, 1800);
+      if (isMounted) {
+        clearInterval(interval);
+        setLoadingProgress(100);
+        setIsLoadingAssets(false);
+      }
+    }, 5000);
 
     return () => {
       isMounted = false;
+      clearInterval(interval);
       clearTimeout(fallbackTimer);
     };
   }, []);
@@ -2686,12 +2728,12 @@ export default function App() {
 
           <div className="space-y-2 text-left">
             <div className="flex justify-between text-xs text-[#a3aab8] font-bold">
-              <span>Loading harbor waters &amp; tackle...</span>
-              <span className="text-emerald-400 font-mono">{loadingProgress}%</span>
+              <span className="truncate pr-2">{loadingStatusText}</span>
+              <span className="text-emerald-400 font-mono flex-shrink-0">{loadingProgress}%</span>
             </div>
             <div className="w-full h-2.5 border border-[#3b404c] bg-[#0c0d10] p-0.5">
               <div
-                className="h-full bg-emerald-500 transition-all duration-150"
+                className="h-full bg-emerald-500 transition-all duration-75"
                 style={{ width: `${Math.max(8, loadingProgress)}%` }}
               />
             </div>
