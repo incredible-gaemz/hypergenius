@@ -111,24 +111,7 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
       />
 
       <div className="relative z-10">
-        {/* Legendary Sighting Active Banner */}
-      {weatherSightingActive && (
-        <div className="mb-4 p-2.5 border border-emerald-600/80 bg-emerald-950/60 text-emerald-200 text-xs flex items-center justify-between">
-          <div className="space-y-0.5">
-            <span className="font-bold uppercase tracking-wider text-[10px] text-amber-300">
-              Dock Rumor: Rare Sighting
-            </span>
-            <div className="text-xs font-semibold">
-              Anglers report the {weatherSightingSpeciesName} active in these waters right now.
-            </div>
-          </div>
-          <span className="text-[10px] px-2 py-0.5 border border-emerald-500 bg-emerald-900 text-emerald-100 font-bold uppercase">
-            Active
-          </span>
-        </div>
-      )}
-
-      <div className="min-h-[160px] flex flex-col items-center justify-center text-center py-3">
+        <div className="min-h-[160px] flex flex-col items-center justify-center text-center py-3">
         {castState === 'idle' && (
           <div className="space-y-3">
             <button

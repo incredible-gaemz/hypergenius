@@ -80,11 +80,6 @@ export const AreasTab: React.FC<AreasTabProps> = ({
                       (e.currentTarget as HTMLElement).style.display = 'none';
                     }}
                   />
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 py-1.5 flex items-center">
-                    <span className="font-bold text-white drop-shadow text-xs">
-                      {area.name}
-                    </span>
-                  </div>
                 </div>
               ) : (
                 <div className="relative w-full h-24 sm:h-28 mb-3 border border-[#22252c] bg-[#0c0d10] overflow-hidden flex items-center justify-center select-none">
@@ -134,7 +129,7 @@ export const AreasTab: React.FC<AreasTabProps> = ({
                     {area.description}
                   </div>
                   <div className="text-[11px] text-[#717885] mt-1">
-                    Discovered here: {caughtInThisArea.length} / {areaFish.length} species · Theme: {area.theme.name}
+                    Discovered here: {caughtInThisArea.length} / {areaFish.length} species
                   </div>
                 </div>
 

@@ -158,17 +158,7 @@
             text-decoration: none;
         }
 
-        .brand-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 0.2rem 0.5rem;
-            background: rgba(168, 85, 247, 0.12);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-            color: var(--accent-purple);
-            border-radius: 4px;
-            letter-spacing: 0.05em;
-        }
+        
 
         .profile-badge {
             display: none;
@@ -274,16 +264,7 @@
             margin-bottom: 2.5rem;
         }
 
-        .hero-badge {
-            display: inline-block;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            color: var(--accent-purple);
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
-        }
+        
 
         h1.hero-title {
             font-size: clamp(2rem, 4vw, 3rem);
@@ -352,21 +333,7 @@
             transform: scale(1.02);
         }
 
-        .card-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(9, 9, 12, 0.88);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            color: #c084fc;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
-            font-weight: 600;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
+        
 
         .project-content {
             padding: 1.35rem;
@@ -394,11 +361,9 @@
         .card-footer {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             border-top: 1px solid var(--border-subtle);
-            padding-top: 0.8rem;
-            font-size: 0.78rem;
-            font-family: 'JetBrains Mono', monospace;
+            padding-top: 0.75rem;
             color: var(--text-muted);
             transition: color 0.18s ease;
         }
@@ -572,7 +537,6 @@
             <img src="purple.gif" alt="Timmy the Sheep" class="brand-mascot" title="Timmy the Sheep">
             <div class="brand-text">
                 <a href="#" class="brand-title">hypergenius 12</a>
-                <span class="brand-badge">LAB</span>
             </div>
             <div id="profile-badge" class="profile-badge">
                 <span id="profile-name"></span>
@@ -599,7 +563,6 @@
 
 <main class="container">
     <section class="hero-section">
-        <div class="hero-badge">EXPERIMENTAL WEB ARSENAL</div>
         <h1 class="hero-title">hypergenius 12</h1>
         <p class="hero-subtitle">A curated collection of standalone interactive web projects, games, 3D simulations, and creative tools.</p>
     </section>
@@ -608,13 +571,11 @@
         <a href="Computer%20Xp/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_xp.png" alt="Windows XP" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Retro OS</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Windows XP</h2>
                 <p class="project-desc">A fully interactive, web-based recreation of the classic Windows XP desktop environment.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -623,13 +584,11 @@
         <a href="slopcraft%203D/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_slopcraft.png" alt="Slopcraft 3D" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">3D Voxel</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Slopcraft 3D</h2>
                 <p class="project-desc">A 3D voxel-based building game bringing creative block-building to the web.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -638,13 +597,11 @@
         <a href="joyful-rutherford/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_joyful.png" alt="Seleste" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Platformer</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Seleste</h2>
                 <p class="project-desc">A 9-color art platformer featuring a 40-chapter summit expedition, dashes, wall jumps, custom palettes, and hero rosters.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -653,13 +610,11 @@
         <a href="neurotrack/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_neurotrack.png" alt="NeuroTrack AI Racing" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">AI Racing</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">NeuroTrack</h2>
                 <p class="project-desc">A 2D top-down racing game with a grid-based track editor. Includes an AI neural network template ready for genetic algorithm training.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -668,13 +623,11 @@
         <a href="fun%20fishing/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_fishing.png" alt="Fun Fishing" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Fishing Sim</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Fun Fishing</h2>
                 <p class="project-desc">A cozy, classic retro fishing simulation with 105 species, rod &amp; reel progression, lively biomes, dynamic reeling, and a commercial fleet.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -683,13 +636,11 @@
         <a href="cmd/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_cmd.png" alt="The Elias Thorne Mystery" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Hacker Sim</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">The Elias Thorne Mystery</h2>
                 <p class="project-desc">Hacker-Sim: The Elias Thorne Mystery. A command prompt based puzzle and hacking simulation.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -698,13 +649,11 @@
         <a href="agar/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_agar.png" alt="Agar" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Survival</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Agar</h2>
                 <p class="project-desc">A web-based multiplayer-style blob eating game with smooth rendering and mechanics.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -713,13 +662,11 @@
         <a href="Cyber/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_cyber.png" alt="Exodus Adventure" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Cyberpunk</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Exodus Adventure</h2>
                 <p class="project-desc">A cyberpunk-inspired web project with neon aesthetics.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -728,13 +675,11 @@
         <a href="backrooms/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_backrooms.png" alt="The Backrooms" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">3D Horror</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">The Backrooms</h2>
                 <p class="project-desc">A psychological horror exploration game. Don't noclip out of reality.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -743,13 +688,11 @@
         <a href="snake/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_snake.png" alt="Dev Snake" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Dev Arcade</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Dev Snake</h2>
                 <p class="project-desc">A developer-themed snake game where you eat code snippets. Levels up and speeds up the more you eat. How long can you survive?</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -758,13 +701,11 @@
         <a href="excavator/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_excavator.png" alt="The DOM Excavator" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Idle Miner</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">The DOM Excavator</h2>
                 <p class="project-desc">A WebGL mining idle game. Dig through the geological strata of the internet.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -773,13 +714,11 @@
         <a href="Itch/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_itch.png" alt="Itch.io Unblocked" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Game Client</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Itch.io Unblocked</h2>
                 <p class="project-desc">Unblocked itch.io client, browser, and direct downloader for indie games, web builds, and developer assets.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -788,13 +727,11 @@
         <a href="puzzley/index.html" class="project-card" data-category="games">
             <div class="card-media">
                 <img src="screenshot_puzzley.png" alt="Wordplay Arcade" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Word Puzzle</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Wordplay Arcade</h2>
                 <p class="project-desc">A vibrant puzzle arcade featuring emoji riddles, typographic rebuses, connections, and word deduction games.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -803,13 +740,11 @@
         <a href="rubiks/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_rubiks.png" alt="Cube Solver" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">3D Puzzle</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Cube Solver</h2>
                 <p class="project-desc">Solve Rubik's cubes from 1x1 to 10x10 in 3D.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -818,13 +753,11 @@
         <a href="timeline/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_timeline.png" alt="Interactive US History Timeline" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Interactive</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Interactive US History Timeline</h2>
                 <p class="project-desc">Drag to explore an interactive US History timeline filled with events, eras, and mini-games.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -833,13 +766,11 @@
         <a href="convert/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_convert.png" alt="Omni-Dimensional Converter" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Physics Sim</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Omni-Dimensional Converter</h2>
                 <p class="project-desc">A hyper-advanced physics engine capable of infinite cross-dimensional bridging.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -848,13 +779,11 @@
         <a href="florr.io-craft-sim/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_florr.png" alt="Florr.io Craft Sim" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Simulator</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Florr.io Craft Sim</h2>
                 <p class="project-desc">A full-featured crafting and forging simulator for Florr.io with authentic odds, inventory, and petal stats.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -863,13 +792,11 @@
         <a href="hyper/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_waveform.png" alt="Waveform Editor" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Audio Tool</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Waveform Editor</h2>
                 <p class="project-desc">A comprehensive audio manipulation toolkit for waveform editing and synthesis.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -878,13 +805,11 @@
         <a href="color-pallete-generator/index.html#264653-2a9d8f-e9c46a-f4a261-e76f51" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_chromacraft.png" alt="ChromaCraft" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Color Suite</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">ChromaCraft</h2>
                 <p class="project-desc">A lightning-fast color palette generator with shades inspection, contrast testing, color blindness simulation, and exports.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -893,13 +818,11 @@
         <a href="dvd/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="dvd.png" alt="DVD Logo Simulator" class="project-image" style="object-position: left center;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Generative Sim</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">DVD Logo Simulator</h2>
                 <p class="project-desc">A highly satisfying interactive DVD logo simulator with generative ambient music and chaos modifiers.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -908,13 +831,11 @@
         <a href="raycaster/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_crapcaster.png" alt="Crapcaster" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">3D Raycaster</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Crapcaster</h2>
                 <p class="project-desc">A brutalist 3D retro raycasting engine with custom textures and map builder.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -923,13 +844,11 @@
         <a href="synesthesia/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_synesthesia.png" alt="Synesthesia Color Mixer" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Shader Lab</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Synesthesia</h2>
                 <p class="project-desc">An infinite, AI-powered color mixing game with beautiful reactive shaders and an evolution tree.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -938,13 +857,11 @@
         <a href="dust/index.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="pixel.png" alt="Dust Sandbox" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Pixel Physics</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Dust</h2>
                 <p class="project-desc">A high-performance pixel physics sandbox for elemental cellular automata. Note: it might be a little broken!</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -953,13 +870,11 @@
         <a href="paths.html" class="project-card" data-category="tools">
             <div class="card-media">
                 <img src="screenshot_paths.png" alt="Text Adventure Editor" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Story Editor</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Text Adventure Editor</h2>
                 <p class="project-desc">A node-based editor for creating and playing interactive text adventure games.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
@@ -968,13 +883,11 @@
         <a href="satisfy/index.html" class="project-card" data-category="3d">
             <div class="card-media">
                 <img src="screenshot_satisfy.png" alt="Satisfy" class="project-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%2318181b%22/%3E%3C/svg%3E'">
-                <span class="card-badge">Fluid Physics</span>
             </div>
             <div class="project-content">
                 <h2 class="project-title">Satisfy</h2>
                 <p class="project-desc">A satisfying interactive physics playground featuring raymarched fluid globs and magnetic particle filings.</p>
                 <div class="card-footer">
-                    <span class="card-launch">Launch Project</span>
                     <span class="project-arrow">&rarr;</span>
                 </div>
             </div>
