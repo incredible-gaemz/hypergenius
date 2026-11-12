@@ -147,10 +147,10 @@ test('Starter trap costs $100 and higher reels provide line and bait protection'
   assert.ok(getRarityOrder('uncommon') > getRarityOrder('common'));
 });
 
-test('Field guide data has complete biological info and Wikipedia links for all 121 species', async () => {
+test('Field guide data has complete biological info and Wikipedia links for all 134 species', async () => {
   const { FISH_GUIDE_DATA } = await import('./fishGuideData');
   
-  assert.equal(FISH_COLLECTION.length, 121, 'Total fish collection must be 121 species');
+  assert.equal(FISH_COLLECTION.length, 134, 'Total fish collection must be 134 species');
   
   for (const fish of FISH_COLLECTION) {
     const guide = FISH_GUIDE_DATA[fish.id];

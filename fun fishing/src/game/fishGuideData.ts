@@ -858,5 +858,96 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
     "habitatBehavior": "Soars along open oceanic surface corridors, offshore volcanic seamounts, and deep barrier reef channels.",
     "dietNotes": "Ram filter-feeder funneling zooplankton swarms, larval fish, and pelagic crustacean clouds through its gill plates.",
     "wikiUrl": "https://en.wikipedia.org/wiki/Giant_oceanic_manta_ray"
+  },
+  "122": {
+    "scientificName": "Melanocetus johnsonii",
+    "visualDescription": "Rounded, pitch-black abyssal predator with sharp needle teeth, tiny beady eyes, and a bioluminescent esca glowing atop a modified dorsal ray.",
+    "habitatBehavior": "Lurks in the bathypelagic aphotic ocean trenches between 1,000 and 4,000 meters below the surface.",
+    "dietNotes": "Lures lanternfish, deep-sea shrimp, and squids directly into its expandable jaw.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Humpback_anglerfish"
+  },
+  "123": {
+    "scientificName": "Oncorhynchus kisutch",
+    "visualDescription": "Streamlined silvery gamefish with dark metallic blue-green back, fine black speckles along the upper back, white gums, and a broad tail.",
+    "habitatBehavior": "Migrates from offshore Pacific waters into swift gravel-bottom coastal rivers and cold clear tributaries to spawn.",
+    "dietNotes": "Voracious carnivore feeding on herring, sand lance, anchovies, insects, and juvenile salmonids.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Coho_salmon"
+  },
+  "124": {
+    "scientificName": "Alosa sapidissima",
+    "visualDescription": "Deep-bodied silvery anadromous herring with an iridescent green-blue dorsal back, a prominent dark shoulder spot behind the gill cover, and a saw-like belly keel.",
+    "habitatBehavior": "Schools in coastal ocean waters before undertaking legendary spring spawning runs far up freshwater rivers.",
+    "dietNotes": "Filter-feeds on plankton, copepods, small mysid shrimp, and small fish larvae.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/American_shad"
+  },
+  "125": {
+    "scientificName": "Balistoides conspicillum",
+    "visualDescription": "Spectacular tropical reef triggerfish with large white polka dots across a black belly, a vivid yellow-orange snout saddle, bright orange lips, and a locking first dorsal spine.",
+    "habitatBehavior": "Patrols steep outer coral reef slopes and drop-offs with clear water and sheltering caverns.",
+    "dietNotes": "Crushes sea urchins, hard corals, crabs, and spiny mollusks with powerful chisel-like jaws.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Clown_triggerfish"
+  },
+  "126": {
+    "scientificName": "Pomacanthus imperator",
+    "visualDescription": "Regal deep-bodied coral angelfish with horizontal electric-blue and yellow stripes, a bold black ocular mask edged in cyan, and a vibrant golden tail.",
+    "habitatBehavior": "Resident of rich coral reefs, sheltered ledges, and reef caves from 3 to 100 meters depth.",
+    "dietNotes": "Feeds on encrusting marine sponges, tunicates, macroalgae, and small benthic invertebrates.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Emperor_angelfish"
+  },
+  "127": {
+    "scientificName": "Gramma loreto",
+    "visualDescription": "Vibrant bi-colored reef gem with an electric violet-purple head and front body blending seamlessly into a bright golden-yellow tail, featuring a dark spot on the dorsal fin.",
+    "habitatBehavior": "Hovering resident of Caribbean coral caves and overhangs, often swimming upside down against rock ceilings.",
+    "dietNotes": "Planktivore feeding on tiny copepods, crustacean larvae, and acting as a cleaner picking ectoparasites from larger fish.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Royal_gramma"
+  },
+  "128": {
+    "scientificName": "Triaenodon obesus",
+    "visualDescription": "Slender, flexible brownish-gray reef shark with a blunt snout, white belly, and brilliant, conspicuous bright white tips on its dorsal and caudal fin lobes.",
+    "habitatBehavior": "Spends daytime resting motionless in coral caves and sandy reef channels, hunting actively through narrow reef crevices at night.",
+    "dietNotes": "Specialist hunter of octopuses, crabs, damselfish, parrotfish, and moray eels deep within coral crevices.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Whitetip_reef_shark"
+  },
+  "129": {
+    "scientificName": "Cheilinus undulatus",
+    "visualDescription": "Colossal coral reef giant sporting a prominent forehead bump, thick fleshy lips, intricate maze-like blue-green facial patterns, and broad rounded fins.",
+    "habitatBehavior": "Solitary roamer along outer coral reef slopes, deep drop-offs, and lagoon channels.",
+    "dietNotes": "Immune to toxic prey; crushes crown-of-thorns starfish, boxfish, sea urchins, and giant clams with heavy pharyngeal teeth.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Humphead_wrasse"
+  },
+  "130": {
+    "scientificName": "Centropyge loricula",
+    "visualDescription": "Fiery dwarf angelfish showcasing an intense glowing orange-red body with 4 to 5 bold black vertical tiger bars and luminous cobalt-blue edges along the dorsal and anal fins.",
+    "habitatBehavior": "Shy inhabitant of shallow stony coral patches, finger coral beds, and surge zones.",
+    "dietNotes": "Browses on filamentous microalgae, spirulina, and small benthic detrital micro-crustaceans.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Flame_angelfish"
+  },
+  "131": {
+    "scientificName": "Diodon hystrix",
+    "visualDescription": "Stout sandy-tan pufferfish covered in sharp defensive spines, speckled with small dark spots, with large expressive pupils and heavy beak-like crushing plates.",
+    "habitatBehavior": "Frequents coral reef ledges, shallow rocky drop-offs, and sheltered lagoon caves.",
+    "dietNotes": "Crushes hard-shelled mollusks, sea urchins, hermit crabs, and snails using fused dental plates.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Spot-fin_porcupinefish"
+  },
+  "132": {
+    "scientificName": "Sphyrna mokarran",
+    "visualDescription": "Apex predator featuring a wide hammer-shaped cephalofoil head with lateral eyes, tall sickle-like first dorsal fin, and slate-gray to bronze body.",
+    "habitatBehavior": "Solitary migratory hunter cruising coastal continental shelves, deep reef drop-offs, and open ocean channels.",
+    "dietNotes": "Specialized predator of stingrays, skates, smaller sharks, groupers, and sea catfishes.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Great_hammerhead"
+  },
+  "133": {
+    "scientificName": "Mola mola",
+    "visualDescription": "Enormous laterally flattened circular disc fish with tall wing-like dorsal and anal fins and a scalloped clavus rudder in place of a tail.",
+    "habitatBehavior": "Basks on its side near the ocean surface to warm up after making deep foraging dives into the twilight zone.",
+    "dietNotes": "Consumes vast quantities of jellyfish, salps, siphonophores, and small pelagic crustaceans.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Ocean_sunfish"
+  },
+  "134": {
+    "scientificName": "Synchiropus splendidus",
+    "visualDescription": "Dazzling scaleless reef dragonet displaying a maze of psychedelic turquoise-blue and orange labyrinth swirls with fan-shaped fins.",
+    "habitatBehavior": "Secretive resident of sheltered coral lagoons, dead coral rubble, and silty reef flats.",
+    "dietNotes": "Picks continuously at benthic micro-copepods, amphipods, small gastropods, and polychaete worms.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Mandarinfish"
   }
 };

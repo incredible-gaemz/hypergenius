@@ -2653,7 +2653,7 @@ export default function App() {
     <div
       className={`min-h-[100dvh] min-h-screen ${activeArea.theme.bgClass} text-[#e3e6eb] select-none p-2 sm:p-4 md:p-6 flex flex-col justify-start transition-colors duration-200`}
     >
-      <div className="w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto space-y-2.5 sm:space-y-3 pb-8 safe-pb transition-all duration-150">
+      <div className={`w-full ${isFullscreen ? 'max-w-4xl lg:max-w-5xl xl:max-w-6xl' : 'max-w-2xl lg:max-w-3xl xl:max-w-4xl'} mx-auto space-y-2.5 sm:space-y-3 pb-8 safe-pb transition-all duration-300`}>
         {/* Header */}
         <header
           className={`border ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3 sm:p-3.5 flex items-center justify-between text-xs transition-colors`}
@@ -2939,6 +2939,7 @@ export default function App() {
 
             {/* Fishing Action Area */}
             <FishingArea
+              isFullscreen={isFullscreen}
               castState={castState}
               rod={equippedRod}
               reel={equippedReel}

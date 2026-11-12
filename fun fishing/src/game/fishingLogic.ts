@@ -392,6 +392,19 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 119, name: 'Megamouth Shark', tier: 'epic', minWeight: 400.0, maxWeight: 2800.0, trophyWeight: 3400.0, basePrice: 3800, bestLureId: 'dragon_scale', areaId: 'ocean' },
   { id: 120, name: 'Coelacanth', tier: 'legendary', minWeight: 80.0, maxWeight: 240.0, trophyWeight: 290.0, basePrice: 4800, bestLureId: 'dragon_scale', areaId: 'reef' },
   { id: 121, name: 'Giant Oceanic Manta Ray', tier: 'legendary', minWeight: 700.0, maxWeight: 3600.0, trophyWeight: 4400.0, basePrice: 5500, bestLureId: 'dragon_scale', areaId: 'reef' },
+  { id: 122, name: 'Deep Sea Anglerfish', tier: 'epic', minWeight: 1.5, maxWeight: 9.0, trophyWeight: 12.0, basePrice: 340, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 123, name: 'Coho Salmon', tier: 'uncommon', minWeight: 3.5, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 28, bestLureId: 'spinner', areaId: 'river' },
+  { id: 124, name: 'American Shad', tier: 'common', minWeight: 1.5, maxWeight: 7.5, trophyWeight: 9.8, basePrice: 10, bestLureId: 'shad', areaId: 'river' },
+  { id: 125, name: 'Clown Triggerfish', tier: 'uncommon', minWeight: 1.5, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 48, bestLureId: 'crawfish', areaId: 'reef' },
+  { id: 126, name: 'Emperor Angelfish', tier: 'rare', minWeight: 1.0, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 88, bestLureId: 'stinky_clam', areaId: 'reef' },
+  { id: 127, name: 'Royal Gramma', tier: 'common', minWeight: 0.1, maxWeight: 0.5, trophyWeight: 0.75, basePrice: 18, bestLureId: 'worm', areaId: 'reef' },
+  { id: 128, name: 'Whitetip Reef Shark', tier: 'epic', minWeight: 15.0, maxWeight: 55.0, trophyWeight: 70.0, basePrice: 260, bestLureId: 'squid', areaId: 'reef' },
+  { id: 129, name: 'Napoleon Wrasse', tier: 'epic', minWeight: 25.0, maxWeight: 240.0, trophyWeight: 320.0, basePrice: 420, bestLureId: 'crawfish', areaId: 'reef' },
+  { id: 130, name: 'Flame Angelfish', tier: 'uncommon', minWeight: 0.2, maxWeight: 0.8, trophyWeight: 1.1, basePrice: 38, bestLureId: 'mayfly', areaId: 'reef' },
+  { id: 131, name: 'Spotted Porcupinefish', tier: 'uncommon', minWeight: 1.5, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 45, bestLureId: 'crawfish', areaId: 'reef' },
+  { id: 132, name: 'Great Hammerhead Shark', tier: 'epic', minWeight: 120.0, maxWeight: 950.0, trophyWeight: 1250.0, basePrice: 480, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 133, name: 'Ocean Sunfish (Mola Mola)', tier: 'epic', minWeight: 200.0, maxWeight: 2200.0, trophyWeight: 2800.0, basePrice: 520, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 134, name: 'Mandarinfish', tier: 'rare', minWeight: 0.1, maxWeight: 0.4, trophyWeight: 0.6, basePrice: 75, bestLureId: 'mayfly', areaId: 'reef' },
 ];
 
 /**
@@ -1522,6 +1535,11 @@ export function rollHookedEncounter(
     }
   }
 
+  // Ensure catch weight respects rod rating capacity soft limit (~1.28x rated limit)
+  if (maxRodWeight > 0) {
+    scaledWeight = Math.min(maxRodWeight * 1.28, scaledWeight);
+  }
+
   const weightRatio = Math.max(1, scaledWeight / species.minWeight);
   const trophyBonus = isTrophy ? 2.5 : 1.0;
 
@@ -2049,6 +2067,45 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('manta') || id === 121) {
     return './fish/giant_oceanic_manta.png';
+  }
+  if (name.includes('angler') || id === 122) {
+    return './fish/anglerfish.png';
+  }
+  if (name.includes('coho') || id === 123) {
+    return './fish/coho_salmon.png';
+  }
+  if (name.includes('shad') || id === 124) {
+    return './fish/american_shad.png';
+  }
+  if (name.includes('clown trigger') || id === 125) {
+    return './fish/clown_triggerfish.png';
+  }
+  if (name.includes('emperor angel') || id === 126) {
+    return './fish/emperor_angelfish.png';
+  }
+  if (name.includes('royal gramma') || id === 127) {
+    return './fish/royal_gramma.png';
+  }
+  if (name.includes('whitetip') || id === 128) {
+    return './fish/whitetip_reef_shark.png';
+  }
+  if (name.includes('wrasse') || name.includes('napoleon') || id === 129) {
+    return './fish/napoleon_wrasse.png';
+  }
+  if (name.includes('flame angel') || id === 130) {
+    return './fish/flame_angelfish.png';
+  }
+  if (name.includes('porcupine') || name.includes('puffer') || id === 131) {
+    return './fish/spotted_porcupinefish.png';
+  }
+  if (name.includes('hammerhead') || id === 132) {
+    return './fish/great_hammerhead.png';
+  }
+  if (name.includes('mola') || name.includes('sunfish (mola') || id === 133) {
+    return './fish/mola_mola.png';
+  }
+  if (name.includes('mandarin') || id === 134) {
+    return './fish/mandarinfish.png';
   }
 
   // 1. Nurse Shark

@@ -50,6 +50,7 @@ interface FishingAreaProps {
   useLiveBait?: boolean;
   weatherSightingActive?: boolean;
   weatherSightingSpeciesName?: string;
+  isFullscreen?: boolean;
   onToggleLiveBait?: (enabled: boolean) => void;
   onCast: () => void;
   onReel: () => void;
@@ -77,6 +78,7 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
   useLiveBait = true,
   weatherSightingActive = false,
   weatherSightingSpeciesName,
+  isFullscreen = false,
   onToggleLiveBait,
   onCast,
   onReel,
@@ -98,11 +100,15 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
 
   return (
     <div
-      className={`relative border-2 ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-5 sm:p-6 text-[#e3e6eb] transition-colors overflow-hidden shadow-xl`}
+      className={`fishing-area-stage relative border-2 ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} ${
+        isFullscreen
+          ? 'p-6 sm:p-10 md:p-12 min-h-[460px] sm:min-h-[560px] md:min-h-[640px] lg:min-h-[700px]'
+          : 'p-5 sm:p-6 min-h-[200px] sm:min-h-[240px]'
+      } text-[#e3e6eb] transition-all duration-300 overflow-hidden shadow-xl flex flex-col justify-center`}
     >
       {/* Scenic Area Pixel Art Background (No darkening overlay - 100% pure pixel art) */}
       <div
-        className="absolute inset-0 pointer-events-none z-0"
+        className="absolute inset-0 pointer-events-none z-0 transition-all duration-300"
         style={{
           backgroundImage: `url(${getAreaBannerUrl(activeArea.id)})`,
           backgroundSize: 'cover',
@@ -112,13 +118,19 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
         }}
       />
 
-      <div className="relative z-10">
-        <div className="min-h-[160px] flex flex-col items-center justify-center text-center py-3">
+      <div className="relative z-10 w-full flex flex-col items-center justify-center">
+        <div
+          className={`fishing-area-content w-full ${
+            isFullscreen
+              ? 'min-h-[400px] sm:min-h-[500px] md:min-h-[580px]'
+              : 'min-h-[160px]'
+          } flex flex-col items-center justify-center text-center py-3 transition-all duration-300`}
+        >
         {castState === 'idle' && (
           <div className="space-y-3">
             <button
               onClick={onCast}
-              className={`w-64 py-3.5 px-6 font-bold text-base tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
+              className={`w-64 sm:w-80 ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
             >
               Cast Line
             </button>
@@ -182,7 +194,7 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
           <div className="space-y-3">
             <button
               onClick={onReel}
-              className={`w-64 py-3.5 px-6 font-bold text-base tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
+              className={`w-64 sm:w-80 ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
             >
               Reel In!
             </button>

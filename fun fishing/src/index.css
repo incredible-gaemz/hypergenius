@@ -90,3 +90,17 @@ img, canvas, svg, .pixel-art {
 ::-webkit-scrollbar-thumb:hover {
   background: #4c576d;
 }
+
+/* Fullscreen responsive expansions for computer */
+:fullscreen .fishing-area-stage {
+  min-height: 55vh !important;
+}
+:fullscreen .fishing-area-content {
+  min-height: 45vh !important;
+}
+:-webkit-full-screen .fishing-area-stage {
+  min-height: 55vh !important;
+}
+:-webkit-full-screen .fishing-area-content {
+  min-height: 45vh !important;
+}
