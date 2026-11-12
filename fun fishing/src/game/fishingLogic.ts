@@ -1490,37 +1490,37 @@ export function rollHookedEncounter(
   const max = Math.max(min, species.maxWeight);
   const weightSpread = Math.max(0.01, max - min);
   const variance = options?.weightVariance ?? Math.random();
-  const rawWeight = min + weightSpread * Math.pow(variance, 1.7);
-  let scaledWeight = isMediumCatchOnBigRod
-    ? rawWeight * Math.min(1.15, rod.sizeMultiplier)
-    : rawWeight * rod.sizeMultiplier;
-  if (!isMediumCatchOnBigRod && minRodWeight > 0 && species.maxWeight >= minRodWeight) {
-    scaledWeight = Math.max(minRodWeight, scaledWeight);
-  }
-
-  // Live bait attracts larger, healthier aggressive fish
-  if (isLiveBait) {
-    scaledWeight *= 1.15;
-  }
-
-  // Soft limit ceiling: Light gear cannot hook fish that are wildly beyond its rated capacity.
-  // The soft limit permits fish to challenge the rod up to 1.25x rated weight (soft limit zone).
-  // Anything over 1.25x is physically impossible to hook on delicate tackle (e.g. fly rod capped at ~12.5 lbs).
-  const maxSoftLimitWeight = maxRodWeight * 1.25;
-  if (scaledWeight > maxSoftLimitWeight) {
-    scaledWeight = maxRodWeight * (1.02 + ((variance * 997) % 1) * 0.22);
-  }
+  // Realistic rod quality bonus: high-end rods attract slightly larger specimens (+5% to +18%)
+  // without artificially multiplying weights by 5x-16x which broke realistic species biology
+  const rodQualityBonus = isMediumCatchOnBigRod
+    ? Math.min(1.08, 1.0 + (rod.sizeMultiplier - 1.0) * 0.015)
+    : 1.0 + Math.min(0.20, (rod.sizeMultiplier - 1.0) * 0.035);
 
   // Trophy rules:
-  // Strictly requires rod power >= 1.4 AND bait equipped AND scaledWeight reaches trophy threshold
-  // Live bait doubles trophy strike probability (12% vs 5%)
+  // Strictly requires rod power >= 1.4 AND bait equipped AND exceptional strike roll
   const canLandTrophy = rod.power >= 1.4 && lure.id !== 'none';
   const trophyRoll = options?.trophyRoll ?? Math.random();
-  const trophyThreshold = isLiveBait ? 0.12 : 0.05;
+  const trophyThreshold = isLiveBait ? 0.08 : 0.04;
   const isTrophy =
     canLandTrophy &&
-    scaledWeight >= species.trophyWeight &&
-    trophyRoll < trophyThreshold;
+    trophyRoll < trophyThreshold &&
+    variance >= 0.70;
+
+  let scaledWeight: number;
+  if (isTrophy) {
+    // True trophy catch: exceeds species trophy weight threshold
+    const trophySpike = species.trophyWeight * (1.0 + Math.pow(variance, 2.2) * 0.16);
+    scaledWeight = Math.max(species.trophyWeight, trophySpike);
+  } else {
+    // Standard catch: scales naturally across species range, bounded just under trophy threshold
+    const naturalWeight = min + weightSpread * Math.pow(variance, 1.8);
+    const candidateWeight = naturalWeight * rodQualityBonus * (isLiveBait ? 1.08 : 1.0);
+    const nonTrophyCeiling = species.trophyWeight ? species.trophyWeight * 0.96 : max * 0.96;
+    scaledWeight = Math.min(nonTrophyCeiling, candidateWeight);
+    if (!isMediumCatchOnBigRod && minRodWeight > 0 && species.maxWeight >= minRodWeight) {
+      scaledWeight = Math.max(minRodWeight, scaledWeight);
+    }
+  }
 
   const weightRatio = Math.max(1, scaledWeight / species.minWeight);
   const trophyBonus = isTrophy ? 2.5 : 1.0;
@@ -1643,6 +1643,103 @@ export function getRarityOrder(tier: RarityTier): number {
       return 1;
     default:
       return 0;
+  }
+}
+
+export type FishSizeClass = 'Juvenile' | 'Average' | 'Lunker' | 'Trophy';
+
+export interface FishSizeThresholds {
+  juvenileMax: number;
+  averageMin: number;
+  averageMax: number;
+  lunkerMin: number;
+  lunkerMax: number;
+  trophyMin: number;
+}
+
+export function getFishSizeThresholds(
+  speciesOrId: FishSpecies | number | { minWeight: number; maxWeight: number; trophyWeight?: number }
+): FishSizeThresholds {
+  const species =
+    typeof speciesOrId === 'number'
+      ? FISH_COLLECTION.find((f) => f.id === speciesOrId)
+      : speciesOrId;
+
+  if (!species) {
+    return {
+      juvenileMax: 1,
+      averageMin: 1,
+      averageMax: 5,
+      lunkerMin: 5,
+      lunkerMax: 10,
+      trophyMin: 10,
+    };
+  }
+
+  const trophyMin = Number((species.trophyWeight ?? species.maxWeight * 0.92).toFixed(2));
+  const range = Math.max(0.01, species.maxWeight - species.minWeight);
+  const rawJuvMax = species.minWeight + range * 0.25;
+  const rawLunkerMin = Math.min(trophyMin, species.minWeight + range * 0.70);
+
+  const juvenileMax = Number(rawJuvMax.toFixed(2));
+  const averageMin = juvenileMax;
+  const averageMax = Number(rawLunkerMin.toFixed(2));
+  const lunkerMin = averageMax;
+  const lunkerMax = trophyMin;
+
+  return {
+    juvenileMax,
+    averageMin,
+    averageMax,
+    lunkerMin,
+    lunkerMax,
+    trophyMin,
+  };
+}
+
+export function getFishSizeClassification(
+  weight: number,
+  speciesOrId: FishSpecies | number | { minWeight: number; maxWeight: number; trophyWeight?: number }
+): FishSizeClass {
+  const species =
+    typeof speciesOrId === 'number'
+      ? FISH_COLLECTION.find((f) => f.id === speciesOrId)
+      : speciesOrId;
+
+  if (!species) return 'Average';
+
+  const trophyWeight = species.trophyWeight ?? species.maxWeight * 0.92;
+
+  // 1. Trophy check
+  if (weight >= trophyWeight) {
+    return 'Trophy';
+  }
+
+  const range = Math.max(0.01, species.maxWeight - species.minWeight);
+  const juvenileThreshold = species.minWeight + range * 0.25;
+  const lunkerThreshold = Math.min(trophyWeight, species.minWeight + range * 0.70);
+
+  if (weight < juvenileThreshold) {
+    return 'Juvenile';
+  }
+
+  if (weight < lunkerThreshold) {
+    return 'Average';
+  }
+
+  return 'Lunker';
+}
+
+export function getSizeClassBadgeStyle(sizeClass: FishSizeClass): string {
+  switch (sizeClass) {
+    case 'Trophy':
+      return 'border-amber-500/80 bg-amber-950/60 text-amber-300 font-bold';
+    case 'Lunker':
+      return 'border-purple-500/70 bg-purple-950/60 text-purple-300 font-bold';
+    case 'Average':
+      return 'border-sky-500/60 bg-sky-950/50 text-sky-300 font-semibold';
+    case 'Juvenile':
+      return 'border-emerald-600/60 bg-emerald-950/40 text-emerald-300 font-medium';
   }
 }
 

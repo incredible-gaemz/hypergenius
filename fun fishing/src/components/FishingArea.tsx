@@ -17,6 +17,8 @@ import {
   getAreaBannerUrl,
   getJunkSpriteUrl,
   getAreaThemeButtonClass,
+  getFishSizeClassification,
+  getSizeClassBadgeStyle,
 } from '../game/fishingLogic';
 
 export type CastState =
@@ -342,8 +344,15 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
                 <div className="text-sm font-bold text-emerald-400">
                   ${pendingCatch.value.toLocaleString()}
                 </div>
-                <div className="text-xs text-[#8c94a2]">
-                  {pendingCatch.weight} lbs
+                <div className="text-xs text-[#8c94a2] flex items-center justify-end gap-1.5 mt-0.5">
+                  <span>{pendingCatch.weight} lbs</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getSizeClassBadgeStyle(
+                      getFishSizeClassification(pendingCatch.weight, pendingCatch.fishId)
+                    )}`}
+                  >
+                    {getFishSizeClassification(pendingCatch.weight, pendingCatch.fishId)}
+                  </span>
                 </div>
               </div>
             </div>

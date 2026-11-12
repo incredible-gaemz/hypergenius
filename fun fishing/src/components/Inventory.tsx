@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   CaughtFish,
   FishMarketOrder,
@@ -6,6 +6,8 @@ import {
   getRarityBadgeStyle,
   getFishSpriteUrl,
   getMutationFilterStyle,
+  getFishSizeClassification,
+  getSizeClassBadgeStyle,
   RarityTier,
 } from '../game/fishingLogic';
 
@@ -42,7 +44,12 @@ export const Inventory: React.FC<InventoryProps> = ({
   onSellBatch,
   onSellAll,
 }) => {
+  const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
   const totalValue = fishList.reduce((acc, f) => acc + f.value, 0);
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroupKey((prev) => (prev === key ? null : key));
+  };
 
   // Group fish by species and mutation strain so they don't consume excessive vertical space
   const groupedFish = useMemo(() => {
@@ -140,103 +147,183 @@ export const Inventory: React.FC<InventoryProps> = ({
           </div>
         ) : (
           <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
-            {groupedFish.map((group) => (
-              <div
-                key={group.key}
-                className={`p-3 border flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-3 ${
-                  group.trophyCount > 0
-                    ? 'border-amber-600/40 bg-[#1d1b16]'
-                    : 'border-[#262830] bg-[#16181d]'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  {getFishSpriteUrl(group.sample) && (
-                    <img
-                      src={getFishSpriteUrl(group.sample)!}
-                      alt={group.speciesName}
-                      className="w-14 h-10 object-contain shrink-0 select-none"
-                      style={{
-                        imageRendering: 'pixelated',
-                        ...getMutationFilterStyle(group.mutation),
-                      }}
-                    />
-                  )}
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`font-bold text-sm ${getRarityTextStyle(group.tier)}`}>
-                        {group.speciesName}
-                      </span>
-                      <span className="text-[11px] px-2 py-0.5 border border-amber-500/70 bg-amber-950/60 text-amber-300 font-extrabold">
-                        x{group.count}
-                      </span>
-                      <span
-                        className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getRarityBadgeStyle(
-                          group.tier
-                        )}`}
-                      >
-                        {group.tier}
-                      </span>
-                      {group.trophyCount > 0 && (
-                        <span className="text-[10px] text-amber-300 border border-amber-500/60 px-1 font-bold">
-                          {group.trophyCount === 1 ? '1 Trophy' : `${group.trophyCount} Trophies`}
-                        </span>
+            {groupedFish.map((group) => {
+              const isExpanded = expandedGroupKey === group.key;
+              return (
+                <div
+                  key={group.key}
+                  className={`border text-xs transition-colors ${
+                    group.trophyCount > 0
+                      ? 'border-amber-600/40 bg-[#1d1b16]'
+                      : 'border-[#262830] bg-[#16181d]'
+                  }`}
+                >
+                  {/* Fish Group Summary Row (Clickable to open / collapse) */}
+                  <div
+                    onClick={() => toggleGroup(group.key)}
+                    className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-[#1c1f26] transition-colors select-none"
+                    title="Click to view all individual specimens of this fish"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {getFishSpriteUrl(group.sample) && (
+                        <img
+                          src={getFishSpriteUrl(group.sample)!}
+                          alt={group.speciesName}
+                          className="w-14 h-10 object-contain shrink-0 select-none"
+                          style={{
+                            imageRendering: 'pixelated',
+                            ...getMutationFilterStyle(group.mutation),
+                          }}
+                        />
                       )}
-                      {group.mutation && group.mutation !== 'normal' && (
-                        <span className="text-[10px] text-cyan-300 border border-cyan-500/60 px-1 font-bold uppercase">
-                          {group.mutationName || group.mutation}
-                        </span>
-                      )}
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`font-bold text-sm ${getRarityTextStyle(group.tier)}`}>
+                            {group.speciesName}
+                          </span>
+                          <span className="text-[11px] px-2 py-0.5 border border-amber-500/70 bg-amber-950/60 text-amber-300 font-extrabold">
+                            x{group.count}
+                          </span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getRarityBadgeStyle(
+                              group.tier
+                            )}`}
+                          >
+                            {group.tier}
+                          </span>
+                          {group.trophyCount > 0 && (
+                            <span className="text-[10px] text-amber-300 border border-amber-500/60 px-1 font-bold">
+                              {group.trophyCount === 1 ? '1 Trophy' : `${group.trophyCount} Trophies`}
+                            </span>
+                          )}
+                          {group.mutation && group.mutation !== 'normal' && (
+                            <span className="text-[10px] text-cyan-300 border border-cyan-500/60 px-1 font-bold uppercase">
+                              {group.mutationName || group.mutation}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-sky-400 font-semibold underline ml-1 hover:text-sky-300">
+                            {isExpanded ? '▲ Hide Specimens' : `▼ View Specimens (${group.count})`}
+                          </span>
+                        </div>
+
+                        <div className="text-[#8c94a2] flex items-center gap-2 text-[11px] flex-wrap">
+                          <span>
+                            Weight:{' '}
+                            <strong className="text-[#c7ccd6]">
+                              {group.minWeight === group.maxWeight
+                                ? `${group.minWeight} lbs`
+                                : `${group.minWeight} - ${group.maxWeight} lbs`}
+                            </strong>
+                            {group.count > 1 && (
+                              <span className="text-[#717885]"> (avg {group.avgWeight} lbs)</span>
+                            )}
+                          </span>
+                          <span>·</span>
+                          <span>
+                            Batch Total:{' '}
+                            <strong className="text-emerald-400 font-bold">
+                              ${group.totalValue.toLocaleString()}
+                            </strong>
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="text-[#8c94a2] flex items-center gap-2 text-[11px] flex-wrap">
-                      <span>
-                        Weight:{' '}
-                        <strong className="text-[#c7ccd6]">
-                          {group.minWeight === group.maxWeight
-                            ? `${group.minWeight} lbs`
-                            : `${group.minWeight} - ${group.maxWeight} lbs`}
-                        </strong>
-                        {group.count > 1 && (
-                          <span className="text-[#717885]"> (avg {group.avgWeight} lbs)</span>
-                        )}
-                      </span>
-                      <span>·</span>
-                      <span>
-                        Batch Total:{' '}
-                        <strong className="text-emerald-400 font-bold">
-                          ${group.totalValue.toLocaleString()}
-                        </strong>
-                      </span>
+                    <div className="shrink-0 flex items-center gap-1.5 self-end sm:self-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSellFish(group.items[0].catchId);
+                        }}
+                        className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors"
+                        title="Sell 1 fish"
+                      >
+                        Sell 1 · ${group.items[0].value.toLocaleString()}
+                      </button>
+                      {group.count > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onSellBatch) {
+                              onSellBatch(group.items.map((f) => f.catchId));
+                            } else {
+                              group.items.forEach((f) => onSellFish(f.catchId));
+                            }
+                          }}
+                          className="px-2.5 py-1 text-xs border border-emerald-700/70 bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-300 font-bold cursor-pointer transition-colors"
+                          title={`Sell all ${group.count} fish of this kind`}
+                        >
+                          Sell All ({group.count}) · ${group.totalValue.toLocaleString()}
+                        </button>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                <div className="shrink-0 flex items-center gap-1.5 self-end sm:self-center">
-                  <button
-                    onClick={() => onSellFish(group.items[0].catchId)}
-                    className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors"
-                    title="Sell 1 fish"
-                  >
-                    Sell 1 · ${group.items[0].value.toLocaleString()}
-                  </button>
-                  {group.count > 1 && (
-                    <button
-                      onClick={() => {
-                        if (onSellBatch) {
-                          onSellBatch(group.items.map((f) => f.catchId));
-                        } else {
-                          group.items.forEach((f) => onSellFish(f.catchId));
-                        }
-                      }}
-                      className="px-2.5 py-1 text-xs border border-emerald-700/70 bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-300 font-bold cursor-pointer transition-colors"
-                      title={`Sell all ${group.count} fish of this kind`}
-                    >
-                      Sell All ({group.count}) · ${group.totalValue.toLocaleString()}
-                    </button>
+                  {/* Expanded Breakdown of Every Individual Held Fish */}
+                  {isExpanded && (
+                    <div className="border-t border-[#252832] bg-[#121418] p-3 space-y-2">
+                      <div className="text-[10px] text-[#788292] uppercase font-bold tracking-wider flex items-center justify-between">
+                        <span>All {group.count} Held {group.speciesName} Specimens</span>
+                        <span>Sorted Heaviest to Lightest</span>
+                      </div>
+
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                        {[...group.items]
+                          .sort((a, b) => b.weight - a.weight)
+                          .map((fish, idx) => {
+                            const sizeClass = getFishSizeClassification(fish.weight, fish.fishId);
+                            return (
+                              <div
+                                key={fish.catchId || idx}
+                                className="flex items-center justify-between gap-2 p-2 border border-[#232630] bg-[#171a21] hover:bg-[#1d2029] transition-colors"
+                              >
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                  <span className="text-[10px] text-[#555d6d] font-bold w-5 shrink-0">
+                                    #{idx + 1}
+                                  </span>
+                                  <span className="font-bold text-sm text-[#f1f3f5]">
+                                    {fish.weight} lbs
+                                  </span>
+                                  <span
+                                    className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getSizeClassBadgeStyle(
+                                      sizeClass
+                                    )}`}
+                                  >
+                                    {sizeClass}
+                                  </span>
+                                  {fish.isTrophy && (
+                                    <span className="text-[9px] px-1.5 py-0.2 border border-amber-500/80 bg-amber-950/60 text-amber-300 font-bold">
+                                      Trophy
+                                    </span>
+                                  )}
+                                  {fish.mutation && fish.mutation !== 'normal' && (
+                                    <span className="text-[9px] px-1.5 py-0.2 border border-cyan-500/60 bg-cyan-950/60 text-cyan-300 font-bold uppercase">
+                                      {fish.mutationName || fish.mutation}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-emerald-400 font-bold text-xs">
+                                    ${fish.value.toLocaleString()}
+                                  </span>
+                                  <button
+                                    onClick={() => onSellFish(fish.catchId)}
+                                    className="px-2 py-0.5 text-[11px] border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-300 font-semibold cursor-pointer transition-colors"
+                                    title="Sell this individual fish"
+                                  >
+                                    Sell
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

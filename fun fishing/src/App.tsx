@@ -558,6 +558,35 @@ export default function App() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isSoundMuted, setIsSoundMuted] = useState<boolean>(() => soundManager.isMuted());
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() =>
+    typeof document !== 'undefined' ? Boolean(document.fullscreenElement) : false
+  );
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const handleToggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      }
+    } catch {
+      // Browsers may block fullscreen without direct user gesture or if embedded in an iframe
+    }
+  };
 
   const handleToggleSound = () => {
     const nextMuted = soundManager.toggleMute();
@@ -1177,6 +1206,86 @@ export default function App() {
     }
     setCastState('idle');
   };
+
+  // Global Keyboard Controls (Space / Enter for Cast, Bite Strike, and Reel-In; Esc to cancel or close modals)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept keystrokes when typing into text inputs, textareas, or selects
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      // Escape: Close open modals, or cancel active cast
+      if (e.key === 'Escape') {
+        if (showSettings) {
+          e.preventDefault();
+          setShowSettings(false);
+          return;
+        }
+        if (showResetConfirm) {
+          e.preventDefault();
+          setShowResetConfirm(false);
+          return;
+        }
+        if (activeTab === 'fish' && (castState === 'cast' || castState === 'nibble')) {
+          e.preventDefault();
+          handleCancelCast();
+          return;
+        }
+      }
+
+      // Space or Enter: Cast Line, strike on bite, Reel In, dismiss/keep catch
+      if (e.key === ' ' || e.key === 'Enter') {
+        // Prevent default spacebar window scrolling
+        if (e.key === ' ') {
+          e.preventDefault();
+        }
+
+        if (activeTab === 'fish') {
+          if (castState === 'idle') {
+            e.preventDefault();
+            handleCast();
+          } else if (castState === 'bite') {
+            e.preventDefault();
+            handleReelIn();
+          } else if (castState === 'caught') {
+            e.preventDefault();
+            handleKeepFish();
+          } else if (castState === 'escaped' || castState === 'nothing') {
+            e.preventDefault();
+            setCastState('idle');
+          } else if (castState === 'junk') {
+            e.preventDefault();
+            handleDismissJunk();
+          } else if (castState === 'treasure') {
+            e.preventDefault();
+            handleClaimTreasure();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    activeTab,
+    castState,
+    showSettings,
+    showResetConfirm,
+    handleCast,
+    handleReelIn,
+    handleCancelCast,
+    handleKeepFish,
+    handleDismissJunk,
+    handleClaimTreasure,
+  ]);
 
   const handleSellFish = (catchId: string) => {
     const item = inventory.find((f) => f.catchId === catchId);
@@ -2542,12 +2651,12 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen ${activeArea.theme.bgClass} text-[#e3e6eb] select-none p-3 sm:p-6 flex flex-col justify-start transition-colors duration-200`}
+      className={`min-h-[100dvh] min-h-screen ${activeArea.theme.bgClass} text-[#e3e6eb] select-none p-2 sm:p-4 md:p-6 flex flex-col justify-start transition-colors duration-200`}
     >
-      <div className="w-full max-w-2xl mx-auto space-y-3">
+      <div className="w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto space-y-2.5 sm:space-y-3 pb-8 safe-pb transition-all duration-150">
         {/* Header */}
         <header
-          className={`border ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3.5 flex items-center justify-between text-xs transition-colors`}
+          className={`border ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3 sm:p-3.5 flex items-center justify-between text-xs transition-colors`}
         >
           <div className="font-bold text-sm text-[#f1f3f5] tracking-wide flex items-center gap-2">
             <span>Fishing</span>
@@ -2564,6 +2673,13 @@ export default function App() {
             <span className="font-bold text-emerald-400 text-sm">
               ${money.toLocaleString()}
             </span>
+            <button
+              onClick={handleToggleFullscreen}
+              className="text-[11px] font-bold text-[#c5cbdb] hover:text-[#f1f3f5] border border-[#393f4e] hover:border-sky-500 bg-[#1a1c22] hover:bg-[#22252e] px-2 py-1 cursor-pointer transition-colors"
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullscreen ? 'Exit Full' : 'Fullscreen'}
+            </button>
             <button
               onClick={() => setShowSettings(true)}
               className="text-[11px] font-bold text-[#c5cbdb] hover:text-[#f1f3f5] border border-[#393f4e] hover:border-sky-500 bg-[#1a1c22] hover:bg-[#22252e] px-2.5 py-1 cursor-pointer transition-colors"
@@ -2611,10 +2727,10 @@ export default function App() {
         )}
 
         {/* Navigation Tabs (9 Tabs: Fish, Box, Shop, Traps, Hatchery, Fleet, Town, Areas, Guide) */}
-        <nav className="grid grid-cols-3 sm:grid-cols-9 gap-1 text-[11px] sm:text-xs">
+        <nav className="flex overflow-x-auto no-scrollbar gap-1 sm:grid sm:grid-cols-9 sm:gap-1 text-[11px] sm:text-xs py-0.5">
           <button
             onClick={() => setActiveTab('fish')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'fish'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2624,7 +2740,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('inventory')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'inventory'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2634,7 +2750,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('shop')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'shop'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2644,7 +2760,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('traps')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'traps'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2654,7 +2770,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('hatchery')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors relative ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
               activeTab === 'hatchery'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2667,7 +2783,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('fleet')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors relative ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
               activeTab === 'fleet'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2680,7 +2796,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('town')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors relative ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
               activeTab === 'town'
                 ? 'border-amber-600 bg-amber-950/60 text-amber-200'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2693,7 +2809,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('areas')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'areas'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2703,7 +2819,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('guide')}
-            className={`py-2 px-1 border text-center font-bold cursor-pointer transition-colors ${
+            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
               activeTab === 'guide'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2734,22 +2850,22 @@ export default function App() {
               </div>
 
               {/* Selectors Row */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-stretch">
                 {/* Rod */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 bg-[#131519] border border-[#232730] p-2 sm:p-2.5 justify-between sm:justify-start">
                   <img
                     src={getRodSpriteUrl(equippedRodId)}
                     alt="Equipped Rod"
-                    className="w-28 h-20 sm:w-32 sm:h-22 object-contain select-none shrink-0"
+                    className="w-20 h-14 sm:w-24 sm:h-18 object-contain select-none shrink-0"
                     style={{ imageRendering: 'pixelated' }}
                   />
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[#8c94a2] font-semibold">Rod:</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 min-w-0 flex-1">
+                    <span className="text-[#8c94a2] font-semibold text-[11px] sm:text-xs shrink-0">Rod:</span>
                     <select
                       value={equippedRodId}
                       onChange={(e) => handleEquipRod(e.target.value)}
                       aria-label="Equipped Rod"
-                      className="border-2 border-[#323640] bg-[#141518] px-2.5 py-1.5 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none"
+                      className="w-full border-2 border-[#323640] bg-[#141518] px-2 py-1 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none text-xs truncate"
                     >
                       {ownedRodIds.map((id) => {
                         const r = RODS.find((rod) => rod.id === id);
@@ -2764,20 +2880,20 @@ export default function App() {
                 </div>
 
                 {/* Reel */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 bg-[#131519] border border-[#232730] p-2 sm:p-2.5 justify-between sm:justify-start">
                   <img
                     src={getReelSpriteUrl(equippedReelId)}
                     alt="Equipped Reel"
-                    className="w-14 h-14 object-contain select-none shrink-0"
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-contain select-none shrink-0"
                     style={{ imageRendering: 'pixelated' }}
                   />
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[#8c94a2] font-semibold">Reel:</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 min-w-0 flex-1">
+                    <span className="text-[#8c94a2] font-semibold text-[11px] sm:text-xs shrink-0">Reel:</span>
                     <select
                       value={equippedReelId}
                       onChange={(e) => handleEquipReel(e.target.value)}
                       aria-label="Equipped Reel"
-                      className="border-2 border-[#323640] bg-[#141518] px-2.5 py-1.5 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none"
+                      className="w-full border-2 border-[#323640] bg-[#141518] px-2 py-1 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none text-xs truncate"
                     >
                       {ownedReelIds.map((id) => {
                         const rl = REELS.find((reel) => reel.id === id);
@@ -2792,20 +2908,20 @@ export default function App() {
                 </div>
 
                 {/* Bait / Lure */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 bg-[#131519] border border-[#232730] p-2 sm:p-2.5 justify-between sm:justify-start">
                   <img
                     src={getLureSpriteUrl(equippedLureId)}
                     alt="Equipped Bait/Lure"
-                    className="w-14 h-14 object-contain select-none shrink-0"
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-contain select-none shrink-0"
                     style={{ imageRendering: 'pixelated' }}
                   />
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[#8c94a2] font-semibold">Bait/Lure:</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 min-w-0 flex-1">
+                    <span className="text-[#8c94a2] font-semibold text-[11px] sm:text-xs shrink-0">Bait:</span>
                     <select
                       value={equippedLureId}
                       onChange={(e) => handleEquipLure(e.target.value)}
                       aria-label="Equipped Bait or Lure"
-                      className="border-2 border-[#323640] bg-[#141518] px-2.5 py-1.5 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none"
+                      className="w-full border-2 border-[#323640] bg-[#141518] px-2 py-1 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none text-xs truncate"
                     >
                       {ownedLureIds.map((id) => {
                         const l = LURES.find((lure) => lure.id === id);

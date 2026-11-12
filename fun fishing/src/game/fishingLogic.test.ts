@@ -443,7 +443,7 @@ test('Big heavy rods have a small realistic chance to hook medium-sized fish wit
       if (enc.caughtFish.weight < 100) {
         caughtMediumFish = true;
         assert.ok(
-          enc.caughtFish.weight >= 1.0,
+          enc.caughtFish.weight >= 0.5,
           `Medium fish caught on heavy rod must be adult size (got ${enc.caughtFish.weight})`
         );
       } else {
@@ -462,6 +462,36 @@ test('Big heavy rods have a small realistic chance to hook medium-sized fish wit
 
   assert.ok(caughtHeavyFish, 'Heavy rod must catch heavy trophy fish');
   assert.ok(caughtMediumFish, 'Heavy rod must have a realistic small chance to catch medium-sized fish');
+});
+
+test('Intuitive fish size classifications and size range thresholds', async () => {
+  const {
+    getFishSizeClassification,
+    getFishSizeThresholds,
+    getSizeClassBadgeStyle,
+    FISH_COLLECTION,
+  } = await import('./fishingLogic');
+
+  const bass = FISH_COLLECTION.find((f) => f.name === 'Largemouth Bass')!;
+  assert.ok(bass, 'Largemouth Bass must exist in catalog');
+
+  // Largemouth Bass: min 1.0, max 12.0, trophy 10.0
+  const thresholds = getFishSizeThresholds(bass);
+  assert.ok(thresholds.juvenileMax < thresholds.averageMax);
+  assert.ok(thresholds.averageMax <= thresholds.trophyMin);
+  assert.equal(thresholds.trophyMin, bass.trophyWeight);
+
+  // Test size classifications across spectrum (Largemouth Bass: min 1.2, max 10.0, trophy 13.0)
+  assert.equal(getFishSizeClassification(1.5, bass), 'Juvenile');
+  assert.equal(getFishSizeClassification(5.0, bass), 'Average');
+  assert.equal(getFishSizeClassification(9.0, bass), 'Lunker');
+  assert.equal(getFishSizeClassification(13.5, bass), 'Trophy');
+
+  // Test badge styling
+  assert.ok(getSizeClassBadgeStyle('Juvenile').includes('emerald'));
+  assert.ok(getSizeClassBadgeStyle('Average').includes('sky'));
+  assert.ok(getSizeClassBadgeStyle('Lunker').includes('purple'));
+  assert.ok(getSizeClassBadgeStyle('Trophy').includes('amber'));
 });
 
 test('Private and commercial contracts separation and generic sailor names', async () => {

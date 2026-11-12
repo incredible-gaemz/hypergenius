@@ -14,6 +14,9 @@ import {
   getFishSpriteUrl,
   getLureSpriteUrl,
   getMutationFilterStyle,
+  getFishSizeClassification,
+  getSizeClassBadgeStyle,
+  getFishSizeThresholds,
 } from '../game/fishingLogic';
 import { FISH_GUIDE_DATA, FishGuideDetails } from '../game/fishGuideData';
 import { HatcheryTank, HatcheryMutation } from '../game/hatcheryLogic';
@@ -442,19 +445,21 @@ export const Guide: React.FC<GuideProps> = ({
               >
                 Species Profile
               </button>
-              <button
-                onClick={() => setInspectedTab('mutations')}
-                className={`py-1.5 px-3 font-bold border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  inspectedTab === 'mutations'
-                    ? 'border-amber-400 text-amber-300'
-                    : 'border-transparent text-[#7e8796] hover:text-[#c0c5ce]'
-                }`}
-              >
-                <span>Mutations</span>
-                <span className="text-[10px] px-1.5 py-0.2 border border-[#3b404d] bg-[#1a1c22] text-[#f1f3f5]">
-                  {unlockedMutationsCount}/5
-                </span>
-              </button>
+              {unlockedMutationsCount > 0 && (
+                <button
+                  onClick={() => setInspectedTab('mutations')}
+                  className={`py-1.5 px-3 font-bold border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    inspectedTab === 'mutations'
+                      ? 'border-amber-400 text-amber-300'
+                      : 'border-transparent text-[#7e8796] hover:text-[#c0c5ce]'
+                  }`}
+                >
+                  <span>Mutations</span>
+                  <span className="text-[10px] px-1.5 py-0.2 border border-[#3b404d] bg-[#1a1c22] text-[#f1f3f5]">
+                    {unlockedMutationsCount}/5
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Tab 1: Species Profile */}
@@ -598,8 +603,21 @@ export const Guide: React.FC<GuideProps> = ({
                     <span className="text-[10px] text-[#717885] uppercase font-semibold">
                       Personal Record
                     </span>
-                    <div className="font-bold text-sm text-[#f1f3f5]">
-                      {inspectedEntry?.maxWeight ? `${inspectedEntry.maxWeight} lbs` : '—'}
+                    <div className="font-bold text-sm text-[#f1f3f5] flex items-center gap-1.5 flex-wrap">
+                      {inspectedEntry?.maxWeight ? (
+                        <>
+                          <span>{inspectedEntry.maxWeight} lbs</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getSizeClassBadgeStyle(
+                              getFishSizeClassification(inspectedEntry.maxWeight, inspectedFish)
+                            )}`}
+                          >
+                            {getFishSizeClassification(inspectedEntry.maxWeight, inspectedFish)}
+                          </span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
                     </div>
                   </div>
 
@@ -622,6 +640,44 @@ export const Guide: React.FC<GuideProps> = ({
                   </div>
                 </div>
 
+                {/* Size Classification Scale Breakdown */}
+                {inspectedFish && (() => {
+                  const thresholds = getFishSizeThresholds(inspectedFish);
+                  return (
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#9aa2b0]">
+                        Size Classification Scale
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <div className="p-2 border border-emerald-800/50 bg-[#121915]">
+                          <div className="text-[10px] text-emerald-400 font-bold uppercase">Juvenile</div>
+                          <div className="text-[#f1f3f5] font-semibold text-xs mt-0.5">
+                            &lt; {thresholds.juvenileMax} lbs
+                          </div>
+                        </div>
+                        <div className="p-2 border border-sky-800/50 bg-[#12161f]">
+                          <div className="text-[10px] text-sky-400 font-bold uppercase">Average</div>
+                          <div className="text-[#f1f3f5] font-semibold text-xs mt-0.5">
+                            {thresholds.averageMin} - {thresholds.averageMax} lbs
+                          </div>
+                        </div>
+                        <div className="p-2 border border-purple-800/50 bg-[#191420]">
+                          <div className="text-[10px] text-purple-400 font-bold uppercase">Lunker</div>
+                          <div className="text-[#f1f3f5] font-semibold text-xs mt-0.5">
+                            {thresholds.lunkerMin} - {thresholds.lunkerMax} lbs
+                          </div>
+                        </div>
+                        <div className="p-2 border border-amber-700/60 bg-[#1d1810]">
+                          <div className="text-[10px] text-amber-300 font-bold uppercase">Trophy</div>
+                          <div className="text-[#f1f3f5] font-semibold text-xs mt-0.5">
+                            &ge; {thresholds.trophyMin} lbs
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Wikipedia Article External Link */}
                 <div className="pt-1 flex items-center justify-between border-t border-[#292d36]">
                   <span className="text-[11px] text-[#717885]">Biological Reference:</span>
@@ -639,7 +695,7 @@ export const Guide: React.FC<GuideProps> = ({
             )}
 
             {/* Tab 2: Genetic Mutations */}
-            {inspectedTab === 'mutations' && (
+            {inspectedTab === 'mutations' && unlockedMutationsCount > 0 && (
               <div className="space-y-4">
                 {/* Quick-Switch Morph Selector Pills */}
                 <div className="flex items-center gap-1.5 flex-wrap pb-1">
@@ -653,8 +709,7 @@ export const Guide: React.FC<GuideProps> = ({
                   >
                     Wild Standard
                   </button>
-                  {ALL_MUTATIONS.map((m) => {
-                    const isUnlocked = unlockedMutationsForInspected.has(m.id);
+                  {ALL_MUTATIONS.filter((m) => unlockedMutationsForInspected.has(m.id)).map((m) => {
                     const isSelected = previewMutation === m.id;
                     return (
                       <button
@@ -671,13 +726,10 @@ export const Guide: React.FC<GuideProps> = ({
                               : m.id === 'melanistic'
                               ? 'border-purple-400 bg-purple-950/70 text-purple-200'
                               : 'border-orange-400 bg-orange-950/70 text-orange-200'
-                            : isUnlocked
-                            ? 'border-[#2d323e] bg-[#14161c] text-[#c0c5ce] hover:text-white'
-                            : 'border-[#20232a] bg-[#111216] text-[#555d6b]'
+                            : 'border-[#2d323e] bg-[#14161c] text-[#c0c5ce] hover:text-white'
                         }`}
                       >
                         <span>{m.name.split(' ')[0]}</span>
-                        {!isUnlocked && <span className="text-[9px] text-[#717885]">(Locked)</span>}
                       </button>
                     );
                   })}
@@ -736,15 +788,9 @@ export const Guide: React.FC<GuideProps> = ({
                       <div className="flex items-center justify-between text-xs border-b border-[#2d323e]/60 pb-2">
                         <span className="font-bold tracking-wide text-[#f1f3f5]">{stageTitle}</span>
                         {previewMutation ? (
-                          isStageUnlocked ? (
-                            <span className="text-[10px] px-2 py-0.5 border border-emerald-500/80 bg-emerald-950/70 text-emerald-300 font-bold uppercase">
-                              Discovered Specimen
-                            </span>
-                          ) : (
-                            <span className="text-[10px] px-2 py-0.5 border border-[#3b404d] bg-[#1a1c22] text-[#788294] font-semibold uppercase">
-                              Preview / Undiscovered
-                            </span>
-                          )
+                          <span className="text-[10px] px-2 py-0.5 border border-emerald-500/80 bg-emerald-950/70 text-emerald-300 font-bold uppercase">
+                            Discovered Specimen
+                          </span>
                         ) : (
                           <span className="text-[10px] px-2 py-0.5 border border-[#3b404d] bg-[#14161c] text-[#8c94a2] font-semibold">
                             Natural Wild
@@ -756,11 +802,9 @@ export const Guide: React.FC<GuideProps> = ({
                         <img
                           src={getFishSpriteUrl(inspectedFish)!}
                           alt={inspectedFish.name}
-                          className={`h-28 w-auto max-w-full object-contain select-none transition-all ${
-                            !isStageUnlocked && previewMutation ? 'opacity-40 grayscale contrast-125' : ''
-                          }`}
+                          className="h-28 w-auto max-w-full object-contain select-none transition-all"
                           style={{
-                            ...(isStageUnlocked || !previewMutation ? getMutationFilterStyle(previewMutation) : {}),
+                            ...(getMutationFilterStyle(previewMutation)),
                             imageRendering: 'pixelated',
                           }}
                         />
@@ -798,89 +842,51 @@ export const Guide: React.FC<GuideProps> = ({
 
                 {/* Mutations List */}
                 <div className="space-y-2.5">
-                  {ALL_MUTATIONS.map((m) => {
-                    const isUnlocked = unlockedMutationsForInspected.has(m.id);
+                  {ALL_MUTATIONS.filter((m) => unlockedMutationsForInspected.has(m.id)).map((m) => {
                     const isSelected = previewMutation === m.id;
 
-                    if (isUnlocked) {
-                      return (
-                        <div
-                          key={m.id}
-                          onClick={() => setPreviewMutation(m.id)}
-                          className={`p-3 border transition-colors cursor-pointer space-y-2 ${
-                            isSelected
-                              ? 'border-amber-400 bg-[#1c1e28]'
-                              : 'border-[#2d323e] hover:border-amber-500/80 bg-[#14161c]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            {/* Rendered mutant sprite */}
-                            <div className="w-16 h-14 shrink-0 flex items-center justify-center bg-[#0c0e12] border border-[#22252e] p-1">
-                              <img
-                                src={getFishSpriteUrl(inspectedFish)!}
-                                alt={m.name}
-                                className="w-full h-full object-contain select-none"
-                                style={{
-                                  ...getMutationFilterStyle(m.id),
-                                  imageRendering: 'pixelated',
-                                }}
-                              />
-                            </div>
-
-                            <div className="flex-1 min-w-0 space-y-0.5">
-                              <div className="flex items-center justify-between gap-1 flex-wrap">
-                                <span className="font-bold text-sm text-[#f1f3f5]">{m.name}</span>
-                                <span className="text-[10px] px-2 py-0.5 border border-emerald-500/80 bg-emerald-950/60 text-emerald-300 font-bold uppercase">
-                                  Unlocked
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-[#a0aec0] leading-snug">
-                                {m.description}
-                              </p>
-                              <div className="flex items-center gap-2 pt-1 text-[10px]">
-                                <span className="text-emerald-400 font-semibold">
-                                  +{Math.round((m.valueMultiplier - 1) * 100)}% Market Value
-                                </span>
-                                <span className="text-[#555e6c]">·</span>
-                                <span className="text-amber-300 font-semibold">
-                                  ${Math.round(inspectedFish.basePrice * m.valueMultiplier)} Base
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // Locked mutation
                     return (
                       <div
                         key={m.id}
-                        className="p-3 border border-[#20232b] bg-[#111317]/80 opacity-75 space-y-2"
+                        onClick={() => setPreviewMutation(m.id)}
+                        className={`p-3 border transition-colors cursor-pointer space-y-2 ${
+                          isSelected
+                            ? 'border-amber-400 bg-[#1c1e28]'
+                            : 'border-[#2d323e] hover:border-amber-500/80 bg-[#14161c]'
+                        }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-16 h-14 shrink-0 flex items-center justify-center bg-[#0a0b0e] border border-[#1a1d24] p-1">
+                          {/* Rendered mutant sprite */}
+                          <div className="w-16 h-14 shrink-0 flex items-center justify-center bg-[#0c0e12] border border-[#22252e] p-1">
                             <img
                               src={getFishSpriteUrl(inspectedFish)!}
-                              alt="Locked Morph"
-                              className="w-full h-full object-contain select-none opacity-20 brightness-0"
-                              style={{ imageRendering: 'pixelated' }}
+                              alt={m.name}
+                              className="w-full h-full object-contain select-none"
+                              style={{
+                                ...getMutationFilterStyle(m.id),
+                                imageRendering: 'pixelated',
+                              }}
                             />
                           </div>
 
                           <div className="flex-1 min-w-0 space-y-0.5">
                             <div className="flex items-center justify-between gap-1 flex-wrap">
-                              <span className="font-bold text-sm text-[#788294]">{m.name}</span>
-                              <span className="text-[10px] px-2 py-0.5 border border-[#3b404d] bg-[#1a1c22] text-[#717885] font-semibold uppercase">
-                                Locked
+                              <span className="font-bold text-sm text-[#f1f3f5]">{m.name}</span>
+                              <span className="text-[10px] px-2 py-0.5 border border-emerald-500/80 bg-emerald-950/60 text-emerald-300 font-bold uppercase">
+                                Unlocked
                               </span>
                             </div>
-                            <p className="text-[11px] text-[#636c7c] italic leading-snug">
-                              Undiscovered genetic morph. Breed in Hatchery tanks using specialized
-                              feed, or hook as an ultra-rare strike in favored waters.
+                            <p className="text-[11px] text-[#a0aec0] leading-snug">
+                              {m.description}
                             </p>
-                            <div className="text-[10px] text-[#555e6c] pt-0.5">
-                              Bounty Potential: +{Math.round((m.valueMultiplier - 1) * 100)}%
+                            <div className="flex items-center gap-2 pt-1 text-[10px]">
+                              <span className="text-emerald-400 font-semibold">
+                                +{Math.round((m.valueMultiplier - 1) * 100)}% Market Value
+                              </span>
+                              <span className="text-[#555e6c]">·</span>
+                              <span className="text-amber-300 font-semibold">
+                                ${Math.round(inspectedFish.basePrice * m.valueMultiplier)} Base
+                              </span>
                             </div>
                           </div>
                         </div>

@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* Mobile-first touch & dynamic viewport height */
+html, body {
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbars for clean mobile tab scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area insets for mobile notches and home indicators */
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 /* Retro Beveled Pixel Buttons */
 button {
   box-sizing: border-box;
