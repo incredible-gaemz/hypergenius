@@ -40,6 +40,7 @@ import {
   getWaitSpeedLabel,
 } from './game/fishingLogic';
 import { soundManager } from './game/audioLogic';
+import { preloadGameAssets } from './game/preloadAssets';
 import { SettingsModal } from './components/SettingsModal';
 import { FishingArea, CastState } from './components/FishingArea';
 import { AreasTab } from './components/AreasTab';
@@ -368,6 +369,11 @@ export default function App() {
     } catch {}
     return generateJobSeekers([]);
   });
+
+  // Preload all game audio and visual sprites for instant web play
+  useEffect(() => {
+    preloadGameAssets();
+  }, []);
 
   // Rotate harbor job seekers periodically
   useEffect(() => {

@@ -1321,6 +1321,7 @@ export function rollHookedEncounter(
     trophyRoll?: number;
     escapeRoll?: number;
     treasureRoll?: number;
+    mediumFishRoll?: number;
   }
 ): HookedEncounter {
   // Extremely rare 0.01 (1%) chance to hook a Sunken Treasure Chest
@@ -1369,12 +1370,31 @@ export function rollHookedEncounter(
   // 1. A rod cannot land a species whose minimum weight exceeds the rod's max capacity
   let sensiblePool = availablePool.filter((f) => f.minWeight <= maxRodWeight);
 
-  // 2. Larger rods have a strict minimum fish target size (no minnows on composite or ocean rods)
+  // 2. Larger rods have a strong preference for heavy trophy fish, with a realistic small chance for aggressive medium-sized gamefish
   if (minRodWeight > 0) {
+    const isBigRod = minRodWeight >= 4.0;
     const heavyCandidates = sensiblePool.filter(
       (f) => f.maxWeight >= minRodWeight && !f.name.toLowerCase().includes('minnow')
     );
-    if (heavyCandidates.length > 0) {
+
+    // Medium gamefish candidates: adult gamefish (>= 2.5 lbs max, non-forage) below the heavy rod threshold
+    const mediumCandidates = sensiblePool.filter(
+      (f) =>
+        f.maxWeight >= 2.5 &&
+        f.maxWeight < minRodWeight &&
+        !f.name.toLowerCase().includes('minnow') &&
+        !f.name.toLowerCase().includes('shiner') &&
+        !f.name.toLowerCase().includes('chub') &&
+        !f.name.toLowerCase().includes('sardine')
+    );
+
+    // Realistic ~12% chance for a medium gamefish to strike big gear, while heavy fish dominate 88%
+    const mediumRoll = options?.mediumFishRoll ?? Math.random();
+    const shouldTargetMedium = isBigRod && mediumCandidates.length > 0 && mediumRoll < 0.12;
+
+    if (shouldTargetMedium) {
+      sensiblePool = mediumCandidates;
+    } else if (heavyCandidates.length > 0) {
       sensiblePool = heavyCandidates;
     }
   }
@@ -1462,13 +1482,19 @@ export function rollHookedEncounter(
     weightedCandidates[Math.floor(Math.random() * weightedCandidates.length)] ||
     tierMatches[0];
 
-  const min = Math.max(species.minWeight, minRodWeight > 0 ? Math.min(species.maxWeight, minRodWeight) : species.minWeight);
+  const isMediumCatchOnBigRod = minRodWeight > 0 && species.maxWeight < minRodWeight;
+  const min = Math.max(
+    species.minWeight,
+    !isMediumCatchOnBigRod && minRodWeight > 0 ? Math.min(species.maxWeight, minRodWeight) : species.minWeight
+  );
   const max = Math.max(min, species.maxWeight);
   const weightSpread = Math.max(0.01, max - min);
   const variance = options?.weightVariance ?? Math.random();
   const rawWeight = min + weightSpread * Math.pow(variance, 1.7);
-  let scaledWeight = rawWeight * rod.sizeMultiplier;
-  if (minRodWeight > 0 && species.maxWeight >= minRodWeight) {
+  let scaledWeight = isMediumCatchOnBigRod
+    ? rawWeight * Math.min(1.15, rod.sizeMultiplier)
+    : rawWeight * rod.sizeMultiplier;
+  if (!isMediumCatchOnBigRod && minRodWeight > 0 && species.maxWeight >= minRodWeight) {
     scaledWeight = Math.max(minRodWeight, scaledWeight);
   }
 

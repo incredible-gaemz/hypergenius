@@ -10,6 +10,7 @@ class SoundManager {
   private autoPauseOnTabHide: boolean = true;
   private currentAreaId: string | null = null;
   private ambientTracks: HTMLAudioElement[] = [];
+  private preloadedAudios: Map<string, HTMLAudioElement> = new Map();
   private reelAudio: HTMLAudioElement | null = null;
   private reelLoopStart: number = 0;
   private reelLoopEnd: number = 0;
@@ -153,6 +154,37 @@ class SoundManager {
     this.autoPauseOnTabHide = enabled;
     if (typeof window !== 'undefined') {
       localStorage.setItem('cozy_reel_autopause', String(enabled));
+    }
+  }
+
+  public preloadAllAudio(): void {
+    if (typeof window === 'undefined') return;
+
+    const allSources = [
+      './audio/reel.mp3',
+      './audio/pond.mp3',
+      './audio/lake.mp3',
+      './audio/marsh.mp3',
+      './audio/river.mp3',
+      './audio/birds.mp3',
+      './audio/ocean.mp3',
+      './audio/gulls.mp3',
+      './audio/coral.mp3',
+    ];
+
+    for (const src of allSources) {
+      if (!this.preloadedAudios.has(src)) {
+        try {
+          const a = new Audio(src);
+          a.preload = 'auto';
+          this.preloadedAudios.set(src, a);
+        } catch {}
+      }
+    }
+
+    if (!this.reelAudio) {
+      this.reelAudio = new Audio('./audio/reel.mp3');
+      this.reelAudio.preload = 'auto';
     }
   }
 

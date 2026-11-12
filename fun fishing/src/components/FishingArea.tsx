@@ -153,14 +153,14 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
             )}
             {castState === 'nibble' ? (
               <div className="space-y-1">
-                <div className="text-sm uppercase tracking-wider text-amber-300 font-extrabold animate-pulse">
-                  [ Tension on Line! ]
+                <div className="text-sm tracking-wide text-amber-300 font-bold animate-pulse">
+                  [ Tension on line! ]
                 </div>
               </div>
             ) : (
               <div className="space-y-1">
-                <div className="text-xs uppercase tracking-wider text-[#cbd5e1] font-bold">
-                  [ Line In Water... ]
+                <div className="text-xs tracking-wide text-[#cbd5e1] font-bold">
+                  [ Line in water... ]
                 </div>
               </div>
             )}
@@ -180,7 +180,7 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
           <div className="space-y-3">
             <button
               onClick={onReel}
-              className="w-56 py-4 px-6 border-2 border-amber-300 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-base tracking-wider cursor-pointer animate-pulse transition-transform active:scale-95 shadow-xl"
+              className={`w-64 py-3.5 px-6 font-bold text-base tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
             >
               Reel In!
             </button>
@@ -188,16 +188,31 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
         )}
 
         {isReeling && (
-          <div className="w-full max-w-xs space-y-2.5 p-3.5 border-2 border-[#2b303c] bg-[#12141a]/95 shadow-xl">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-amber-300">
-                Reeling in... {reelingRemainingSec.toFixed(1)}s
+          <div className="w-full max-w-xs space-y-2 p-3 border-2 border-[#2b303c] bg-[#12141a]/95">
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-[#f1f3f5]">
+                Reeling in...
+              </span>
+              <span className="text-[#8c94a2]">
+                {reelingRemainingSec.toFixed(1)}s
               </span>
             </div>
 
-            <div className="w-full bg-[#121316] h-3 border-2 border-[#262830]">
+            <div className="w-full bg-[#16181f] h-3 border border-[#3b404c] overflow-hidden">
               <div
-                className="bg-amber-400 h-full transition-all duration-75"
+                className={`h-full transition-all duration-75 ${
+                  activeArea.id === 'pond'
+                    ? 'bg-emerald-500'
+                    : activeArea.id === 'river'
+                    ? 'bg-sky-500'
+                    : activeArea.id === 'lake'
+                    ? 'bg-teal-500'
+                    : activeArea.id === 'bayou'
+                    ? 'bg-amber-500'
+                    : activeArea.id === 'ocean'
+                    ? 'bg-blue-500'
+                    : 'bg-fuchsia-500'
+                }`}
                 style={{ width: `${reelingProgressPercent}%` }}
               />
             </div>

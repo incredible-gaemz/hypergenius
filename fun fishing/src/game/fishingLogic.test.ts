@@ -425,6 +425,45 @@ test('Larger rods have minimum fish size and never hook forage minnows', async (
   }
 });
 
+test('Big heavy rods have a small realistic chance to hook medium-sized fish without minnows', async () => {
+  const { rollHookedEncounter, RODS, REELS, LURES } = await import('./fishingLogic');
+  const heavyRod = RODS.find((r) => r.id === 'the_one_rod') || RODS.find((r) => r.id === 'titan_spine')!;
+  const reel = REELS[0];
+  const lure = LURES[2]; // Worm
+
+  let caughtMediumFish = false;
+  let caughtHeavyFish = false;
+
+  for (let i = 0; i < 80; i++) {
+    const enc = rollHookedEncounter('ocean', heavyRod, lure, reel, { nothingRoll: 0.99 });
+    if (enc.type === 'fish' && enc.caughtFish) {
+      assert.notEqual(enc.caughtFish.name, 'Minnow');
+      assert.notEqual(enc.caughtFish.name, 'Fathead Minnow');
+      assert.notEqual(enc.caughtFish.name, 'Golden Shiner');
+      if (enc.caughtFish.weight < 100) {
+        caughtMediumFish = true;
+        assert.ok(
+          enc.caughtFish.weight >= 1.0,
+          `Medium fish caught on heavy rod must be adult size (got ${enc.caughtFish.weight})`
+        );
+      } else {
+        caughtHeavyFish = true;
+      }
+    }
+  }
+
+  // Also verify deterministic medium fish roll flag
+  const forcedMedium = rollHookedEncounter('ocean', heavyRod, lure, reel, {
+    nothingRoll: 0.99,
+    mediumFishRoll: 0.05,
+  });
+  assert.equal(forcedMedium.type, 'fish');
+  assert.ok(forcedMedium.caughtFish && forcedMedium.caughtFish.weight < 100);
+
+  assert.ok(caughtHeavyFish, 'Heavy rod must catch heavy trophy fish');
+  assert.ok(caughtMediumFish, 'Heavy rod must have a realistic small chance to catch medium-sized fish');
+});
+
 test('Private and commercial contracts separation and generic sailor names', async () => {
   const { createPrivateOrder, createCommercialOrder } = await import('./fishingLogic');
   const { HIREABLE_CREW, generateJobSeekers } = await import('./commercialLogic');

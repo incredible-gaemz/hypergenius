@@ -1,31 +1,7 @@
 @import "tailwindcss";
 
-/* Global Authentic 16-Bit Pixel Art Theme */
-*, *::before, *::after {
-  font-family: 'DotGothic16', 'Silkscreen', monospace, system-ui;
-  border-radius: 0 !important;
-  letter-spacing: 0.02em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body, html {
-  font-family: 'DotGothic16', 'Silkscreen', monospace, system-ui;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-
-/* Pixel Titles & Headers */
-h1, h2, h3, .pixel-title {
-  font-family: 'DotGothic16', 'Silkscreen', monospace;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
 /* Retro Beveled Pixel Buttons */
 button {
-  font-family: 'DotGothic16', 'Silkscreen', monospace;
   box-sizing: border-box;
   white-space: nowrap;
 }
@@ -54,13 +30,11 @@ button:disabled {
 
 /* Inset Pixel Form Controls (Inputs, Selects) */
 input, select, textarea {
-  font-family: 'DotGothic16', monospace;
   box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.85), inset -2px -2px 0px 0px rgba(255, 255, 255, 0.1);
-  image-rendering: pixelated;
 }
 
 /* Pixel Graphics & Sprites */
-img, canvas, svg {
+img, canvas, svg, .pixel-art {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
