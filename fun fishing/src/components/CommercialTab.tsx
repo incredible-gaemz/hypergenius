@@ -212,34 +212,34 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
           <div className="p-3 border border-[#242730] bg-[#101216] text-xs text-[#a3aab8] space-y-1">
             <div className="flex justify-between">
               <span className="text-[#717885]">Charter Fee:</span>
-              <span className="font-bold text-sky-400">$400</span>
+              <span className="font-bold text-sky-400">$1,000</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#717885]">Your Funds:</span>
-              <span className={`font-bold ${money >= 400 ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <span className={`font-bold ${money >= 1000 ? 'text-emerald-400' : 'text-amber-400'}`}>
                 ${money.toLocaleString()}
               </span>
             </div>
           </div>
 
           <button
-            disabled={money < 400 || !charterNameInput.trim()}
+            disabled={money < 1000 || !charterNameInput.trim()}
             onClick={() => {
               if (onStartCommercialBusiness && charterNameInput.trim()) {
                 onStartCommercialBusiness(charterNameInput.trim());
               }
             }}
             className={`w-full py-2.5 font-bold border text-xs transition-colors ${
-              money >= 400 && charterNameInput.trim()
+              money >= 1000 && charterNameInput.trim()
                 ? 'border-sky-600 bg-sky-950 hover:bg-sky-900 text-sky-200 cursor-pointer'
                 : 'border-[#282a32] bg-[#121417] text-[#555a64] cursor-not-allowed'
             }`}
           >
-            {money < 400
-              ? 'Need $400 to Found Company'
+            {money < 1000
+              ? 'Need $1,000 to Found Company'
               : !charterNameInput.trim()
               ? 'Enter Company Name'
-              : 'Register Company · $400'}
+              : 'Register Company · $1,000'}
           </button>
         </div>
       </div>

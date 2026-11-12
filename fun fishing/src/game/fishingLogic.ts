@@ -1174,7 +1174,8 @@ export function getMinRodWeight(rod: Rod): number {
 export function calculateReelDuration(
   fishWeightLbs: number,
   rod: Rod,
-  reel: Reel
+  reel: Reel,
+  isTrophy = false
 ): number {
   // Base fight time: 3.2 seconds minimum so even small catches have a real reeling phase
   const baseSeconds = 3.2;
@@ -1197,7 +1198,12 @@ export function calculateReelDuration(
     rawSeconds *= Math.pow(strain, 2.2);
   }
 
-  return Math.max(2.2, Math.min(30.0, Number(rawSeconds.toFixed(1))));
+  // Trophy weights take 1.5x as long to reel in
+  if (isTrophy) {
+    rawSeconds *= 1.5;
+  }
+
+  return Math.max(2.2, Math.min(45.0, Number(rawSeconds.toFixed(1))));
 }
 
 export function rollFishEscape(
@@ -1604,7 +1610,7 @@ export function rollHookedEncounter(
     mutationName,
   };
 
-  const reelDurationSec = calculateReelDuration(caughtFish.weight, rod, reel);
+  const reelDurationSec = calculateReelDuration(caughtFish.weight, rod, reel, caughtFish.isTrophy);
   const willEscape = rollFishEscape(
     caughtFish.weight,
     rod,

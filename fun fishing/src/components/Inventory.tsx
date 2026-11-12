@@ -79,7 +79,8 @@ export const Inventory: React.FC<InventoryProps> = ({
       }
       g.items.push(item);
       g.count++;
-      if (item.isTrophy) g.trophyCount++;
+      const isActualTrophy = item.isTrophy && getFishSizeClassification(item.weight, item.fishId) === 'Trophy';
+      if (isActualTrophy) g.trophyCount++;
       g.totalValue += item.value;
       if (item.weight < g.minWeight) g.minWeight = item.weight;
       if (item.weight > g.maxWeight) g.maxWeight = item.weight;
@@ -158,11 +159,15 @@ export const Inventory: React.FC<InventoryProps> = ({
                       : 'border-[#262830] bg-[#16181d]'
                   }`}
                 >
-                  {/* Fish Group Summary Row (Clickable to open / collapse) */}
+                  {/* Fish Group Summary Row (Clickable to open / collapse if multiple held) */}
                   <div
-                    onClick={() => toggleGroup(group.key)}
-                    className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-[#1c1f26] transition-colors select-none"
-                    title="Click to view all individual specimens of this fish"
+                    onClick={() => {
+                      if (group.count > 1) toggleGroup(group.key);
+                    }}
+                    className={`p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      group.count > 1 ? 'cursor-pointer hover:bg-[#1c1f26]' : ''
+                    } transition-colors select-none`}
+                    title={group.count > 1 ? "Click to view all individual specimens of this fish" : undefined}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {getFishSpriteUrl(group.sample) && (
@@ -201,9 +206,11 @@ export const Inventory: React.FC<InventoryProps> = ({
                               {group.mutationName || group.mutation}
                             </span>
                           )}
-                          <span className="text-[10px] text-sky-400 font-semibold underline ml-1 hover:text-sky-300">
-                            {isExpanded ? '▲ Hide Specimens' : `▼ View Specimens (${group.count})`}
-                          </span>
+                          {group.count > 1 && (
+                            <span className="text-[10px] text-sky-400 font-semibold underline ml-1 hover:text-sky-300">
+                              {isExpanded ? '▲ Hide Specimens' : `▼ View Specimens (${group.count})`}
+                            </span>
+                          )}
                         </div>
 
                         <div className="text-[#8c94a2] flex items-center gap-2 text-[11px] flex-wrap">
@@ -220,7 +227,7 @@ export const Inventory: React.FC<InventoryProps> = ({
                           </span>
                           <span>·</span>
                           <span>
-                            Batch Total:{' '}
+                            {group.count > 1 ? 'Batch Total: ' : 'Value: '}
                             <strong className="text-emerald-400 font-bold">
                               ${group.totalValue.toLocaleString()}
                             </strong>
@@ -236,9 +243,11 @@ export const Inventory: React.FC<InventoryProps> = ({
                           onSellFish(group.items[0].catchId);
                         }}
                         className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors"
-                        title="Sell 1 fish"
+                        title={group.count > 1 ? "Sell 1 fish" : "Sell fish"}
                       >
-                        Sell 1 · ${group.items[0].value.toLocaleString()}
+                        {group.count > 1
+                          ? `Sell 1 · $${group.items[0].value.toLocaleString()}`
+                          : `Sell · $${group.items[0].value.toLocaleString()}`}
                       </button>
                       {group.count > 1 && (
                         <button
@@ -259,8 +268,8 @@ export const Inventory: React.FC<InventoryProps> = ({
                     </div>
                   </div>
 
-                  {/* Expanded Breakdown of Every Individual Held Fish */}
-                  {isExpanded && (
+                  {/* Expanded Breakdown of Every Individual Held Fish (Only when multiple held) */}
+                  {isExpanded && group.count > 1 && (
                     <div className="border-t border-[#252832] bg-[#121418] p-3 space-y-2">
                       <div className="text-[10px] text-[#788292] uppercase font-bold tracking-wider flex items-center justify-between">
                         <span>All {group.count} Held {group.speciesName} Specimens</span>

@@ -107,9 +107,9 @@ export const Shop: React.FC<ShopProps> = ({
           ) : (
             <div
               className="px-3 py-1.5 border border-[#22252c] bg-[#121316] text-[#4d5462] text-xs font-semibold select-none flex items-center gap-1.5"
-              title="Charter your commercial fishing fleet for $400 in the Fleet tab"
+              title="Charter your commercial fishing fleet for $1,000 in the Fleet tab"
             >
-              <span>Commercial Fleet · Charter in Fleet tab · $400</span>
+              <span>Commercial Fleet · Charter in Fleet tab · $1,000</span>
             </div>
           )}
         </div>

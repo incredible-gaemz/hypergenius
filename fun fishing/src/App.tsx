@@ -40,7 +40,7 @@ import {
   getWaitSpeedLabel,
 } from './game/fishingLogic';
 import { soundManager } from './game/audioLogic';
-import { preloadGameAssets } from './game/preloadAssets';
+import { preloadGameAssets, preloadCriticalGameAssets } from './game/preloadAssets';
 import { SettingsModal } from './components/SettingsModal';
 import { FishingArea, CastState } from './components/FishingArea';
 import { AreasTab } from './components/AreasTab';
@@ -379,9 +379,28 @@ export default function App() {
     return generateJobSeekers([]);
   });
 
-  // Preload all game audio and visual sprites for instant web play
+  // Preload all game visual sprites and audio for instant web play
+  const [isLoadingAssets, setIsLoadingAssets] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
   useEffect(() => {
-    preloadGameAssets();
+    let isMounted = true;
+    preloadCriticalGameAssets((pct) => {
+      if (isMounted) setLoadingProgress(pct);
+    }).then(() => {
+      setTimeout(() => {
+        if (isMounted) setIsLoadingAssets(false);
+      }, 120);
+    });
+
+    const fallbackTimer = setTimeout(() => {
+      if (isMounted) setIsLoadingAssets(false);
+    }, 1800);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   // Rotate harbor job seekers periodically
@@ -1751,13 +1770,18 @@ export default function App() {
     const mutationDetail = MUTATION_DETAILS[tank.mutationStrain] || MUTATION_DETAILS.normal;
 
     for (let i = 0; i < tank.clutchCount; i++) {
-      const isTrophy = i < tank.trophyCount;
+      const isTrophyCandidate = i < tank.trophyCount;
       const isMutant = i < tank.mutationCount && tank.mutationStrain !== 'normal';
-      const minW = species.minWeight;
-      const maxW = isTrophy
-        ? species.trophyWeight
-        : species.minWeight + (species.maxWeight - species.minWeight) * 0.6;
-      const weight = Number((minW + Math.random() * (maxW - minW)).toFixed(2));
+      let weight: number;
+      if (isTrophyCandidate) {
+        // True trophy weight >= species.trophyWeight
+        weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.15)).toFixed(2));
+      } else {
+        const minW = species.minWeight;
+        const maxW = species.trophyWeight * 0.95;
+        weight = Number((minW + Math.random() * (maxW - minW)).toFixed(2));
+      }
+      const isTrophy = weight >= species.trophyWeight;
       const trophyBonus = isTrophy ? 2.5 : 1.0;
       const mutantBonus = isMutant ? mutationDetail.valueMultiplier : 1.0;
       const value = Math.max(
@@ -1868,13 +1892,18 @@ export default function App() {
       const mutationDetail = MUTATION_DETAILS[tank.mutationStrain] || MUTATION_DETAILS.normal;
 
       for (let i = 0; i < actualCount; i++) {
-        const isTrophy = i < harvestTrophy;
+        const isTrophyCandidate = i < harvestTrophy;
         const isMutant = i < harvestMutation && tank.mutationStrain !== 'normal';
-        const minW = species.minWeight;
-        const maxW = isTrophy
-          ? species.trophyWeight
-          : species.minWeight + (species.maxWeight - species.minWeight) * 0.6;
-        const weight = Number((minW + Math.random() * (maxW - minW)).toFixed(2));
+        let weight: number;
+        if (isTrophyCandidate) {
+          // True trophy weight >= species.trophyWeight
+          weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.15)).toFixed(2));
+        } else {
+          const minW = species.minWeight;
+          const maxW = species.trophyWeight * 0.95;
+          weight = Number((minW + Math.random() * (maxW - minW)).toFixed(2));
+        }
+        const isTrophy = weight >= species.trophyWeight;
         const trophyBonus = isTrophy ? 2.5 : 1.0;
         const mutantBonus = isMutant ? mutationDetail.valueMultiplier : 1.0;
         const value = Math.max(1, Math.round(species.basePrice * 1.35 * trophyBonus * mutantBonus));
@@ -2086,8 +2115,8 @@ export default function App() {
   // Commercial Fleet Empire Handlers
   const handleStartCommercialBusiness = (name: string) => {
     const trimmed = name.trim();
-    if (money < 400 || !trimmed || commercialBusinessName) return;
-    setMoney((prev) => prev - 400);
+    if (money < 1000 || !trimmed || commercialBusinessName) return;
+    setMoney((prev) => prev - 1000);
     setCommercialBusinessName(trimmed);
   };
 
@@ -2633,6 +2662,49 @@ export default function App() {
     (id) => (catalog[Number(id)]?.caughtCount || 0) >= 1
   ).length;
 
+  if (isLoadingAssets) {
+    return (
+      <div className="min-h-[100dvh] min-h-screen bg-[#0c0d10] text-[#e3e6eb] font-mono flex flex-col items-center justify-center p-6 select-none">
+        <div className="w-full max-w-sm border border-[#2b303c] bg-[#14161c] p-6 space-y-4 text-center shadow-2xl">
+          <div className="space-y-1">
+            <h1 className="text-lg font-bold tracking-wider text-amber-300">
+              Cozy Reel
+            </h1>
+            <p className="text-[11px] text-[#8c94a2] tracking-wide uppercase">
+              Classic Fishing Game
+            </p>
+          </div>
+
+          <div className="py-2 flex items-center justify-center">
+            <img
+              src="./fish/rainbow_trout.png"
+              alt="Loading"
+              className="w-20 h-16 object-contain animate-pulse"
+              style={{ imageRendering: 'pixelated' }}
+            />
+          </div>
+
+          <div className="space-y-2 text-left">
+            <div className="flex justify-between text-xs text-[#a3aab8] font-bold">
+              <span>Loading harbor waters &amp; tackle...</span>
+              <span className="text-emerald-400 font-mono">{loadingProgress}%</span>
+            </div>
+            <div className="w-full h-2.5 border border-[#3b404c] bg-[#0c0d10] p-0.5">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-150"
+                style={{ width: `${Math.max(8, loadingProgress)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="text-[10px] text-[#636b78] italic">
+            Preloading visual sprites &amp; audio...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`min-h-[100dvh] min-h-screen ${activeArea.theme.bgClass} text-[#e3e6eb] select-none p-2 sm:p-4 md:p-6 flex flex-col justify-start transition-colors duration-200`}
@@ -2813,9 +2885,8 @@ export default function App() {
           </button>
         </nav>
 
-        {/* Tab Content */}
-        {activeTab === 'fish' && (
-          <div className="space-y-3">
+        {/* Tab Content - Persistent Panels to Prevent Image Reloading / Flashing */}
+        <div className={activeTab === 'fish' ? 'space-y-3' : 'hidden'}>
             {/* Gear & Setup Bar */}
             <div
               className={`border-2 ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3.5 text-xs space-y-3 transition-colors`}
@@ -2949,10 +3020,9 @@ export default function App() {
               onClaimTreasure={handleClaimTreasure}
               onResetToIdle={() => setCastState('idle')}
             />
-          </div>
-        )}
+        </div>
 
-        {activeTab === 'areas' && (
+        <div className={activeTab === 'areas' ? 'block' : 'hidden'}>
           <AreasTab
             money={money}
             unlockedAreaIds={unlockedAreaIds}
@@ -2961,9 +3031,9 @@ export default function App() {
             onUnlockArea={handleUnlockArea}
             onSelectArea={handleSelectArea}
           />
-        )}
+        </div>
 
-        {activeTab === 'traps' && (
+        <div className={activeTab === 'traps' ? 'block' : 'hidden'}>
           <TrapsTab
             money={money}
             traps={traps}
@@ -2977,9 +3047,9 @@ export default function App() {
             onUpgradeTrapModel={handleUpgradeTrapModel}
             onUnlockTrapSlot={handleUnlockTrapSlot}
           />
-        )}
+        </div>
 
-        {activeTab === 'hatchery' && (
+        <div className={activeTab === 'hatchery' ? 'block' : 'hidden'}>
           <HatcheryTab
             money={money}
             inventory={inventory}
@@ -2998,9 +3068,9 @@ export default function App() {
             hatcheryUnlocked={hatcheryUnlocked}
             onUnlockHatchery={handleUnlockHatchery}
           />
-        )}
+        </div>
 
-        {activeTab === 'town' && (
+        <div className={activeTab === 'town' ? 'block' : 'hidden'}>
           <TownTab
             money={money}
             inventory={inventory}
@@ -3036,9 +3106,9 @@ export default function App() {
             onToggleRestaurantAutomation={handleToggleRestaurantAutomation}
             onSelectPrepStyle={handleSelectPrepStyle}
           />
-        )}
+        </div>
 
-        {activeTab === 'fleet' && (
+        <div className={activeTab === 'fleet' ? 'block' : 'hidden'}>
           <CommercialTab
             money={money}
             ownedBoats={ownedBoats}
@@ -3062,9 +3132,9 @@ export default function App() {
             onRetireBoat={handleRetireBoat}
             onGiveCrewBonus={handleGiveCrewBonus}
           />
-        )}
+        </div>
 
-        {activeTab === 'shop' && (
+        <div className={activeTab === 'shop' ? 'block' : 'hidden'}>
           <Shop
             money={money}
             ownedRodIds={ownedRodIds}
@@ -3085,25 +3155,25 @@ export default function App() {
             onBuyBoat={handleBuyBoat}
             onBuyUpgrade={handleBuyUpgrade}
           />
-        )}
+        </div>
 
-        {activeTab === 'inventory' && (
+        <div className={activeTab === 'inventory' ? 'block' : 'hidden'}>
           <Inventory
             fishList={inventory}
             onSellFish={handleSellFish}
             onSellBatch={handleSellFishBatch}
             onSellAll={handleSellAll}
           />
-        )}
+        </div>
 
-        {activeTab === 'guide' && (
+        <div className={activeTab === 'guide' ? 'block' : 'hidden'}>
           <Guide
             catalogMap={catalog}
             currentWeather={currentWeather}
             inventory={inventory}
             hatcheryTanks={hatcheryTanks}
           />
-        )}
+        </div>
 
         {/* Footer */}
         <footer className="pt-2 text-center text-[11px] text-[#555d6b] flex items-center justify-end border-t border-[#1d2026]">

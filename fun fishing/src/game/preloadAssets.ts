@@ -13,78 +13,106 @@ import {
 import { BOATS_CATALOG, getBoatSpriteUrl } from './commercialLogic';
 import { soundManager } from './audioLogic';
 
-const preloadedImages = new Set<string>();
+// Global in-memory cache retaining HTMLImageElement references throughout app lifetime.
+// Keeping live DOM image objects prevents the browser from discarding decoded bitmaps.
+export const GLOBAL_IMAGE_CACHE = new Map<string, HTMLImageElement>();
 
-function preloadSingleImage(url: string): Promise<void> {
-  if (!url || preloadedImages.has(url)) return Promise.resolve();
-  preloadedImages.add(url);
+export function preloadSingleImage(url: string): Promise<void> {
+  if (!url) return Promise.resolve();
+  if (GLOBAL_IMAGE_CACHE.has(url)) return Promise.resolve();
 
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
+    img.decoding = 'async';
+    img.onload = () => {
+      GLOBAL_IMAGE_CACHE.set(url, img);
+      resolve();
+    };
+    img.onerror = () => {
+      // Resolve anyway so loading screen is never stuck
+      resolve();
+    };
     img.src = url;
   });
 }
 
 /**
- * Preloads all audio tracks and visual sprites so that web gameplay is instant
- * with zero loading lag, flickering, or audio delay.
+ * Preloads all high-priority visual assets (all 6 area backgrounds, all rods,
+ * reels, lures, boats, junk, and starter fish).
  */
-export function preloadGameAssets(): void {
+export async function preloadCriticalGameAssets(
+  onProgress?: (progressPct: number) => void
+): Promise<void> {
   if (typeof window === 'undefined') return;
 
   // 1. Audio preloading (all ambient tracks and reeling sfx)
   soundManager.preloadAllAudio();
 
-  // 2. High-priority images (Area banners, starter rods/reels/lures, common catches)
-  const highPriorityUrls: string[] = [
+  // 2. Critical assets needed on the immediate screens
+  const criticalUrls: string[] = [
     ...FISHING_AREAS.map((a) => getAreaBannerUrl(a.id)),
-    ...RODS.slice(0, 6).map((r) => getRodSpriteUrl(r.id)),
-    ...REELS.slice(0, 6).map((r) => getReelSpriteUrl(r.id)),
-    ...LURES.slice(0, 8).map((l) => getLureSpriteUrl(l.id)),
-    ...BOATS_CATALOG.slice(0, 4).map((b) => getBoatSpriteUrl(b.id)),
+    ...RODS.map((r) => getRodSpriteUrl(r.id)),
+    ...REELS.map((r) => getReelSpriteUrl(r.id)),
+    ...LURES.map((l) => getLureSpriteUrl(l.id)),
+    ...BOATS_CATALOG.map((b) => getBoatSpriteUrl(b.id)),
     './fish/bluegill.png',
     './fish/largemouth_bass.png',
     './fish/rainbow_trout.png',
     './fish/yellow_perch.png',
-    './fish/treasure_chest.png',
     './fish/channel_catfish.png',
+    './fish/treasure_chest.png',
+    './junk/waterlogged_boot.png',
+    './junk/rusty_tin_can.png',
+    './junk/clump_of_seaweed.png',
+    './junk/sunken_driftwood.png',
+    './lures/none.png',
   ];
 
-  for (const url of highPriorityUrls) {
-    preloadSingleImage(url);
-  }
+  let loadedCount = 0;
+  const total = criticalUrls.length;
 
-  // 3. Progressive background preload for all remaining items, boats, and fish catalog
-  const backgroundUrls: string[] = [
-    ...RODS.slice(6).map((r) => getRodSpriteUrl(r.id)),
-    ...REELS.slice(6).map((r) => getReelSpriteUrl(r.id)),
-    ...LURES.slice(8).map((l) => getLureSpriteUrl(l.id)),
-    ...BOATS_CATALOG.slice(4).map((b) => getBoatSpriteUrl(b.id)),
-    ...FISH_COLLECTION.map((f) => getFishSpriteUrl(f)),
-  ];
+  const promises = criticalUrls.map(async (url) => {
+    await preloadSingleImage(url);
+    loadedCount += 1;
+    if (onProgress) {
+      onProgress(Math.min(100, Math.round((loadedCount / total) * 100)));
+    }
+  });
 
-  let index = 0;
-  const batchSize = 6;
-  const loadNextBatch = () => {
-    const slice = backgroundUrls.slice(index, index + batchSize);
-    for (const url of slice) {
+  await Promise.all(promises);
+
+  // 3. Background stream all remaining fish catalog species into memory
+  const remainingFishUrls = FISH_COLLECTION.map((f) => getFishSpriteUrl(f)).filter(
+    (url) => !GLOBAL_IMAGE_CACHE.has(url)
+  );
+
+  let idx = 0;
+  const batchSize = 8;
+  const pumpRemaining = () => {
+    const batch = remainingFishUrls.slice(idx, idx + batchSize);
+    for (const url of batch) {
       preloadSingleImage(url);
     }
-    index += batchSize;
-    if (index < backgroundUrls.length) {
+    idx += batchSize;
+    if (idx < remainingFishUrls.length) {
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(loadNextBatch, { timeout: 500 });
+        (window as any).requestIdleCallback(pumpRemaining, { timeout: 400 });
       } else {
-        setTimeout(loadNextBatch, 80);
+        setTimeout(pumpRemaining, 50);
       }
     }
   };
 
   if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(loadNextBatch, { timeout: 300 });
+    (window as any).requestIdleCallback(pumpRemaining, { timeout: 250 });
   } else {
-    setTimeout(loadNextBatch, 60);
+    setTimeout(pumpRemaining, 40);
   }
+}
+
+/**
+ * Legacy non-blocking kick-off
+ */
+export function preloadGameAssets(): void {
+  preloadCriticalGameAssets();
 }

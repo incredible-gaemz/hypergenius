@@ -263,6 +263,15 @@ test('Fly rod is rated for 10 lbs and cannot catch 50 lbs fish, with exponential
     'Reeling over cap must take exponentially longer due to rod strain'
   );
 
+  // Trophy fight multiplier test: trophy catches take 1.5x as long to reel in
+  const normalDuration = calculateReelDuration(8.0, flyRod, reel, false);
+  const trophyDuration = calculateReelDuration(8.0, flyRod, reel, true);
+  assert.equal(
+    trophyDuration,
+    Number((normalDuration * 1.5).toFixed(1)),
+    'Trophy catches must take 1.5x as long to reel in'
+  );
+
   // Soft limit exponential escape test
   const escapeUnder = rollFishEscape(8.0, flyRod, reel, 0.20);
   const escapeSeverelyOver = rollFishEscape(25.0, flyRod, reel, 0.20);
