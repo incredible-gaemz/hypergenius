@@ -293,12 +293,12 @@ export function calculateBreedingDuration(
   growthRate: number = 1.0,
   pairCount: number = 1
 ): number {
-  let baseSec = 120;
-  if (species.tier === 'common') baseSec = 120;
-  else if (species.tier === 'uncommon') baseSec = 210;
-  else if (species.tier === 'rare') baseSec = 360;
-  else if (species.tier === 'epic') baseSec = 540;
-  else if (species.tier === 'legendary') baseSec = 900;
+  let baseSec = 60;
+  if (species.tier === 'common') baseSec = 60;
+  else if (species.tier === 'uncommon') baseSec = 150;
+  else if (species.tier === 'rare') baseSec = 340;
+  else if (species.tier === 'epic') baseSec = 720;
+  else if (species.tier === 'legendary') baseSec = 1500;
 
   const feed = FEED_OPTIONS.find((f) => f.id === feedType) || FEED_OPTIONS[0];
   let adjustedSec = baseSec / (feed.speedMultiplier * Math.max(0.5, growthRate));

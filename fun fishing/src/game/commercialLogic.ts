@@ -158,7 +158,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 450,
     crewCapacity: 1,
     cargoCapacity: 8,
-    baseVoyageSec: 240, // 4 minutes
+    baseVoyageSec: 360, // 6 minutes
     description: 'A humble flat-bottomed wooden skiff for quiet river eddies and farm ponds.',
     tier: 1,
   },
@@ -168,7 +168,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 1400,
     crewCapacity: 2,
     cargoCapacity: 18,
-    baseVoyageSec: 420, // 7 minutes
+    baseVoyageSec: 600, // 10 minutes
     description: 'Double-ended seaworthy dory with twin oarlocks, outriggers, and a livewell.',
     tier: 2,
   },
@@ -178,7 +178,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 3800,
     crewCapacity: 3,
     cargoCapacity: 35,
-    baseVoyageSec: 720, // 12 minutes
+    baseVoyageSec: 960, // 16 minutes
     description: 'Diesel-powered harbor workhorse with hydraulic net drum and insulated fish hold.',
     tier: 3,
   },
@@ -188,7 +188,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 11000,
     crewCapacity: 5,
     cargoCapacity: 70,
-    baseVoyageSec: 1080, // 18 minutes
+    baseVoyageSec: 1440, // 24 minutes
     description: 'Heavy steel hull with refrigerated storage capable of braving deep ocean banks.',
     tier: 4,
   },
@@ -198,7 +198,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 32000,
     crewCapacity: 10,
     cargoCapacity: 140,
-    baseVoyageSec: 1500, // 25 minutes
+    baseVoyageSec: 2100, // 35 minutes
     description: 'Ice-strengthened hull engineered for rough northern seas with high-capacity hydraulic pot haulers.',
     tier: 5,
   },
@@ -208,7 +208,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 75000,
     crewCapacity: 15,
     cargoCapacity: 240,
-    baseVoyageSec: 1800, // 30 minutes
+    baseVoyageSec: 2700, // 45 minutes
     description: 'Industrial flagship with on-board blast freezers, dual booms, and crew mess.',
     tier: 6,
   },
@@ -218,7 +218,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 180000,
     crewCapacity: 25,
     cargoCapacity: 420,
-    baseVoyageSec: 2400, // 40 minutes
+    baseVoyageSec: 3600, // 60 minutes
     description: 'Commercial purse seiner equipped with sonar helicopter pad, drone tracking, and massive brine tanks.',
     tier: 7,
   },
@@ -228,7 +228,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 450000,
     crewCapacity: 35,
     cargoCapacity: 750,
-    baseVoyageSec: 3600, // 60 minutes
+    baseVoyageSec: 5400, // 90 minutes
     description: 'Ice-class commercial mega-trawler with twin stern ramps, industrial blast freezers, and limitless ocean range.',
     tier: 8,
   },
@@ -236,6 +236,20 @@ export const BOATS_CATALOG: BoatDefinition[] = [
 
 export function getBoatSpriteUrl(boatDefId: string): string {
   return `./boats/${boatDefId}.png`;
+}
+
+/**
+ * Calculates the scrap / retirement resale refund value for an owned vessel.
+ * Returns 25% to 50% of the original boat purchase price.
+ */
+export function getBoatRetireValue(
+  boat: OwnedBoat,
+  boatDef: BoatDefinition
+): { value: number; percent: number } {
+  const seed = (boat.instanceId || 'boat').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const percent = 25 + (seed % 26); // 25% to 50% inclusive
+  const value = Math.max(1, Math.round(boatDef.price * (percent / 100)));
+  return { value, percent };
 }
 
 export const HIREABLE_CREW: CrewMember[] = [
@@ -446,6 +460,13 @@ export const FLEET_UPGRADES: FleetUpgrade[] = [
     effect: '+50% cash payout across all wholesale sales and fulfilled contracts',
     description: 'Direct air-cargo link delivers catches to premium luxury auctions in Tokyo and London.',
   },
+  {
+    id: 'abyssal_crawler_suite',
+    name: 'Autonomous Hadal Benthic Dredge & Sonar Suite',
+    price: 285000,
+    effect: '+100% deep-sea haul yield, doubles hold capacity, and targets rare abyssal fauna',
+    description: 'Titanium-armored autonomous benthic dredge deployed to trench depths with sub-millimeter target lock.',
+  },
 ];
 
 export const COMMERCIAL_BAITS: CommercialBait[] = [
@@ -506,6 +527,7 @@ export function calculateVoyageDuration(
       bayou: 1.20,
       ocean: 1.35,
       reef: 1.50,
+      trench: 1.75,
     };
     duration *= areaDistanceMultipliers[destinationAreaId] || 1.0;
   }
@@ -567,6 +589,7 @@ export function getRecommendedCommercialBait(species: FishSpecies): CommercialBa
   if (
     species.areaId === 'ocean' ||
     species.areaId === 'reef' ||
+    species.areaId === 'trench' ||
     species.tier === 'epic' ||
     species.tier === 'legendary'
   ) {
@@ -770,9 +793,15 @@ export function calculateExpeditionHaul(
 
   // Upgrades: Reinforced trawl net expands cargo capacity by +35%
   const hasTrawlNet = installedUpgrades.some((u) => u.id === 'reinforced_trawl_net');
-  const effectiveCargoCapacity = hasTrawlNet
+  const hasAbyssalCrawler = installedUpgrades.some((u) => u.id === 'abyssal_crawler_suite');
+  let effectiveCargoCapacity = hasTrawlNet
     ? Math.round(boatDef.cargoCapacity * 1.35)
     : boatDef.cargoCapacity;
+
+  if (hasAbyssalCrawler) {
+    effectiveCargoCapacity = Math.round(effectiveCargoCapacity * 2.0);
+    bonusNotes.push('Hadal Benthic Dredge 2x cargo capacity');
+  }
 
   if (hasTrawlNet) bonusNotes.push('Reinforced Trawl Net +35% cargo space');
 
@@ -812,6 +841,12 @@ export function calculateExpeditionHaul(
   if (hasLonglineDrum) {
     targetCatchCount = Math.round(targetCatchCount * 1.60);
     bonusNotes.push('Longline Drum +60% catch yield');
+  }
+
+  // Upgrade: Autonomous Hadal Benthic Dredge (+100% deep catch yield)
+  if (hasAbyssalCrawler && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) {
+    targetCatchCount = Math.round(targetCatchCount * 2.0);
+    bonusNotes.push('Hadal Benthic Dredge +100% deep-sea yield');
   }
 
   // Crew morale bonus from worker bonuses (up to +50% yield)
@@ -937,22 +972,22 @@ export function calculateExpeditionHaul(
 
     // Tier probability roll (Rebalanced: fleets catch predominantly common/uncommon commercial hauls, with significantly reduced rare/epic and exceedingly rare legendary odds):
     let rarityRoll = seed % 1000;
-    if (expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality') rarityRoll += 50;
-    if (hasSonarFinder) rarityRoll += 40;
-    if (hasSpotterDrone) rarityRoll += 45;
-    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 45;
+    if (expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality') rarityRoll += 30;
+    if (hasSonarFinder) rarityRoll += 25;
+    if (hasSpotterDrone) rarityRoll += 30;
+    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 25;
 
     let targetTier: RarityTier = 'common';
-    if (rarityRoll < 760) {
+    if (rarityRoll < 780) {
       targetTier = 'common';
-    } else if (rarityRoll < 935) {
+    } else if (rarityRoll < 945) {
       targetTier = 'uncommon';
-    } else if (rarityRoll < 985) {
+    } else if (rarityRoll < 990) {
       targetTier = 'rare';
-    } else if (rarityRoll < 998) {
+    } else if (rarityRoll < 999) {
       targetTier = 'epic';
     } else {
-      // Exceedingly rare commercial encounter with a legendary titan
+      // Exceedingly rare commercial encounter with a legendary titan (0.1% base)
       targetTier = 'legendary';
     }
 
@@ -969,8 +1004,8 @@ export function calculateExpeditionHaul(
 
       if (isFavoredBait) {
         if (isLegendaryTarget) {
-          // Fleets have an especially low chance to catch legendary titans: no free guarantee, ~4% roll
-          isTargetRoll = (seed % 100) < 4;
+          // Fleets have an especially low chance to catch legendary titans: no free guarantee, ~1.5% roll
+          isTargetRoll = (seed % 1000) < 15;
         } else if (isEpicTarget) {
           const minGuaranteed = Math.min(1, finalCatchCount);
           if (i < minGuaranteed) {
@@ -990,7 +1025,7 @@ export function calculateExpeditionHaul(
       } else {
         // Other bait: heavily reduced rate
         if (isLegendaryTarget) {
-          isTargetRoll = (seed % 1000) < 5; // 0.5%
+          isTargetRoll = (seed % 1000) < 2; // 0.2%
         } else if (isEpicTarget) {
           isTargetRoll = (seed % 100) < 6;
         } else {
@@ -1013,15 +1048,15 @@ export function calculateExpeditionHaul(
     }
 
     // Size and weight distribution: small runts, standard adults, and monster catches
-    // Monster chance: base ~8%, boosted by quality focus (20%), monger (30%), or cryo freezer
+    // Monster chance: rebalanced for fleets (3.5% base, 8.5% on quality focus)
     let monsterChance =
       expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality'
-        ? 0.20
-        : 0.08;
-    if (hasMonger) monsterChance += 0.12;
-    if (hasCryoFreezer) monsterChance += 0.05;
+        ? 0.085
+        : 0.035;
+    if (hasMonger) monsterChance += 0.035;
+    if (hasCryoFreezer) monsterChance += 0.02;
     if (crewMembers.some((c) => (c.moraleLevel || 0) >= 4)) {
-      monsterChance *= 1.5;
+      monsterChance = Math.min(0.18, monsterChance * 1.25);
     }
 
     // Small juvenile / runt chance: ~15%

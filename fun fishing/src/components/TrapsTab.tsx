@@ -21,6 +21,7 @@ interface TrapsTabProps {
   unlockedTrapSlots: number;
   unlockedAreaIds: string[];
   onHarvestTrap: (slotIndex: number) => void;
+  onHarvestAllTraps?: () => void;
   onSetTrapArea: (slotIndex: number, areaId: AreaId) => void;
   onBaitTrap: (slotIndex: number, baitId: string) => void;
   onBaitTrapWithFish: (slotIndex: number, catchId: string) => void;
@@ -35,6 +36,7 @@ export const TrapsTab: React.FC<TrapsTabProps> = ({
   unlockedTrapSlots,
   unlockedAreaIds,
   onHarvestTrap,
+  onHarvestAllTraps,
   onSetTrapArea,
   onBaitTrap,
   onBaitTrapWithFish,
@@ -51,20 +53,38 @@ export const TrapsTab: React.FC<TrapsTabProps> = ({
       ? TRAP_SLOT_PRICES[unlockedTrapSlots]
       : null;
 
+  const totalReadyCatchCount = traps.slice(0, unlockedTrapSlots).reduce((sum, trap) => {
+    const harvest = calculateTrapCatch(trap);
+    return sum + harvest.count;
+  }, 0);
+
   return (
     <div className="border border-[#2a2d34] bg-[#181a1f] p-4 text-[#e3e6eb] space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#292d36] pb-3 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#292d36] pb-3 text-xs gap-2.5">
         <div>
           <span className="font-bold text-[#f1f3f5] text-sm">Aquatic Trapping</span>
           <div className="text-[11px] text-[#8c94a2] mt-0.5">
             Traps soak passively in water. Check back every minute or two. Harvested fish go to your Box.
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <span className="text-[#8c94a2]">
+        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+          <span className="text-[#8c94a2] text-[11px] sm:text-xs">
             Active Traps: {unlockedTrapSlots} / {TRAP_SLOT_PRICES.length}
           </span>
+          {onHarvestAllTraps && unlockedTrapSlots > 0 && (
+            <button
+              onClick={onHarvestAllTraps}
+              disabled={totalReadyCatchCount === 0}
+              className={`px-3.5 py-1.5 font-bold border text-xs transition-colors min-h-[36px] touch-manipulation ${
+                totalReadyCatchCount > 0
+                  ? 'border-emerald-600 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 cursor-pointer shadow-xs'
+                  : 'border-[#2d313a] bg-[#14161b] text-[#555d6b] cursor-not-allowed'
+              }`}
+            >
+              Collect All {totalReadyCatchCount > 0 ? `(${totalReadyCatchCount})` : ''}
+            </button>
+          )}
         </div>
       </div>
 

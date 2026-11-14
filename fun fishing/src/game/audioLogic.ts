@@ -170,13 +170,14 @@ class SoundManager {
       './audio/ocean.mp3',
       './audio/gulls.mp3',
       './audio/coral.mp3',
+      './audio/trench.mp3',
     ];
 
     for (const src of allSources) {
       if (!this.preloadedAudios.has(src)) {
         try {
           const a = new Audio(src);
-          a.preload = 'auto';
+          a.preload = src.includes('trench.mp3') ? 'metadata' : 'auto';
           this.preloadedAudios.set(src, a);
         } catch {}
       }
@@ -213,6 +214,10 @@ class SoundManager {
     } else if (this.currentAreaId === 'ocean' && this.ambientTracks.length >= 2) {
       this.ambientTracks[0].volume = baseMult * 0.95;
       this.ambientTracks[1].volume = baseMult * 0.75;
+    } else if (this.currentAreaId === 'trench') {
+      for (const audio of this.ambientTracks) {
+        audio.volume = Math.min(1.0, baseMult * 1.5);
+      }
     } else {
       for (const audio of this.ambientTracks) {
         audio.volume = baseMult;
@@ -263,6 +268,9 @@ class SoundManager {
         break;
       case 'reef':
         trackConfigs = [{ src: './audio/coral.mp3', volume: base }];
+        break;
+      case 'trench':
+        trackConfigs = [{ src: './audio/trench.mp3', volume: Math.min(1.0, base * 1.5) }];
         break;
       default:
         trackConfigs = [{ src: './audio/pond.mp3', volume: base }];

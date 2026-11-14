@@ -11,6 +11,7 @@ import {
   getFishSpriteUrl,
 } from './fishingLogic';
 import { BOATS_CATALOG, getBoatSpriteUrl } from './commercialLogic';
+import { WHALE_SPECIES, getWhaleSpriteUrl } from './whalingLogic';
 import { soundManager } from './audioLogic';
 
 // Global in-memory cache retaining HTMLImageElement references throughout app lifetime.
@@ -55,6 +56,8 @@ export async function preloadCriticalGameAssets(
     ...REELS.map((r) => getReelSpriteUrl(r.id)),
     ...LURES.map((l) => getLureSpriteUrl(l.id)),
     ...BOATS_CATALOG.map((b) => getBoatSpriteUrl(b.id)),
+    ...WHALE_SPECIES.map((w) => getWhaleSpriteUrl(w.id)),
+    './areas/whaling.png',
     './fish/bluegill.png',
     './fish/largemouth_bass.png',
     './fish/rainbow_trout.png',
@@ -83,7 +86,7 @@ export async function preloadCriticalGameAssets(
 
   // 3. Background stream all remaining fish catalog species into memory
   const remainingFishUrls = FISH_COLLECTION.map((f) => getFishSpriteUrl(f)).filter(
-    (url) => !GLOBAL_IMAGE_CACHE.has(url)
+    (url): url is string => Boolean(url) && !GLOBAL_IMAGE_CACHE.has(url!)
   );
 
   let idx = 0;

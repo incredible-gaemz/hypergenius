@@ -20,6 +20,7 @@ import {
   CommercialBaitId,
   CommercialStats,
   getBoatSpriteUrl,
+  getBoatRetireValue,
 } from '../game/commercialLogic';
 import {
   AreaId,
@@ -93,6 +94,41 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
 }) => {
   const [subTab, setSubTab] = useState<'fleet' | 'crew' | 'stats'>('fleet');
   const [charterNameInput, setCharterNameInput] = useState('');
+
+  const [docksCooldownSec, setDocksCooldownSec] = useState<number>(() => {
+    try {
+      const savedTime = localStorage.getItem('cozy_reel_docks_cd');
+      if (savedTime) {
+        const remaining = Math.ceil((parseInt(savedTime, 10) - Date.now()) / 1000);
+        return remaining > 0 ? remaining : 0;
+      }
+    } catch {}
+    return 0;
+  });
+
+  useEffect(() => {
+    if (docksCooldownSec <= 0) return;
+    const interval = setInterval(() => {
+      setDocksCooldownSec((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem('cozy_reel_docks_cd');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [docksCooldownSec]);
+
+  const handleAskAroundDocks = () => {
+    if (docksCooldownSec > 0) return;
+    onRefreshJobSeekers();
+    const expiry = Date.now() + 30000;
+    try {
+      localStorage.setItem('cozy_reel_docks_cd', String(expiry));
+    } catch {}
+    setDocksCooldownSec(30);
+  };
   const [selectedAreaByBoat, setSelectedAreaByBoat] = useState<Record<string, AreaId>>(() => {
     try {
       const saved = localStorage.getItem('cozy_reel_fleet_settings_v1');
@@ -424,36 +460,40 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                           </strong>
                         </span>
 
-                        {!isOnVoyage && !isHaulReady && (
-                          <div className="ml-1">
-                            {isRetireConfirming ? (
-                              <div className="flex items-center gap-1">
+                        {!isOnVoyage && !isHaulReady && (() => {
+                          const scrapInfo = getBoatRetireValue(boat, boatDef);
+                          return (
+                            <div className="ml-1">
+                              {isRetireConfirming ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => {
+                                      onRetireBoat(boat.instanceId);
+                                      setBoatRetireConfirmId(null);
+                                    }}
+                                    className="px-2 py-0.5 border border-rose-600 bg-rose-950 text-rose-200 font-bold text-[11px] cursor-pointer"
+                                  >
+                                    Confirm Scrap · +${scrapInfo.value.toLocaleString()}
+                                  </button>
+                                  <button
+                                    onClick={() => setBoatRetireConfirmId(null)}
+                                    className="px-1.5 py-0.5 border border-[#333742] bg-[#1c1e24] text-[#8c94a2] text-[11px] cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
                                 <button
-                                  onClick={() => {
-                                    onRetireBoat(boat.instanceId);
-                                    setBoatRetireConfirmId(null);
-                                  }}
-                                  className="px-2 py-0.5 border border-rose-600 bg-rose-950 text-rose-200 font-bold text-[11px] cursor-pointer"
+                                  onClick={() => setBoatRetireConfirmId(boat.instanceId)}
+                                  className="text-[10px] px-1.5 py-0.5 border border-[#2c303c] hover:border-amber-600 bg-[#14161c] text-[#8c94a2] hover:text-amber-300 cursor-pointer"
+                                  title={`Sell boat for ${scrapInfo.percent}% salvage scrap value`}
                                 >
-                                  Confirm Scrap · $0
+                                  Scrap Vessel · +${scrapInfo.value.toLocaleString()} ({scrapInfo.percent}%)
                                 </button>
-                                <button
-                                  onClick={() => setBoatRetireConfirmId(null)}
-                                  className="px-1.5 py-0.5 border border-[#333742] bg-[#1c1e24] text-[#8c94a2] text-[11px] cursor-pointer"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => setBoatRetireConfirmId(boat.instanceId)}
-                                className="text-[10px] px-1.5 py-0.5 border border-[#2c303c] hover:border-rose-700 bg-[#14161c] text-[#8c94a2] hover:text-rose-300 cursor-pointer"
-                              >
-                                Scrap Boat · $0
-                              </button>
-                            )}
-                          </div>
-                        )}
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 
@@ -734,7 +774,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                           <div className="space-y-1">
                             <span className="text-[11px] text-[#8c94a2]">Focus:</span>
                             <select
-                              value={currentFocus === 'trophy' || currentFocus === 'quality' ? 'quality' : currentFocus === 'orders' ? 'orders' : 'quantity'}
+                              value={currentFocus === 'trophy' || currentFocus === 'quality' ? 'quality' : 'quantity'}
                               aria-label="Search Focus"
                               onChange={(e) =>
                                 setSelectedFocusByBoat((prev) => ({
@@ -746,7 +786,6 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                             >
                               <option value="quantity">Quantity</option>
                               <option value="quality">Quality</option>
-                              <option value="orders">Contracts</option>
                             </select>
                           </div>
 
@@ -822,10 +861,15 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             <div className="flex items-center justify-between border-b border-[#252831] pb-2 text-xs">
               <span className="font-bold text-[#f1f3f5]">Available Fishermen at Harbor</span>
               <button
-                onClick={onRefreshJobSeekers}
-                className="px-2 py-0.5 text-xs border border-[#3b404d] hover:border-sky-600 bg-[#1c1e24] text-[#c0c5ce] hover:text-sky-300 font-semibold cursor-pointer"
+                onClick={handleAskAroundDocks}
+                disabled={docksCooldownSec > 0}
+                className={`px-2 py-0.5 text-xs border font-semibold transition-colors ${
+                  docksCooldownSec > 0
+                    ? 'border-[#2d313a] bg-[#14161b] text-[#5c6473] cursor-not-allowed'
+                    : 'border-[#3b404d] hover:border-sky-600 bg-[#1c1e24] text-[#c0c5ce] hover:text-sky-300 cursor-pointer'
+                }`}
               >
-                Ask Around Docks
+                {docksCooldownSec > 0 ? `Ask Around Docks (${docksCooldownSec}s)` : 'Ask Around Docks'}
               </button>
             </div>
 

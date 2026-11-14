@@ -20,9 +20,18 @@ import {
 } from '../game/fishingLogic';
 import { FISH_GUIDE_DATA, FishGuideDetails } from '../game/fishGuideData';
 import { HatcheryTank, HatcheryMutation } from '../game/hatcheryLogic';
+import {
+  WHALE_SPECIES,
+  WhaleSpecies,
+  WhaleCatalogEntry,
+  WHALE_GUIDE_DATA,
+  getWhaleSpriteUrl,
+  getWhaleRarityTier,
+} from '../game/whalingLogic';
 
 interface GuideProps {
   catalogMap: Record<number, CatalogEntry>;
+  whaleCatalog?: Record<string, WhaleCatalogEntry>;
   currentWeather?: WeatherDef;
   inventory?: CaughtFish[];
   hatcheryTanks?: HatcheryTank[];
@@ -76,6 +85,7 @@ const ALL_MUTATIONS: Array<{
 
 export const Guide: React.FC<GuideProps> = ({
   catalogMap,
+  whaleCatalog,
   currentWeather,
   inventory,
   hatcheryTanks,
@@ -85,21 +95,32 @@ export const Guide: React.FC<GuideProps> = ({
   const [selectedTier, setSelectedTier] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<GuideFilterStatus>('all');
   const [inspectedFish, setInspectedFish] = useState<FishSpecies | null>(null);
+  const [inspectedWhale, setInspectedWhale] = useState<WhaleSpecies | null>(null);
   const [inspectedTab, setInspectedTab] = useState<'profile' | 'mutations'>('profile');
   const [previewMutation, setPreviewMutation] = useState<HatcheryMutation | null>(null);
 
-  const totalSpecies = FISH_COLLECTION.length;
+  const totalFishCount = FISH_COLLECTION.length;
+  const totalWhaleCount = WHALE_SPECIES.length;
+  const totalSpecies = totalFishCount + totalWhaleCount;
 
-  // Unlocked count: Species caught 1 or more times
-  const unlockedCount = useMemo(() => {
+  // Unlocked count: Fish caught 1 or more times
+  const unlockedFishCount = useMemo(() => {
     return FISH_COLLECTION.filter((f) => (catalogMap[f.id]?.caughtCount || 0) >= 1).length;
   }, [catalogMap]);
+
+  // Unlocked count: Whales caught 1 or more times
+  const unlockedWhaleCount = useMemo(() => {
+    return WHALE_SPECIES.filter((w) => (whaleCatalog?.[w.id]?.caughtCount || 0) >= 1).length;
+  }, [whaleCatalog]);
+
+  const totalUnlockedCount = unlockedFishCount + unlockedWhaleCount;
 
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setInspectedFish(null);
+        setInspectedWhale(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -108,6 +129,9 @@ export const Guide: React.FC<GuideProps> = ({
 
   // Filtered fish list
   const filteredFish = useMemo(() => {
+    if (selectedArea === 'whaling') {
+      return [];
+    }
     return FISH_COLLECTION.filter((fish) => {
       // Area filter
       if (selectedArea !== 'all' && fish.areaId !== selectedArea) {
@@ -138,6 +162,30 @@ export const Guide: React.FC<GuideProps> = ({
     });
   }, [searchQuery, selectedArea, selectedTier, statusFilter, catalogMap]);
 
+  // Filtered whale list
+  const filteredWhales = useMemo(() => {
+    if (selectedArea !== 'all' && selectedArea !== 'whaling') {
+      return [];
+    }
+    return WHALE_SPECIES.filter((whale) => {
+      const tier = getWhaleRarityTier(whale);
+      if (selectedTier !== 'all' && tier !== selectedTier) {
+        return false;
+      }
+      const isUnlocked = (whaleCatalog?.[whale.id]?.caughtCount || 0) > 0;
+      if (statusFilter === 'unlocked' && !isUnlocked) return false;
+      if (statusFilter === 'locked' && isUnlocked) return false;
+      if (searchQuery.trim().length > 0) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = whale.name.toLowerCase().includes(q);
+        const matchScientific = whale.scientificName.toLowerCase().includes(q);
+        const matchArea = 'whaling grounds'.includes(q) || 'whale'.includes(q);
+        if (!matchName && !matchScientific && !matchArea) return false;
+      }
+      return true;
+    });
+  }, [searchQuery, selectedArea, selectedTier, statusFilter, whaleCatalog]);
+
   const activeGuideDetails: FishGuideDetails | null = useMemo(() => {
     if (!inspectedFish) return null;
     return FISH_GUIDE_DATA[inspectedFish.id] || null;
@@ -150,7 +198,7 @@ export const Guide: React.FC<GuideProps> = ({
 
   const inspectedWeatherList = useMemo(() => {
     if (!inspectedFish) return [];
-    return getFishPreferredWeather(inspectedFish.name, inspectedFish.areaId);
+    return getFishPreferredWeather(inspectedFish.id);
   }, [inspectedFish]);
 
   const inspectedLure = useMemo(() => {
@@ -196,8 +244,26 @@ export const Guide: React.FC<GuideProps> = ({
     return Array.from(unlockedMutationsForInspected).filter((m) => m !== 'normal').length;
   }, [unlockedMutationsForInspected]);
 
+  const activeWhaleDetails = useMemo(() => {
+    if (!inspectedWhale) return null;
+    return WHALE_GUIDE_DATA[inspectedWhale.id] || null;
+  }, [inspectedWhale]);
+
+  const inspectedWhaleEntry = useMemo(() => {
+    if (!inspectedWhale) return undefined;
+    return whaleCatalog?.[inspectedWhale.id];
+  }, [inspectedWhale, whaleCatalog]);
+
   const handleOpenFishModal = (fish: FishSpecies) => {
     setInspectedFish(fish);
+    setInspectedWhale(null);
+    setInspectedTab('profile');
+    setPreviewMutation(null);
+  };
+
+  const handleOpenWhaleModal = (whale: WhaleSpecies) => {
+    setInspectedWhale(whale);
+    setInspectedFish(null);
     setInspectedTab('profile');
     setPreviewMutation(null);
   };
@@ -217,7 +283,9 @@ export const Guide: React.FC<GuideProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-1 border border-emerald-600 bg-emerald-950/60 text-emerald-300 font-bold">
-              {unlockedCount} / {totalSpecies} Species Discovered
+              {selectedArea === 'whaling'
+                ? `${unlockedWhaleCount} / ${totalWhaleCount} Whales Discovered`
+                : `${totalUnlockedCount} / ${totalSpecies} Species Discovered`}
             </span>
           </div>
         </div>
@@ -226,15 +294,61 @@ export const Guide: React.FC<GuideProps> = ({
         <div className="w-full bg-[#1e222b] h-2.5 border border-[#2a2e39] overflow-hidden">
           <div
             className="bg-emerald-500 h-full transition-all duration-300"
-            style={{ width: `${Math.round((unlockedCount / totalSpecies) * 100)}%` }}
+            style={{
+              width: `${Math.round(
+                selectedArea === 'whaling'
+                  ? (unlockedWhaleCount / totalWhaleCount) * 100
+                  : (totalUnlockedCount / totalSpecies) * 100
+              )}%`,
+            }}
           />
+        </div>
+
+        {/* Quick Filter Area Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <button
+            onClick={() => setSelectedArea('all')}
+            className={`px-2.5 py-1 font-bold border transition-colors cursor-pointer shrink-0 touch-manipulation ${
+              selectedArea === 'all'
+                ? 'border-emerald-500 bg-emerald-950/60 text-emerald-200'
+                : 'border-[#292d37] bg-[#161820] text-[#8c94a2] hover:text-[#c0c5ce]'
+            }`}
+          >
+            All Waters ({totalSpecies})
+          </button>
+          <button
+            onClick={() => setSelectedArea('whaling')}
+            className={`px-2.5 py-1 font-bold border transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 touch-manipulation ${
+              selectedArea === 'whaling'
+                ? 'border-blue-400 bg-blue-950/70 text-blue-200'
+                : 'border-blue-900/60 bg-blue-950/25 text-blue-300 hover:text-blue-200'
+            }`}
+          >
+            Whaling Grounds ({totalWhaleCount})
+            <span className="text-[10px] px-1 py-0.2 border border-blue-500/50 bg-blue-900/40 text-blue-300 font-bold">
+              {unlockedWhaleCount}/{totalWhaleCount}
+            </span>
+          </button>
+          {FISHING_AREAS.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => setSelectedArea(a.id)}
+              className={`px-2 py-1 font-semibold border transition-colors cursor-pointer shrink-0 touch-manipulation ${
+                selectedArea === a.id
+                  ? 'border-sky-500 bg-sky-950/60 text-sky-200'
+                  : 'border-[#292d37] bg-[#161820] text-[#717887] hover:text-[#c0c5ce]'
+              }`}
+            >
+              {a.name}
+            </button>
+          ))}
         </div>
 
         {/* Filter Controls */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
           <input
             type="text"
-            placeholder="Search discovered fish or waters..."
+            placeholder="Search discovered fish, whales, or waters..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border border-[#2d323c] bg-[#181a22] px-2.5 py-1.5 text-[#f1f3f5] placeholder-[#555d6b] focus:outline-none focus:border-sky-500"
@@ -248,9 +362,10 @@ export const Guide: React.FC<GuideProps> = ({
             <option value="all">All Waters ({totalSpecies})</option>
             {FISHING_AREAS.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.name}
+                {a.name} ({FISH_COLLECTION.filter((f) => f.areaId === a.id).length})
               </option>
             ))}
+            <option value="whaling">Whaling Grounds ({totalWhaleCount})</option>
           </select>
 
           <select
@@ -264,6 +379,7 @@ export const Guide: React.FC<GuideProps> = ({
             <option value="rare">Rare</option>
             <option value="epic">Epic</option>
             <option value="legendary">Legendary</option>
+            <option value="mythical">Mythical</option>
           </select>
 
           <select
@@ -284,7 +400,7 @@ export const Guide: React.FC<GuideProps> = ({
           const entry = catalogMap[fish.id];
           const isUnlocked = (entry?.caughtCount || 0) > 0;
           const count = entry?.caughtCount || 0;
-          const preferredWeather = getFishPreferredWeather(fish.name, fish.areaId);
+          const preferredWeather = getFishPreferredWeather(fish.id);
           const weatherMatch = currentWeather && preferredWeather.includes(currentWeather.id);
 
           if (isUnlocked) {
@@ -297,7 +413,7 @@ export const Guide: React.FC<GuideProps> = ({
                 {/* Visual Fish Sprite Preview */}
                 <div className="w-16 h-14 shrink-0 bg-[#0c0e12] border border-[#232732] flex items-center justify-center p-1 overflow-hidden">
                   <img
-                    src={getFishSpriteUrl(fish)}
+                    src={getFishSpriteUrl(fish) || undefined}
                     alt={fish.name}
                     className="w-full h-full object-contain select-none group-hover:scale-105 transition-transform"
                     style={{ imageRendering: 'pixelated' }}
@@ -365,7 +481,7 @@ export const Guide: React.FC<GuideProps> = ({
               {/* Undiscovered Fish Silhouette */}
               <div className="w-16 h-14 shrink-0 bg-[#0a0b0e] border border-[#1a1c22] flex items-center justify-center p-1 overflow-hidden">
                 <img
-                  src={getFishSpriteUrl(fish)}
+                  src={getFishSpriteUrl(fish) || undefined}
                   alt="Undiscovered Fish"
                   className="w-full h-full object-contain select-none opacity-20 brightness-0"
                   style={{ imageRendering: 'pixelated' }}
@@ -382,6 +498,133 @@ export const Guide: React.FC<GuideProps> = ({
             </div>
           );
         })}
+
+        {/* Section Divider when showing both fish and whales in 'all' view */}
+        {selectedArea === 'all' && filteredWhales.length > 0 && filteredFish.length > 0 && (
+          <div className="col-span-full pt-4 pb-1.5 border-b border-blue-900/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-xs uppercase tracking-wider text-blue-200">
+                Deep Ocean Whales & Cetaceans
+              </span>
+              <span className="text-[10px] px-2 py-0.5 border border-blue-500/50 bg-blue-950/60 text-blue-300 font-bold">
+                Whaling Grounds
+              </span>
+            </div>
+            <span className="text-[11px] text-blue-400 font-semibold">
+              {unlockedWhaleCount} / {totalWhaleCount} Discovered
+            </span>
+          </div>
+        )}
+
+        {/* Whales Grid Cards */}
+        {filteredWhales.map((whale) => {
+          const entry = whaleCatalog?.[whale.id];
+          const isUnlocked = (entry?.caughtCount || 0) > 0;
+          const count = entry?.caughtCount || 0;
+          const tier = getWhaleRarityTier(whale);
+
+          if (isUnlocked) {
+            return (
+              <div
+                key={`whale_${whale.id}`}
+                onClick={() => handleOpenWhaleModal(whale)}
+                className="group border border-blue-900/60 hover:border-blue-400 bg-[#121620] hover:bg-[#161c2b] p-3 text-xs flex items-center gap-3 cursor-pointer transition-colors shadow-xs"
+              >
+                {/* Visual Whale Sprite Preview */}
+                <div className="w-16 h-14 shrink-0 bg-[#090d15] border border-blue-950 flex items-center justify-center p-1 overflow-hidden">
+                  <img
+                    src={getWhaleSpriteUrl(whale.id)}
+                    alt={whale.name}
+                    className="w-full h-full object-contain select-none group-hover:scale-105 transition-transform"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                </div>
+
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-start justify-between gap-1">
+                    <span className={`font-bold text-sm truncate ${getRarityTextStyle(tier)}`}>
+                      {whale.name}
+                    </span>
+                    <span className="text-[10px] text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform shrink-0">
+                      View
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold border-blue-500/70 bg-blue-950/60 text-blue-300">
+                      Whale
+                    </span>
+                    <span
+                      className={`text-[9px] px-1.5 py-0.2 border uppercase tracking-wider font-semibold ${getRarityBadgeStyle(
+                        tier
+                      )}`}
+                    >
+                      {tier}
+                    </span>
+                    {entry?.maxWeight && entry.maxWeight >= whale.maxWeightLbs * 0.95 && (
+                      <span
+                        className="text-[10px] px-1.5 py-0.2 border border-amber-500/80 bg-amber-950/60 text-amber-300 font-bold"
+                        title="Trophy Record"
+                      >
+                        Trophy
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-[11px] text-[#8c94a2] flex items-center justify-between pt-0.5">
+                    <span>
+                      Weight:{' '}
+                      <strong className="text-[#c0c5ce]">
+                        {whale.minWeightLbs.toLocaleString()} - {whale.maxWeightLbs.toLocaleString()} lbs
+                      </strong>
+                    </span>
+                    <span>
+                      Caught: <strong className="text-emerald-400">x{count}</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // Undiscovered Whale
+          return (
+            <div
+              key={`whale_${whale.id}`}
+              onClick={() => handleOpenWhaleModal(whale)}
+              className="p-3 border border-[#21242b] hover:border-[#383f50] bg-[#131518] hover:bg-[#161820] text-[#555d6b] flex items-center gap-3 text-xs cursor-pointer transition-colors"
+            >
+              <div className="w-16 h-14 shrink-0 bg-[#0a0b0e] border border-[#1a1c22] flex items-center justify-center p-1 overflow-hidden">
+                <img
+                  src={getWhaleSpriteUrl(whale.id)}
+                  alt="Undiscovered Cetacean"
+                  className="w-full h-full object-contain select-none opacity-20 brightness-0"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              </div>
+
+              <div className="flex-1 min-w-0 space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold tracking-widest text-[#68738a] flex items-center gap-1.5">
+                    <span>???</span>
+                    <span className="text-[11px] text-[#555e70] font-normal">({whale.name})</span>
+                  </div>
+                  <span className="text-[10px] text-[#717b91]">Inspect</span>
+                </div>
+                <div className="text-[10px] uppercase text-[#424855]">Undiscovered Cetacean</div>
+                <div className="text-[10px] text-[#4a5264]">
+                  Whaling Grounds &bull; {whale.minWeightLbs.toLocaleString()} - {whale.maxWeightLbs.toLocaleString()} lbs
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {filteredFish.length === 0 && filteredWhales.length === 0 && (
+          <div className="col-span-full py-12 text-center text-[#717887] text-xs">
+            No species found matching your filter criteria.
+          </div>
+        )}
       </div>
 
       {/* Field Guide Detail Inspector Modal */}
@@ -896,6 +1139,157 @@ export const Guide: React.FC<GuideProps> = ({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Whale Field Guide Detail Inspector Modal */}
+      {inspectedWhale && activeWhaleDetails && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5"
+          onClick={() => setInspectedWhale(null)}
+        >
+          <div
+            className="w-full max-w-lg border-2 border-blue-600/70 bg-[#141822] p-5 sm:p-6 text-xs text-[#e3e6eb] space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ imageRendering: 'pixelated' }}
+          >
+            {/* Modal Header */}
+            <div className="border-b border-[#252c3c] pb-3 flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-lg font-bold ${getRarityTextStyle(getWhaleRarityTier(inspectedWhale))}`}>
+                    {inspectedWhale.name}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 border uppercase tracking-wider font-semibold border-blue-500/70 bg-blue-950/60 text-blue-300">
+                    Whale
+                  </span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 border uppercase tracking-wider font-semibold ${getRarityBadgeStyle(
+                      getWhaleRarityTier(inspectedWhale)
+                    )}`}
+                  >
+                    {getWhaleRarityTier(inspectedWhale)}
+                  </span>
+                  {inspectedWhaleEntry && inspectedWhaleEntry.maxWeight >= inspectedWhale.maxWeightLbs * 0.95 && (
+                    <span
+                      className="text-[11px] px-1.5 py-0.5 border border-amber-500/80 bg-amber-950/60 text-amber-300 font-bold"
+                      title="Trophy Cetacean"
+                    >
+                      Trophy
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-[#8c94a2] italic mt-0.5 font-serif">
+                  {activeWhaleDetails.scientificName}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setInspectedWhale(null)}
+                className="text-xs text-[#8c94a2] hover:text-[#f1f3f5] border border-[#2d313b] hover:border-[#4a505e] px-2.5 py-1 bg-[#1c1f26] cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Pixel Art Sprite Preview */}
+            <div className="py-4 px-4 border border-[#252d3d] bg-[#0c1018] flex items-center justify-center">
+              <img
+                src={getWhaleSpriteUrl(inspectedWhale.id)}
+                alt={inspectedWhale.name}
+                className="h-32 w-auto max-w-full object-contain select-none"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </div>
+
+            {/* Biometrics */}
+            <div className="grid grid-cols-3 gap-2 p-3 border border-[#252d3d] bg-[#0f1420] text-center">
+              <div>
+                <div className="text-[10px] uppercase text-[#717885] font-semibold">
+                  Typical Weight
+                </div>
+                <div className="text-xs font-bold text-[#f1f3f5] mt-0.5">
+                  {inspectedWhale.minWeightLbs.toLocaleString()} - {inspectedWhale.maxWeightLbs.toLocaleString()} lbs
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase text-[#717885] font-semibold">
+                  Personal Record
+                </div>
+                <div className="text-xs font-bold text-amber-300 mt-0.5">
+                  {inspectedWhaleEntry?.maxWeight
+                    ? `${inspectedWhaleEntry.maxWeight.toLocaleString()} lbs`
+                    : 'None yet'}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase text-[#717885] font-semibold">
+                  Base Market Value
+                </div>
+                <div className="text-xs font-bold text-emerald-400 mt-0.5">
+                  ${inspectedWhale.basePrice.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Identification */}
+            <div className="space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9aa2b0]">
+                Visual Identification
+              </div>
+              <p className="text-[#c0c5ce] leading-relaxed bg-[#10141e] p-3 border border-[#222938]">
+                {activeWhaleDetails.visualDescription}
+              </p>
+            </div>
+
+            {/* Habitat & Behavior */}
+            <div className="space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9aa2b0]">
+                Pelagic Habitat & Behavior
+              </div>
+              <p className="text-[#c0c5ce] leading-relaxed bg-[#10141e] p-3 border border-[#222938]">
+                {activeWhaleDetails.habitatBehavior}
+              </p>
+            </div>
+
+            {/* Diet & Ecology */}
+            <div className="space-y-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9aa2b0]">
+                Diet & Ecological Role
+              </div>
+              <p className="text-[#c0c5ce] leading-relaxed bg-[#10141e] p-3 border border-[#222938]">
+                {activeWhaleDetails.dietNotes}
+              </p>
+            </div>
+
+            {/* Whaling Operations Note */}
+            <div className="p-3 border border-blue-900/50 bg-blue-950/20 text-[#a2b0cb] text-[11px] space-y-1">
+              <div className="font-bold text-blue-200">Whaling Operations</div>
+              <div>
+                Encountered in the offshore Whaling Grounds. Requires heavy hydraulic rod, high-capacity winch reel, and a commercial whaling permit.
+              </div>
+            </div>
+
+            {/* Wikipedia Reference Link */}
+            <div className="pt-1 flex items-center justify-between border-t border-[#252c3c] text-xs">
+              <a
+                href={activeWhaleDetails.wikiUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-400 hover:text-sky-300 underline font-semibold flex items-center gap-1"
+              >
+                Read on Wikipedia &rarr;
+              </a>
+              <button
+                onClick={() => setInspectedWhale(null)}
+                className="px-4 py-1.5 border border-[#3b4356] bg-[#1a202c] hover:bg-[#252d3e] text-[#f1f3f5] font-bold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

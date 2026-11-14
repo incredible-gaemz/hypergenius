@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type RarityTier = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export type RarityTier = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythical';
 
 export interface FishSpecies {
   id: number;
@@ -39,7 +39,7 @@ export interface Lure {
   id: string;
   name: string;
   price: number;
-  rarityWeights: Record<RarityTier, number>;
+  rarityWeights: Partial<Record<RarityTier, number>>;
   targetFishIds?: number[];
   targetNote?: string;
   emptyHookChance?: number; // chance to catch nothing (e.g. 0.28 without bait)
@@ -76,7 +76,7 @@ export interface CatalogEntry {
   unlockedMutations?: string[];
 }
 
-export type AreaId = 'pond' | 'river' | 'lake' | 'bayou' | 'ocean' | 'reef';
+export type AreaId = 'pond' | 'river' | 'lake' | 'bayou' | 'ocean' | 'reef' | 'trench';
 
 export interface FishingAreaDef {
   id: AreaId;
@@ -217,7 +217,7 @@ export const FISHING_AREAS: FishingAreaDef[] = [
     id: 'ocean',
     name: 'Coastal Ocean',
     description: 'Atlantic coastal pier and tidal surf where salt gamefish, flounder, and bass hunt.',
-    unlockCost: 800,
+    unlockCost: 1000,
     requiredSpecies: 28,
     theme: {
       name: 'Coastal Surf',
@@ -233,7 +233,7 @@ export const FISHING_AREAS: FishingAreaDef[] = [
     id: 'reef',
     name: 'Tropical Coral Reef',
     description: 'Vibrant barrier reef drop-offs alive with snappers, barracudas, groupers, and pelagics.',
-    unlockCost: 3000,
+    unlockCost: 10000,
     requiredSpecies: 40,
     bannerPosition: 'center 15%',
     theme: {
@@ -244,6 +244,23 @@ export const FISHING_AREAS: FishingAreaDef[] = [
       accentClass: 'text-cyan-300',
       accentBgClass: 'bg-cyan-950/40 border-cyan-500/70',
       textMutedClass: 'text-[#7ba0a0]',
+    },
+  },
+  {
+    id: 'trench',
+    name: 'Abyssal Trench',
+    description: 'Lightless hadal rift in the deep ocean crust, pressurized and stalked by bioluminescent aberrations.',
+    unlockCost: 150000,
+    requiredSpecies: 48,
+    bannerPosition: 'center center',
+    theme: {
+      name: 'Abyssal Trench',
+      bgClass: 'bg-[#05070f]',
+      panelClass: 'bg-[#0a0d1a]',
+      borderClass: 'border-[#181f36]',
+      accentClass: 'text-indigo-400',
+      accentBgClass: 'bg-indigo-950/40 border-indigo-600/70',
+      textMutedClass: 'text-[#69749c]',
     },
   },
 ];
@@ -265,10 +282,10 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 2, name: 'Creek Chub', tier: 'common', minWeight: 0.2, maxWeight: 0.9, trophyWeight: 1.2, basePrice: 2, bestLureId: 'bread_crust', areaId: 'pond' },
   { id: 3, name: 'Golden Shiner', tier: 'common', minWeight: 0.1, maxWeight: 0.6, trophyWeight: 0.8, basePrice: 2, bestLureId: 'bread_crust', areaId: 'pond' },
   { id: 4, name: 'Fathead Minnow', tier: 'common', minWeight: 0.05, maxWeight: 0.2, trophyWeight: 0.3, basePrice: 1, bestLureId: 'bread_crust', areaId: 'pond' },
-  { id: 5, name: 'Bluegill', tier: 'common', minWeight: 0.3, maxWeight: 1.5, trophyWeight: 1.9, basePrice: 3, bestLureId: 'worm', areaId: 'pond' },
-  { id: 6, name: 'Pumpkinseed Sunfish', tier: 'common', minWeight: 0.25, maxWeight: 1.2, trophyWeight: 1.6, basePrice: 3, bestLureId: 'worm', areaId: 'pond' },
+  { id: 5, name: 'Bluegill', tier: 'common', minWeight: 0.3, maxWeight: 1.5, trophyWeight: 1.9, basePrice: 3, bestLureId: 'cricket', areaId: 'pond' },
+  { id: 6, name: 'Pumpkinseed Sunfish', tier: 'common', minWeight: 0.25, maxWeight: 1.2, trophyWeight: 1.6, basePrice: 3, bestLureId: 'cricket', areaId: 'pond' },
   { id: 7, name: 'Green Sunfish', tier: 'common', minWeight: 0.3, maxWeight: 1.4, trophyWeight: 1.8, basePrice: 3, bestLureId: 'worm', areaId: 'pond' },
-  { id: 8, name: 'Redear Sunfish', tier: 'common', minWeight: 0.4, maxWeight: 2.0, trophyWeight: 2.6, basePrice: 4, bestLureId: 'worm', areaId: 'pond' },
+  { id: 8, name: 'Redear Sunfish', tier: 'common', minWeight: 0.4, maxWeight: 2.0, trophyWeight: 2.6, basePrice: 4, bestLureId: 'cricket', areaId: 'pond' },
   { id: 9, name: 'Warmouth', tier: 'common', minWeight: 0.4, maxWeight: 1.8, trophyWeight: 2.4, basePrice: 4, bestLureId: 'worm', areaId: 'pond' },
   { id: 10, name: 'Rock Bass', tier: 'common', minWeight: 0.5, maxWeight: 2.0, trophyWeight: 2.6, basePrice: 4, bestLureId: 'jig', areaId: 'pond' },
   { id: 11, name: 'Yellow Bullhead', tier: 'common', minWeight: 0.8, maxWeight: 3.5, trophyWeight: 4.5, basePrice: 5, bestLureId: 'cheese_cube', areaId: 'pond' },
@@ -289,7 +306,7 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 24, name: 'River Smallmouth Bass', tier: 'common', minWeight: 0.8, maxWeight: 5.0, trophyWeight: 6.8, basePrice: 12, bestLureId: 'jig', areaId: 'river' },
   { id: 25, name: 'Cutthroat Trout', tier: 'uncommon', minWeight: 0.9, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 16, bestLureId: 'mayfly', areaId: 'river' },
   { id: 26, name: 'Golden Trout', tier: 'uncommon', minWeight: 0.6, maxWeight: 4.0, trophyWeight: 5.5, basePrice: 22, bestLureId: 'mayfly', areaId: 'river' },
-  { id: 27, name: 'Mountain Whitefish', tier: 'uncommon', minWeight: 0.7, maxWeight: 3.8, trophyWeight: 5.0, basePrice: 15, bestLureId: 'jig', areaId: 'river' },
+  { id: 27, name: 'Mountain Whitefish', tier: 'uncommon', minWeight: 0.7, maxWeight: 3.8, trophyWeight: 5.0, basePrice: 15, bestLureId: 'cricket', areaId: 'river' },
   { id: 28, name: 'Arctic Grayling', tier: 'uncommon', minWeight: 0.8, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 24, bestLureId: 'mayfly', areaId: 'river' },
   { id: 29, name: 'River Walleye', tier: 'uncommon', minWeight: 1.2, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 18, bestLureId: 'jig', areaId: 'river' },
   { id: 30, name: 'Sauger', tier: 'uncommon', minWeight: 1.0, maxWeight: 5.5, trophyWeight: 7.0, basePrice: 16, bestLureId: 'jig', areaId: 'river' },
@@ -325,16 +342,16 @@ export const FISH_COLLECTION: FishSpecies[] = [
   // --- BAYOU (Cypress Bayou) ---
   { id: 57, name: 'Bowfin (Mudfish)', tier: 'common', minWeight: 2.0, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 15, bestLureId: 'crawfish', areaId: 'bayou' },
   { id: 58, name: 'Channel Catfish', tier: 'common', minWeight: 2.0, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 18, bestLureId: 'cheese_cube', areaId: 'bayou' },
-  { id: 59, name: 'Flathead Catfish', tier: 'uncommon', minWeight: 4.0, maxWeight: 48.0, trophyWeight: 62.0, basePrice: 32, bestLureId: 'crawfish', areaId: 'bayou' },
-  { id: 60, name: 'Blue Catfish', tier: 'uncommon', minWeight: 5.0, maxWeight: 65.0, trophyWeight: 85.0, basePrice: 38, bestLureId: 'cheese_cube', areaId: 'bayou' },
+  { id: 59, name: 'Flathead Catfish', tier: 'uncommon', minWeight: 4.0, maxWeight: 48.0, trophyWeight: 62.0, basePrice: 32, bestLureId: 'cut_bait', areaId: 'bayou' },
+  { id: 60, name: 'Blue Catfish', tier: 'uncommon', minWeight: 5.0, maxWeight: 65.0, trophyWeight: 85.0, basePrice: 38, bestLureId: 'cut_bait', areaId: 'bayou' },
   { id: 61, name: 'Spotted Gar', tier: 'uncommon', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 24, bestLureId: 'minnow', areaId: 'bayou' },
   { id: 62, name: 'Shortnose Gar', tier: 'uncommon', minWeight: 1.2, maxWeight: 7.0, trophyWeight: 9.0, basePrice: 22, bestLureId: 'minnow', areaId: 'bayou' },
   { id: 63, name: 'Longnose Gar', tier: 'rare', minWeight: 3.0, maxWeight: 25.0, trophyWeight: 34.0, basePrice: 48, bestLureId: 'spinner', areaId: 'bayou' },
   { id: 64, name: 'Bigmouth Buffalo', tier: 'rare', minWeight: 6.0, maxWeight: 45.0, trophyWeight: 60.0, basePrice: 55, bestLureId: 'sweet_corn', areaId: 'bayou' },
   { id: 65, name: 'Smallmouth Buffalo', tier: 'rare', minWeight: 5.0, maxWeight: 38.0, trophyWeight: 50.0, basePrice: 50, bestLureId: 'sweet_corn', areaId: 'bayou' },
   { id: 66, name: 'Paddlefish', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 100.0, basePrice: 78, bestLureId: 'jig', areaId: 'bayou' },
-  { id: 67, name: 'Alligator Gar', tier: 'epic', minWeight: 25.0, maxWeight: 190.0, trophyWeight: 250.0, basePrice: 160, bestLureId: 'bloodworm', areaId: 'bayou' },
-  { id: 68, name: 'Monster Flathead Catfish', tier: 'epic', minWeight: 35.0, maxWeight: 110.0, trophyWeight: 140.0, basePrice: 175, bestLureId: 'crawfish', areaId: 'bayou' },
+  { id: 67, name: 'Alligator Gar', tier: 'epic', minWeight: 25.0, maxWeight: 190.0, trophyWeight: 250.0, basePrice: 160, bestLureId: 'cut_bait', areaId: 'bayou' },
+  { id: 68, name: 'Monster Flathead Catfish', tier: 'epic', minWeight: 35.0, maxWeight: 110.0, trophyWeight: 140.0, basePrice: 175, bestLureId: 'cut_bait', areaId: 'bayou' },
   { id: 69, name: 'Albino River Gar', tier: 'legendary', minWeight: 40.0, maxWeight: 230.0, trophyWeight: 300.0, basePrice: 850, bestLureId: 'dragon_scale', areaId: 'bayou' },
 
   // --- OCEAN (Coastal Ocean) ---
@@ -343,17 +360,17 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 72, name: 'Striped Mullet', tier: 'common', minWeight: 1.0, maxWeight: 4.0, trophyWeight: 5.5, basePrice: 10, bestLureId: 'bread_crust', areaId: 'ocean' },
   { id: 73, name: 'Summer Flounder', tier: 'common', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 18, bestLureId: 'jig', areaId: 'ocean' },
   { id: 74, name: 'Winter Flounder', tier: 'common', minWeight: 1.0, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 16, bestLureId: 'jig', areaId: 'ocean' },
-  { id: 75, name: 'Black Sea Bass', tier: 'common', minWeight: 1.2, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 18, bestLureId: 'jig', areaId: 'ocean' },
+  { id: 75, name: 'Black Sea Bass', tier: 'common', minWeight: 1.2, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 18, bestLureId: 'feather_jig', areaId: 'ocean' },
   { id: 76, name: 'Sheepshead', tier: 'uncommon', minWeight: 2.0, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 28, bestLureId: 'crawfish', areaId: 'ocean' },
   { id: 77, name: 'Speckled Sea Trout', tier: 'uncommon', minWeight: 1.5, maxWeight: 8.5, trophyWeight: 11.5, basePrice: 26, bestLureId: 'minnow', areaId: 'ocean' },
-  { id: 78, name: 'Striped Bass', tier: 'uncommon', minWeight: 4.0, maxWeight: 40.0, trophyWeight: 52.0, basePrice: 38, bestLureId: 'crankbait', areaId: 'ocean' },
-  { id: 79, name: 'Red Drum (Redfish)', tier: 'uncommon', minWeight: 3.5, maxWeight: 35.0, trophyWeight: 48.0, basePrice: 36, bestLureId: 'crankbait', areaId: 'ocean' },
+  { id: 78, name: 'Striped Bass', tier: 'uncommon', minWeight: 4.0, maxWeight: 40.0, trophyWeight: 52.0, basePrice: 38, bestLureId: 'feather_jig', areaId: 'ocean' },
+  { id: 79, name: 'Red Drum (Redfish)', tier: 'uncommon', minWeight: 3.5, maxWeight: 35.0, trophyWeight: 48.0, basePrice: 36, bestLureId: 'cut_bait', areaId: 'ocean' },
   { id: 80, name: 'Black Drum', tier: 'uncommon', minWeight: 5.0, maxWeight: 50.0, trophyWeight: 65.0, basePrice: 42, bestLureId: 'stinky_clam', areaId: 'ocean' },
-  { id: 81, name: 'Bluefish', tier: 'uncommon', minWeight: 2.5, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 32, bestLureId: 'spinner', areaId: 'ocean' },
-  { id: 82, name: 'Snook', tier: 'rare', minWeight: 4.0, maxWeight: 28.0, trophyWeight: 36.0, basePrice: 65, bestLureId: 'jig', areaId: 'ocean' },
+  { id: 81, name: 'Bluefish', tier: 'uncommon', minWeight: 2.5, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 32, bestLureId: 'feather_jig', areaId: 'ocean' },
+  { id: 82, name: 'Snook', tier: 'rare', minWeight: 4.0, maxWeight: 28.0, trophyWeight: 36.0, basePrice: 65, bestLureId: 'feather_jig', areaId: 'ocean' },
   { id: 83, name: 'Tarpon', tier: 'rare', minWeight: 15.0, maxWeight: 140.0, trophyWeight: 190.0, basePrice: 95, bestLureId: 'shad', areaId: 'ocean' },
-  { id: 84, name: 'Cobia', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 98.0, basePrice: 85, bestLureId: 'jig', areaId: 'ocean' },
-  { id: 85, name: 'Pacific Halibut', tier: 'rare', minWeight: 15.0, maxWeight: 180.0, trophyWeight: 240.0, basePrice: 95, bestLureId: 'stinky_clam', areaId: 'ocean' },
+  { id: 84, name: 'Cobia', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 98.0, basePrice: 85, bestLureId: 'diamond_jig', areaId: 'ocean' },
+  { id: 85, name: 'Pacific Halibut', tier: 'rare', minWeight: 15.0, maxWeight: 180.0, trophyWeight: 240.0, basePrice: 95, bestLureId: 'diamond_jig', areaId: 'ocean' },
   { id: 86, name: 'King (Chinook) Salmon', tier: 'rare', minWeight: 8.0, maxWeight: 50.0, trophyWeight: 65.0, basePrice: 75, bestLureId: 'shad', areaId: 'ocean' },
   { id: 87, name: 'Yellowfin Tuna', tier: 'epic', minWeight: 20.0, maxWeight: 160.0, trophyWeight: 210.0, basePrice: 220, bestLureId: 'squid', areaId: 'ocean' },
   { id: 88, name: 'Bluefin Tuna', tier: 'epic', minWeight: 50.0, maxWeight: 550.0, trophyWeight: 720.0, basePrice: 450, bestLureId: 'squid', areaId: 'ocean' },
@@ -369,42 +386,64 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 96, name: 'Red Snapper', tier: 'uncommon', minWeight: 3.0, maxWeight: 26.0, trophyWeight: 34.0, basePrice: 42, bestLureId: 'stinky_clam', areaId: 'reef' },
   { id: 97, name: 'Lionfish', tier: 'uncommon', minWeight: 0.8, maxWeight: 3.2, trophyWeight: 4.2, basePrice: 42, bestLureId: 'spinner', areaId: 'reef' },
   { id: 98, name: 'Spotted Moray Eel', tier: 'uncommon', minWeight: 3.0, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 50, bestLureId: 'crawfish', areaId: 'reef' },
-  { id: 99, name: 'Great Barracuda', tier: 'rare', minWeight: 5.0, maxWeight: 42.0, trophyWeight: 55.0, basePrice: 85, bestLureId: 'crankbait', areaId: 'reef' },
-  { id: 100, name: 'Giant Trevally', tier: 'rare', minWeight: 8.0, maxWeight: 68.0, trophyWeight: 90.0, basePrice: 105, bestLureId: 'crankbait', areaId: 'reef' },
-  { id: 101, name: 'Wahoo', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 100.0, basePrice: 115, bestLureId: 'crankbait', areaId: 'reef' },
+  { id: 99, name: 'Great Barracuda', tier: 'rare', minWeight: 5.0, maxWeight: 42.0, trophyWeight: 55.0, basePrice: 85, bestLureId: 'feather_jig', areaId: 'reef' },
+  { id: 100, name: 'Giant Trevally', tier: 'rare', minWeight: 8.0, maxWeight: 68.0, trophyWeight: 90.0, basePrice: 105, bestLureId: 'diamond_jig', areaId: 'reef' },
+  { id: 101, name: 'Wahoo', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 100.0, basePrice: 115, bestLureId: 'diamond_jig', areaId: 'reef' },
   { id: 102, name: 'Mahi-Mahi', tier: 'rare', minWeight: 6.0, maxWeight: 45.0, trophyWeight: 60.0, basePrice: 95, bestLureId: 'squid', areaId: 'reef' },
-  { id: 103, name: 'Goliath Grouper', tier: 'rare', minWeight: 35.0, maxWeight: 320.0, trophyWeight: 420.0, basePrice: 145, bestLureId: 'stinky_clam', areaId: 'reef' },
+  { id: 103, name: 'Goliath Grouper', tier: 'rare', minWeight: 35.0, maxWeight: 320.0, trophyWeight: 420.0, basePrice: 145, bestLureId: 'cut_bait', areaId: 'reef' },
   { id: 104, name: 'Blacktip Reef Shark', tier: 'epic', minWeight: 18.0, maxWeight: 85.0, trophyWeight: 110.0, basePrice: 240, bestLureId: 'squid', areaId: 'reef' },
   { id: 105, name: 'Nurse Shark', tier: 'epic', minWeight: 25.0, maxWeight: 160.0, trophyWeight: 210.0, basePrice: 210, bestLureId: 'stinky_clam', areaId: 'reef' },
   { id: 106, name: 'Blue Marlin', tier: 'epic', minWeight: 60.0, maxWeight: 600.0, trophyWeight: 780.0, basePrice: 450, bestLureId: 'squid', areaId: 'reef' },
   { id: 107, name: 'Swordfish', tier: 'epic', minWeight: 45.0, maxWeight: 490.0, trophyWeight: 640.0, basePrice: 400, bestLureId: 'squid', areaId: 'reef' },
   { id: 108, name: 'Sailfish', tier: 'epic', minWeight: 30.0, maxWeight: 140.0, trophyWeight: 180.0, basePrice: 320, bestLureId: 'squid', areaId: 'reef' },
   { id: 109, name: 'Grand Sovereign Marlin', tier: 'legendary', minWeight: 150.0, maxWeight: 1100.0, trophyWeight: 1450.0, basePrice: 2500, bestLureId: 'dragon_scale', areaId: 'reef' },
-  { id: 110, name: 'Longear Sunfish', tier: 'common', minWeight: 0.3, maxWeight: 1.6, trophyWeight: 2.1, basePrice: 4, bestLureId: 'worm', areaId: 'pond' },
+  { id: 110, name: 'Longear Sunfish', tier: 'common', minWeight: 0.3, maxWeight: 1.6, trophyWeight: 2.1, basePrice: 4, bestLureId: 'cricket', areaId: 'pond' },
   { id: 111, name: 'Dolly Varden Trout', tier: 'rare', minWeight: 1.5, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 35, bestLureId: 'spinner', areaId: 'river' },
   { id: 112, name: 'Splake', tier: 'rare', minWeight: 2.0, maxWeight: 14.0, trophyWeight: 18.0, basePrice: 40, bestLureId: 'crankbait', areaId: 'lake' },
   { id: 113, name: 'Redfin Pickerel', tier: 'uncommon', minWeight: 0.5, maxWeight: 2.5, trophyWeight: 3.2, basePrice: 18, bestLureId: 'minnow', areaId: 'bayou' },
-  { id: 114, name: 'Florida Pompano', tier: 'rare', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 10.5, basePrice: 45, bestLureId: 'jig', areaId: 'ocean' },
-  { id: 115, name: 'Picasso Triggerfish', tier: 'uncommon', minWeight: 0.8, maxWeight: 3.5, trophyWeight: 4.8, basePrice: 32, bestLureId: 'stinky_clam', areaId: 'reef' },
-  { id: 116, name: 'Giant Oarfish', tier: 'legendary', minWeight: 150.0, maxWeight: 650.0, trophyWeight: 800.0, basePrice: 3200, bestLureId: 'dragon_scale', areaId: 'ocean' },
-  { id: 117, name: 'Colossal Squid', tier: 'legendary', minWeight: 350.0, maxWeight: 1200.0, trophyWeight: 1450.0, basePrice: 4500, bestLureId: 'dragon_scale', areaId: 'ocean' },
+  { id: 114, name: 'Florida Pompano', tier: 'rare', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 10.5, basePrice: 45, bestLureId: 'feather_jig', areaId: 'ocean' },
+  { id: 115, name: 'Picasso Triggerfish', tier: 'uncommon', minWeight: 0.8, maxWeight: 3.5, trophyWeight: 4.8, basePrice: 32, bestLureId: 'feather_jig', areaId: 'reef' },
+  { id: 116, name: 'Giant Oarfish', tier: 'legendary', minWeight: 150.0, maxWeight: 650.0, trophyWeight: 800.0, basePrice: 3200, bestLureId: 'dragon_scale', areaId: 'trench' },
+  { id: 117, name: 'Colossal Squid', tier: 'legendary', minWeight: 350.0, maxWeight: 1200.0, trophyWeight: 1450.0, basePrice: 4500, bestLureId: 'dragon_scale', areaId: 'trench' },
   { id: 118, name: 'Great White Shark', tier: 'legendary', minWeight: 600.0, maxWeight: 4500.0, trophyWeight: 5200.0, basePrice: 6000, bestLureId: 'dragon_scale', areaId: 'ocean' },
-  { id: 119, name: 'Megamouth Shark', tier: 'epic', minWeight: 400.0, maxWeight: 2800.0, trophyWeight: 3400.0, basePrice: 3800, bestLureId: 'dragon_scale', areaId: 'ocean' },
+  { id: 119, name: 'Megamouth Shark', tier: 'epic', minWeight: 400.0, maxWeight: 2800.0, trophyWeight: 3400.0, basePrice: 3800, bestLureId: 'dragon_scale', areaId: 'trench' },
   { id: 120, name: 'Coelacanth', tier: 'legendary', minWeight: 80.0, maxWeight: 240.0, trophyWeight: 290.0, basePrice: 4800, bestLureId: 'dragon_scale', areaId: 'reef' },
   { id: 121, name: 'Giant Oceanic Manta Ray', tier: 'legendary', minWeight: 700.0, maxWeight: 3600.0, trophyWeight: 4400.0, basePrice: 5500, bestLureId: 'dragon_scale', areaId: 'reef' },
-  { id: 122, name: 'Deep Sea Anglerfish', tier: 'epic', minWeight: 1.5, maxWeight: 9.0, trophyWeight: 12.0, basePrice: 340, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 122, name: 'Deep Sea Anglerfish', tier: 'epic', minWeight: 1.5, maxWeight: 9.0, trophyWeight: 12.0, basePrice: 340, bestLureId: 'deep_glow_rig', areaId: 'trench' },
   { id: 123, name: 'Coho Salmon', tier: 'uncommon', minWeight: 3.5, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 28, bestLureId: 'spinner', areaId: 'river' },
   { id: 124, name: 'American Shad', tier: 'common', minWeight: 1.5, maxWeight: 7.5, trophyWeight: 9.8, basePrice: 10, bestLureId: 'shad', areaId: 'river' },
   { id: 125, name: 'Clown Triggerfish', tier: 'uncommon', minWeight: 1.5, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 48, bestLureId: 'crawfish', areaId: 'reef' },
   { id: 126, name: 'Emperor Angelfish', tier: 'rare', minWeight: 1.0, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 88, bestLureId: 'stinky_clam', areaId: 'reef' },
   { id: 127, name: 'Royal Gramma', tier: 'common', minWeight: 0.1, maxWeight: 0.5, trophyWeight: 0.75, basePrice: 18, bestLureId: 'worm', areaId: 'reef' },
-  { id: 128, name: 'Whitetip Reef Shark', tier: 'epic', minWeight: 15.0, maxWeight: 55.0, trophyWeight: 70.0, basePrice: 260, bestLureId: 'squid', areaId: 'reef' },
-  { id: 129, name: 'Napoleon Wrasse', tier: 'epic', minWeight: 25.0, maxWeight: 240.0, trophyWeight: 320.0, basePrice: 420, bestLureId: 'crawfish', areaId: 'reef' },
+  { id: 128, name: 'Whitetip Reef Shark', tier: 'epic', minWeight: 15.0, maxWeight: 55.0, trophyWeight: 70.0, basePrice: 260, bestLureId: 'cut_bait', areaId: 'reef' },
+  { id: 129, name: 'Napoleon Wrasse', tier: 'epic', minWeight: 25.0, maxWeight: 240.0, trophyWeight: 320.0, basePrice: 420, bestLureId: 'cut_bait', areaId: 'reef' },
   { id: 130, name: 'Flame Angelfish', tier: 'uncommon', minWeight: 0.2, maxWeight: 0.8, trophyWeight: 1.1, basePrice: 38, bestLureId: 'mayfly', areaId: 'reef' },
   { id: 131, name: 'Spotted Porcupinefish', tier: 'uncommon', minWeight: 1.5, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 45, bestLureId: 'crawfish', areaId: 'reef' },
-  { id: 132, name: 'Great Hammerhead Shark', tier: 'epic', minWeight: 120.0, maxWeight: 950.0, trophyWeight: 1250.0, basePrice: 480, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 132, name: 'Great Hammerhead Shark', tier: 'epic', minWeight: 120.0, maxWeight: 950.0, trophyWeight: 1250.0, basePrice: 480, bestLureId: 'cut_bait', areaId: 'ocean' },
   { id: 133, name: 'Ocean Sunfish (Mola Mola)', tier: 'epic', minWeight: 200.0, maxWeight: 2200.0, trophyWeight: 2800.0, basePrice: 520, bestLureId: 'squid', areaId: 'ocean' },
   { id: 134, name: 'Mandarinfish', tier: 'rare', minWeight: 0.1, maxWeight: 0.4, trophyWeight: 0.6, basePrice: 75, bestLureId: 'mayfly', areaId: 'reef' },
+  { id: 135, name: 'Barreleye Fish', tier: 'uncommon', minWeight: 0.4, maxWeight: 1.8, trophyWeight: 2.2, basePrice: 180, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 136, name: "Sloane's Viperfish", tier: 'uncommon', minWeight: 0.3, maxWeight: 1.5, trophyWeight: 2.0, basePrice: 210, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 137, name: 'Gulper Eel', tier: 'rare', minWeight: 1.5, maxWeight: 7.0, trophyWeight: 9.5, basePrice: 420, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 138, name: 'Frilled Shark', tier: 'epic', minWeight: 15.0, maxWeight: 65.0, trophyWeight: 80.0, basePrice: 850, bestLureId: 'diamond_jig', areaId: 'trench' },
+  { id: 139, name: 'Giant Isopod', tier: 'common', minWeight: 1.0, maxWeight: 4.5, trophyWeight: 5.5, basePrice: 95, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 140, name: 'Black Swallower', tier: 'rare', minWeight: 0.5, maxWeight: 2.5, trophyWeight: 3.2, basePrice: 380, bestLureId: 'minnow', areaId: 'trench' },
+  { id: 141, name: 'Blobfish', tier: 'common', minWeight: 2.0, maxWeight: 12.0, trophyWeight: 15.0, basePrice: 110, bestLureId: 'cut_bait', areaId: 'trench' },
+  { id: 142, name: 'Fangtooth', tier: 'uncommon', minWeight: 0.6, maxWeight: 2.2, trophyWeight: 2.8, basePrice: 220, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 143, name: 'Stoplight Loosejaw', tier: 'rare', minWeight: 0.4, maxWeight: 1.8, trophyWeight: 2.4, basePrice: 450, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 144, name: 'Pointy-nosed Blue Chimaera', tier: 'epic', minWeight: 18.0, maxWeight: 75.0, trophyWeight: 92.0, basePrice: 920, bestLureId: 'diamond_jig', areaId: 'trench' },
+  { id: 145, name: 'Greenland Shark', tier: 'legendary', minWeight: 750.0, maxWeight: 2400.0, trophyWeight: 2800.0, basePrice: 4200, bestLureId: 'dragon_scale', areaId: 'trench' },
+  { id: 146, name: 'Mariana Snailfish', tier: 'common', minWeight: 0.1, maxWeight: 0.5, trophyWeight: 0.7, basePrice: 85, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 147, name: 'Pacific Sleeper Shark', tier: 'epic', minWeight: 350.0, maxWeight: 2200.0, trophyWeight: 2700.0, basePrice: 1200, bestLureId: 'cut_bait', areaId: 'trench' },
+  { id: 148, name: 'Giant Grenadier', tier: 'uncommon', minWeight: 5.0, maxWeight: 45.0, trophyWeight: 60.0, basePrice: 240, bestLureId: 'diamond_jig', areaId: 'trench' },
+  { id: 149, name: 'Goblin Shark', tier: 'rare', minWeight: 80.0, maxWeight: 450.0, trophyWeight: 560.0, basePrice: 580, bestLureId: 'squid', areaId: 'trench' },
+  { id: 150, name: 'Dumbo Octopus', tier: 'rare', minWeight: 1.0, maxWeight: 6.0, trophyWeight: 8.5, basePrice: 460, bestLureId: 'crawfish', areaId: 'trench' },
+  { id: 151, name: 'Bigfin Squid', tier: 'epic', minWeight: 40.0, maxWeight: 280.0, trophyWeight: 360.0, basePrice: 950, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  { id: 152, name: 'Tripod Fish', tier: 'uncommon', minWeight: 0.5, maxWeight: 2.2, trophyWeight: 2.9, basePrice: 210, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  // --- MYTHICAL RELICS & CRYPTIDS ---
+  { id: 153, name: 'Lau Swamp Catfish', tier: 'mythical', minWeight: 350.0, maxWeight: 1100.0, trophyWeight: 1350.0, basePrice: 11000, bestLureId: 'cut_bait', areaId: 'bayou' },
+  { id: 154, name: 'Queensland Titan Grouper', tier: 'mythical', minWeight: 500.0, maxWeight: 1500.0, trophyWeight: 1800.0, basePrice: 14000, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 155, name: 'Abyssal Ghost Chimaera', tier: 'mythical', minWeight: 60.0, maxWeight: 240.0, trophyWeight: 290.0, basePrice: 17500, bestLureId: 'deep_glow_rig', areaId: 'trench' },
 ];
 
 /**
@@ -425,7 +464,7 @@ export const RODS: Rod[] = [
   { id: 'legendary_rod', name: 'Custom 130lb Big-Game Chair Rod', price: 75000, waitSeconds: 1.8, sizeMultiplier: 4.2, power: 10.5, minWeight: 30.0 },
   { id: 'thicc_rod', name: 'Thicc rod', price: 175000, waitSeconds: 1.4, sizeMultiplier: 5.2, power: 12.5, minWeight: 45.0 },
   { id: 'extreme_rod', name: 'Mastercrafted Heirloom Grander Rod', price: 420000, waitSeconds: 1.0, sizeMultiplier: 7.5, power: 16.5, minWeight: 100.0 },
-  { id: 'the_one_rod', name: 'Heavy Hydraulic Bent-Butt Boom', price: 10000000, waitSeconds: 0.4, sizeMultiplier: 16.0, power: 26.0, minWeight: 300.0 },
+  { id: 'the_one_rod', name: 'Heavy Hydraulic Bent-Butt Boom', price: 1000000, waitSeconds: 0.4, sizeMultiplier: 16.0, power: 26.0, minWeight: 300.0 },
 ];
 
 export function getWaitSpeedLabel(waitSeconds: number): string {
@@ -487,6 +526,8 @@ export function getAreaThemeButtonClass(areaId: string): string {
       return 'border-2 border-blue-500 bg-blue-950/80 hover:bg-blue-900 hover:border-blue-400 text-blue-100 shadow-lg shadow-blue-950/50';
     case 'reef':
       return 'border-2 border-cyan-400 bg-cyan-950/80 hover:bg-cyan-900 hover:border-cyan-300 text-cyan-100 shadow-lg shadow-cyan-950/50';
+    case 'trench':
+      return 'border-2 border-indigo-500 bg-indigo-950/80 hover:bg-indigo-900 hover:border-indigo-400 text-indigo-100 shadow-lg shadow-indigo-950/50';
     default:
       return 'border-2 border-[#3b404c] bg-[#22252c] hover:bg-[#2a2e37] text-[#f1f3f5]';
   }
@@ -539,6 +580,14 @@ export const LURES: Lure[] = [
     emptyHookChance: 0.05,
   },
   {
+    id: 'cricket',
+    name: 'Field Cricket',
+    price: 60,
+    rarityWeights: { common: 45, uncommon: 45, rare: 10, epic: 0, legendary: 0 },
+    targetNote: 'River & Lake Surface Panfish',
+    emptyHookChance: 0.05,
+  },
+  {
     id: 'bobber',
     name: 'bobber',
     price: 75,
@@ -568,11 +617,27 @@ export const LURES: Lure[] = [
     emptyHookChance: 0.03,
   },
   {
+    id: 'feather_jig',
+    name: 'Bucktail Feather Jig',
+    price: 850,
+    rarityWeights: { common: 15, uncommon: 42, rare: 35, epic: 8, legendary: 0 },
+    targetNote: 'Midwater Gamefish',
+    emptyHookChance: 0.03,
+  },
+  {
     id: 'stinky_clam',
     name: 'Stinky Clam',
     price: 1100,
     rarityWeights: { common: 12, uncommon: 36, rare: 38, epic: 14, legendary: 0 },
     targetNote: 'Deep Saltwater Dwellers',
+    emptyHookChance: 0.03,
+  },
+  {
+    id: 'cut_bait',
+    name: 'Oily Cut Bait Chunk',
+    price: 1600,
+    rarityWeights: { common: 10, uncommon: 35, rare: 40, epic: 13, legendary: 1, mythical: 1 },
+    targetNote: 'Bayou & Coastal Bottom Feeders',
     emptyHookChance: 0.03,
   },
   {
@@ -610,15 +675,31 @@ export const LURES: Lure[] = [
     id: 'squid',
     name: 'Squid',
     price: 35000,
-    rarityWeights: { common: 2, uncommon: 14, rare: 45, epic: 30, legendary: 9 },
+    rarityWeights: { common: 2, uncommon: 14, rare: 45, epic: 29, legendary: 9, mythical: 1 },
     targetNote: 'Pelagic Ocean Hunters',
+    emptyHookChance: 0.01,
+  },
+  {
+    id: 'diamond_jig',
+    name: 'Heavy Diamond Iron Jig',
+    price: 75000,
+    rarityWeights: { common: 2, uncommon: 10, rare: 40, epic: 34, legendary: 13, mythical: 1 },
+    targetNote: 'Deep Vertical Ocean Predators',
+    emptyHookChance: 0.01,
+  },
+  {
+    id: 'deep_glow_rig',
+    name: 'Bioluminescent Abyssal Drop Rig',
+    price: 160000,
+    rarityWeights: { common: 1, uncommon: 5, rare: 30, epic: 41, legendary: 21, mythical: 2 },
+    targetNote: 'Trench Abyssal Monsters',
     emptyHookChance: 0.01,
   },
   {
     id: 'dragon_scale',
     name: 'Abalone Pearl Trolling Skirt',
     price: 450000,
-    rarityWeights: { common: 0, uncommon: 2, rare: 20, epic: 45, legendary: 33 },
+    rarityWeights: { common: 0, uncommon: 2, rare: 20, epic: 43, legendary: 32, mythical: 3 },
     targetNote: 'Apex Pelagic Giants',
     emptyHookChance: 0.01,
   },
@@ -764,6 +845,13 @@ export const AREA_TRAP_POOL: Record<AreaId, TrapItem[]> = {
     { id: 'reef_squidlet', name: 'Baby Reef Squid', type: 'bait', value: 22, lureEquivalentId: 'squid' },
     { id: 'spiny_lobster_pup', name: 'Rock Lobster Juvenile', type: 'catch', value: 45 },
     { id: 'mantis_shrimp', name: 'Peacock Mantis Shrimp', type: 'catch', value: 35 },
+  ],
+  trench: [
+    { id: 'abyssal_amphipod', name: 'Giant Abyssal Amphipod', type: 'bait', value: 35, lureEquivalentId: 'squid' },
+    { id: 'deep_sea_prawn', name: 'Scarlet Deep-Sea Prawn', type: 'bait', value: 40, lureEquivalentId: 'crawfish' },
+    { id: 'vent_crab', name: 'Hydrothermal Vent Crab', type: 'catch', value: 65 },
+    { id: 'bathynomus_scout', name: 'Juvenile Deep Isopod', type: 'catch', value: 85 },
+    { id: 'bioluminescent_squidlet', name: 'Bioluminescent Squidlet', type: 'bait', value: 50, lureEquivalentId: 'squid' },
   ],
 };
 
@@ -1081,9 +1169,88 @@ export function getTrapBaitDisplay(trap: ActiveTrap): {
   };
 }
 
-export function rollWaitTime(rod: Rod): number {
+export interface LureAreaEffectiveness {
+  waitMultiplier: number;
+  emptyPenalty: number;
+  isMismatched: boolean;
+  warningText?: string;
+}
+
+export function getLureAreaEffectiveness(lureId: string, areaId: AreaId): LureAreaEffectiveness {
+  if (lureId === 'none') {
+    return {
+      waitMultiplier: 1.4,
+      emptyPenalty: 0.25,
+      isMismatched: true,
+      warningText: 'Unbaited hook: slower bites and low catch rate',
+    };
+  }
+
+  // Deep Sea (Trench): 10,000m deep dark abyss.
+  // Surface bobbers, insects, bread, corn, cheese, earthworms cannot reach abyssal depths.
+  if (areaId === 'trench') {
+    if (['bobber', 'bread_crust', 'sweet_corn', 'cheese_cube', 'worm', 'mayfly', 'cricket'].includes(lureId)) {
+      return {
+        waitMultiplier: 3.2,
+        emptyPenalty: 0.65,
+        isMismatched: true,
+        warningText: 'Freshwater surface bait cannot reach abyssal depths (very slow bites)',
+      };
+    }
+    if (['minnow', 'spinner', 'feather_jig', 'crankbait'].includes(lureId)) {
+      return {
+        waitMultiplier: 1.8,
+        emptyPenalty: 0.35,
+        isMismatched: true,
+        warningText: 'Shallow lure struggles in deep ocean trench',
+      };
+    }
+  }
+
+  // Open Ocean & Coral Reef: heavy swells, strong saltwater currents, open pelagic waters.
+  if (areaId === 'ocean' || areaId === 'reef') {
+    if (['bobber', 'bread_crust', 'sweet_corn', 'cheese_cube', 'mayfly', 'cricket'].includes(lureId)) {
+      return {
+        waitMultiplier: 2.3,
+        emptyPenalty: 0.50,
+        isMismatched: true,
+        warningText: 'Freshwater bobber floats away in ocean swell (slow bites)',
+      };
+    }
+    if (['worm'].includes(lureId)) {
+      return {
+        waitMultiplier: 1.6,
+        emptyPenalty: 0.30,
+        isMismatched: true,
+        warningText: 'Earthworms spoil quickly in saltwater',
+      };
+    }
+  }
+
+  // Freshwater Pond: Heavy abyssal or deep offshore trolling rigs
+  if (areaId === 'pond') {
+    if (['dragon_scale', 'deep_glow_rig', 'diamond_jig'].includes(lureId)) {
+      return {
+        waitMultiplier: 1.7,
+        emptyPenalty: 0.25,
+        isMismatched: true,
+        warningText: 'Heavy deep-sea rig spooks shallow pond fish',
+      };
+    }
+  }
+
+  return {
+    waitMultiplier: 1.0,
+    emptyPenalty: 0.0,
+    isMismatched: false,
+  };
+}
+
+export function rollWaitTime(rod: Rod, lure?: Lure, areaId?: AreaId): number {
   const variance = 0.75 + Math.random() * 0.6;
-  return Math.max(0.3, Number((rod.waitSeconds * variance).toFixed(1)));
+  const effectiveness = lure && areaId ? getLureAreaEffectiveness(lure.id, areaId) : { waitMultiplier: 1.0 };
+  const baseWait = rod.waitSeconds * effectiveness.waitMultiplier;
+  return Math.max(0.3, Number((baseWait * variance).toFixed(1)));
 }
 
 export function pickRarityTier(
@@ -1092,11 +1259,12 @@ export function pickRarityTier(
 ): RarityTier {
   const weights = lure.rarityWeights;
   const total =
-    weights.common +
-    weights.uncommon +
-    weights.rare +
-    weights.epic +
-    weights.legendary;
+    (weights.common || 0) +
+    (weights.uncommon || 0) +
+    (weights.rare || 0) +
+    (weights.epic || 0) +
+    (weights.legendary || 0) +
+    (weights.mythical || 0);
   let running = 0;
   const target = randomFloat * total;
 
@@ -1106,9 +1274,10 @@ export function pickRarityTier(
     'rare',
     'epic',
     'legendary',
+    'mythical',
   ];
   for (const t of tiers) {
-    running += weights[t];
+    running += weights[t] || 0;
     if (target <= running) return t;
   }
   return 'common';
@@ -1175,7 +1344,9 @@ export function calculateReelDuration(
   fishWeightLbs: number,
   rod: Rod,
   reel: Reel,
-  isTrophy = false
+  isTrophy = false,
+  tier?: RarityTier,
+  areaId?: AreaId
 ): number {
   // Base fight time: 3.2 seconds minimum so even small catches have a real reeling phase
   const baseSeconds = 3.2;
@@ -1203,14 +1374,25 @@ export function calculateReelDuration(
     rawSeconds *= 1.5;
   }
 
-  return Math.max(2.2, Math.min(45.0, Number(rawSeconds.toFixed(1))));
+  // Mythical fish put up an intense, prolonged struggle
+  if (tier === 'mythical') {
+    rawSeconds *= 1.8;
+  }
+
+  // Deep-sea fauna take 2x as long to haul up from the abyss
+  if (areaId === 'trench') {
+    rawSeconds *= 2.0;
+  }
+
+  return Math.max(2.2, Math.min(90.0, Number(rawSeconds.toFixed(1))));
 }
 
 export function rollFishEscape(
   fishWeightLbs: number,
   rod: Rod,
   reel: Reel,
-  randomFloat = Math.random()
+  randomFloat = Math.random(),
+  tier?: RarityTier
 ): boolean {
   const baseMax = getMaxRodWeight(rod);
   // Better reels provide precision drag cushioning, boosting effective line threshold
@@ -1232,6 +1414,11 @@ export function rollFishEscape(
     const exponentialSnap = Math.pow(excess * 2.8, 2.0);
     const reelProtection = (reel.lineStrength || 0) * 0.008;
     finalChance = Math.min(0.99, Math.max(0.22, 0.22 + exponentialSnap - reelProtection));
+  }
+
+  // Mythical fish are fierce fighters that test tackle resilience
+  if (tier === 'mythical') {
+    finalChance = Math.min(0.95, finalChance + 0.15);
   }
 
   return randomFloat < finalChance;
@@ -1363,15 +1550,20 @@ export function rollHookedEncounter(
   }
 
   const isLiveBait = options?.useLiveBait ?? false;
+  const effectiveness = getLureAreaEffectiveness(lure.id, areaId);
   // Better reels reduce the chance of losing bait or having missed bites
   const reelBaitProtection = Math.max(0.35, 1 - (reel.lineStrength || 0) * 0.03);
-  const baseEmptyChance = lure.emptyHookChance ?? 0.04;
-  // Live lively bait attracts aggressive strikes, drastically reducing missed bites / junk
-  const emptyChance = isLiveBait ? baseEmptyChance * 0.25 : baseEmptyChance * reelBaitProtection;
+  const baseEmptyChance = (lure.emptyHookChance ?? 0.04) + effectiveness.emptyPenalty;
+  // Live lively bait attracts aggressive strikes, reducing missed bites / junk
+  const emptyChance = isLiveBait
+    ? Math.min(0.85, baseEmptyChance * 0.55)
+    : Math.min(0.95, baseEmptyChance * reelBaitProtection);
   const nothingRoll = options?.nothingRoll ?? Math.random();
 
   if (nothingRoll < emptyChance) {
-    if (nothingRoll < emptyChance * 0.45) {
+    // If bait is mismatched, much higher chance of nothing (fish completely ignore mismatched bait)
+    const nothingRatio = effectiveness.isMismatched ? 0.85 : 0.45;
+    if (nothingRoll < emptyChance * nothingRatio) {
       return {
         type: 'nothing',
         reelDurationSec: 2.2,
@@ -1452,17 +1644,18 @@ export function rollHookedEncounter(
     }
   }
 
-  // When live bait is active, boost uncommon, rare, and epic tier weights
+  // When live bait is active, slightly boost uncommon, rare, and epic tier weights
   let targetTier: RarityTier;
   if (isLiveBait) {
     const liveLure: Lure = {
       ...lure,
       rarityWeights: {
-        common: Math.max(15, Math.round(lure.rarityWeights.common * 0.65)),
-        uncommon: Math.round(lure.rarityWeights.uncommon * 1.6),
-        rare: Math.round(lure.rarityWeights.rare * 2.0),
-        epic: Math.round(lure.rarityWeights.epic * 2.2),
-        legendary: Math.round(lure.rarityWeights.legendary * 1.5),
+        common: Math.max(25, Math.round((lure.rarityWeights.common || 0) * 0.8)),
+        uncommon: Math.round((lure.rarityWeights.uncommon || 0) * 1.25),
+        rare: Math.round((lure.rarityWeights.rare || 0) * 1.35),
+        epic: Math.round((lure.rarityWeights.epic || 0) * 1.45),
+        legendary: Math.round((lure.rarityWeights.legendary || 0) * 1.2),
+        mythical: Math.round((lure.rarityWeights.mythical || 0) * 1.2),
       },
     };
     targetTier = pickRarityTier(liveLure, options?.tierRoll);
@@ -1528,7 +1721,7 @@ export function rollHookedEncounter(
   // Strictly requires rod power >= 1.4 AND bait equipped AND exceptional strike roll
   const canLandTrophy = rod.power >= 1.4 && lure.id !== 'none';
   const trophyRoll = options?.trophyRoll ?? Math.random();
-  const trophyThreshold = isLiveBait ? 0.08 : 0.04;
+  const trophyThreshold = isLiveBait ? 0.055 : 0.04;
   const isTrophyCandidate =
     canLandTrophy &&
     trophyRoll < trophyThreshold &&
@@ -1542,7 +1735,7 @@ export function rollHookedEncounter(
   } else {
     // Standard catch: scales naturally across species range, bounded just under trophy threshold
     const naturalWeight = min + weightSpread * Math.pow(variance, 1.8);
-    const candidateWeight = naturalWeight * rodQualityBonus * (isLiveBait ? 1.08 : 1.0);
+    const candidateWeight = naturalWeight * rodQualityBonus * (isLiveBait ? 1.03 : 1.0);
     const nonTrophyCeiling = species.trophyWeight ? species.trophyWeight * 0.96 : max * 0.96;
     scaledWeight = Math.min(nonTrophyCeiling, candidateWeight);
     if (!isMediumCatchOnBigRod && minRodWeight > 0 && species.maxWeight >= minRodWeight) {
@@ -1610,12 +1803,20 @@ export function rollHookedEncounter(
     mutationName,
   };
 
-  const reelDurationSec = calculateReelDuration(caughtFish.weight, rod, reel, caughtFish.isTrophy);
+  const reelDurationSec = calculateReelDuration(
+    caughtFish.weight,
+    rod,
+    reel,
+    caughtFish.isTrophy,
+    caughtFish.tier,
+    caughtFish.areaId
+  );
   const willEscape = rollFishEscape(
     caughtFish.weight,
     rod,
     reel,
-    options?.escapeRoll
+    options?.escapeRoll,
+    caughtFish.tier
   );
 
   return {
@@ -1628,7 +1829,7 @@ export function rollHookedEncounter(
 }
 
 export function isSecretFish(tier: RarityTier): boolean {
-  return tier === 'legendary' || tier === 'epic';
+  return tier === 'mythical' || tier === 'legendary' || tier === 'epic';
 }
 
 export function getRarityTextStyle(tier: RarityTier): string {
@@ -1643,6 +1844,8 @@ export function getRarityTextStyle(tier: RarityTier): string {
       return 'text-purple-300 font-extrabold tracking-wider italic';
     case 'legendary':
       return 'text-amber-300 font-black tracking-widest uppercase';
+    case 'mythical':
+      return 'text-rose-400 font-black tracking-widest uppercase';
     default:
       return 'text-[#e3e6eb]';
   }
@@ -1660,6 +1863,8 @@ export function getRarityBadgeStyle(tier: RarityTier): string {
       return 'border-purple-600/70 bg-purple-950/50 text-purple-200';
     case 'legendary':
       return 'border-amber-500/80 bg-amber-950/60 text-amber-200 font-bold';
+    case 'mythical':
+      return 'border-rose-500/90 bg-rose-950/70 text-rose-200 font-extrabold';
     default:
       return 'border-[#3a404d] bg-[#1a1d23] text-[#c0c5ce]';
   }
@@ -1667,6 +1872,8 @@ export function getRarityBadgeStyle(tier: RarityTier): string {
 
 export function getRarityOrder(tier: RarityTier): number {
   switch (tier) {
+    case 'mythical':
+      return 6;
     case 'legendary':
       return 5;
     case 'epic':
@@ -2067,6 +2274,17 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   const id = fish.fishId ?? fish.id;
   const name = (fish.name || '').toLowerCase();
 
+  // Mythical Relics & Cryptids
+  if (name.includes('lau swamp') || name.includes('lau catfish') || id === 153) {
+    return './fish/lau_swamp_catfish.png';
+  }
+  if (name.includes('queensland') || name.includes('titan grouper') || id === 154) {
+    return './fish/queensland_titan_grouper.png';
+  }
+  if (name.includes('abyssal ghost') || name.includes('ghost chimaera') || id === 155) {
+    return './fish/abyssal_ghost_chimaera.png';
+  }
+
   // Ocean Deep Mega-Creatures & Relics
   if (name.includes('oarfish') || id === 116) {
     return './fish/giant_oarfish.png';
@@ -2124,6 +2342,60 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('mandarin') || id === 134) {
     return './fish/mandarinfish.png';
+  }
+  if (name.includes('barreleye') || id === 135) {
+    return './fish/barreleye_fish.png';
+  }
+  if (name.includes('viperfish') || id === 136) {
+    return './fish/viperfish.png';
+  }
+  if (name.includes('gulper eel') || id === 137) {
+    return './fish/gulper_eel.png';
+  }
+  if (name.includes('frilled shark') || id === 138) {
+    return './fish/frilled_shark.png';
+  }
+  if (name.includes('isopod') || id === 139) {
+    return './fish/giant_isopod.png';
+  }
+  if (name.includes('black swallower') || id === 140) {
+    return './fish/black_swallower.png';
+  }
+  if (name.includes('blobfish') || id === 141) {
+    return './fish/blobfish.png';
+  }
+  if (name.includes('fangtooth') || id === 142) {
+    return './fish/fangtooth.png';
+  }
+  if (name.includes('loosejaw') || id === 143) {
+    return './fish/stoplight_loosejaw.png';
+  }
+  if (name.includes('chimaera') || id === 144) {
+    return './fish/blue_chimaera.png';
+  }
+  if (name.includes('greenland shark') || id === 145) {
+    return './fish/greenland_shark.png';
+  }
+  if (name.includes('snailfish') || id === 146) {
+    return './fish/mariana_snailfish.png';
+  }
+  if (name.includes('sleeper shark') || id === 147) {
+    return './fish/pacific_sleeper_shark.png';
+  }
+  if (name.includes('grenadier') || id === 148) {
+    return './fish/giant_grenadier.png';
+  }
+  if (name.includes('goblin shark') || id === 149) {
+    return './fish/goblin_shark.png';
+  }
+  if (name.includes('dumbo') || (name.includes('octopus') && id === 150)) {
+    return './fish/dumbo_octopus.png';
+  }
+  if (name.includes('bigfin') || id === 151) {
+    return './fish/bigfin_squid.png';
+  }
+  if (name.includes('tripod') || id === 152) {
+    return './fish/tripod_fish.png';
   }
 
   // 1. Nurse Shark

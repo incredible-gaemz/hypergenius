@@ -92,6 +92,7 @@ export const Inventory: React.FC<InventoryProps> = ({
     }
 
     const tierOrder: Record<RarityTier, number> = {
+      mythical: 6,
       legendary: 5,
       epic: 4,
       rare: 3,

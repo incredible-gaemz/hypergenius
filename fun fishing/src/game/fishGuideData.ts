@@ -949,5 +949,152 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
     "habitatBehavior": "Secretive resident of sheltered coral lagoons, dead coral rubble, and silty reef flats.",
     "dietNotes": "Picks continuously at benthic micro-copepods, amphipods, small gastropods, and polychaete worms.",
     "wikiUrl": "https://en.wikipedia.org/wiki/Mandarinfish"
+  },
+  "135": {
+    "scientificName": "Macropinna microstoma",
+    "visualDescription": "Bizarre bathypelagic fish with a delicate transparent fluid-filled cranial shield encasing large, glowing emerald-green tubular eyes directed upward.",
+    "habitatBehavior": "Hovers motionlessly in the bathypelagic darkness between 600 and 800 meters, rotating its eyes forward when locking onto prey.",
+    "dietNotes": "Steals siphonophore tentacles, small pelagic jellies, and trapped copepods with surgical precision.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Macropinna_microstoma"
+  },
+  "136": {
+    "scientificName": "Chauliodus sloani",
+    "visualDescription": "Slender iridescent deep-sea dragonfish with monstrous curved needle fangs that do not fit inside its mouth, folding back against the head, and ventral photophore rows.",
+    "habitatBehavior": "Undertakes vertical diel migrations from 1,000 meters up to 400 meters at night to ambush unsuspecting bathypelagic forage.",
+    "dietNotes": "Impales lanternfish, small squid, and hatchetfish on its hinged fang bars.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Sloane%27s_viperfish"
+  },
+  "137": {
+    "scientificName": "Eurypharynx pelecanoides",
+    "visualDescription": "Pitch-black eel-like fish featuring an astonishingly massive expandable pouch mouth loosely hinged to a tiny skull, ending in a whip-like glowing tail.",
+    "habitatBehavior": "Cruises abyssal midwaters with its mouth closed into a small snout, suddenly inflating its pouch to envelope entire shoals or large prey.",
+    "dietNotes": "Swallows schools of small mysid crustaceans, cephalopods, and bioluminescent deep-sea shrimp.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Pelican_eel"
+  },
+  "138": {
+    "scientificName": "Chlamydoselachus anguineus",
+    "visualDescription": "Living fossil with an elongated dark brown eel-like shark body, six pairs of frilled gill openings around the neck, and 25 rows of three-pronged trident teeth.",
+    "habitatBehavior": "Benthic predator slithering through submarine canyons, deep trenches, and continental slopes between 500 and 1,500 meters.",
+    "dietNotes": "Strikes like a snake by bending its body and lunging forward to swallow deep-sea squid and benthic bony fish whole.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Frilled_shark"
+  },
+  "139": {
+    "scientificName": "Bathynomus giganteus",
+    "visualDescription": "Enormous deep-sea scavenger crustacean with an armored segmented lilac-gray exoskeleton, dozens of hooked jointed legs, and massive triangular compound eyes.",
+    "habitatBehavior": "Crawls slowly over muddy abyssal ocean plains up to 2,000 meters deep, adapted to months of metabolic fasting between marine snow falls.",
+    "dietNotes": "Scavenges whale falls, sunken fish carcasses, crabs, and deep-sea benthic worms.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Bathynomus_giganteus"
+  },
+  "140": {
+    "scientificName": "Chiasmodon niger",
+    "visualDescription": "Dark, slender predatory fish capable of distending its stomach into a translucent balloon to engulf prey over twice its length and ten times its own mass.",
+    "habitatBehavior": "Solitary deep-water stalker inhabiting oceanic mesopelagic and bathypelagic zones between 700 and 2,700 meters.",
+    "dietNotes": "Swallows whole giant dragonfish, barracudinas, and squid tail-first using backwards-pointing palatine fangs.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Black_swallower"
+  },
+  "141": {
+    "scientificName": "Psychrolutes marcidus",
+    "visualDescription": "Gelatinous pale pinkish-gray benthic fish whose body density is slightly less than water, allowing it to drift above the sea floor without expending swimming energy.",
+    "habitatBehavior": "Rests motionless on deep continental shelves and ocean floor depressions under crushing hydrostatic pressures exceeding 1,000 psi.",
+    "dietNotes": "Passively ingests edible organic particles, deep-sea sea pens, micro-crabs, and carrion drifting past its downturned jaws.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Psychrolutes_marcidus"
+  },
+  "142": {
+    "scientificName": "Anoplogaster cornuta",
+    "visualDescription": "Ferocious deep-sea predator with dark armored scales and the largest teeth proportionate to body size of any known marine species, fitting into roof sockets beside the brain.",
+    "habitatBehavior": "Active hunter ranging from 500 to 5,000 meters beneath the surface, navigating extreme cold and absolute darkness.",
+    "dietNotes": "Chases down squid, hatchetfish, and midwater shrimp, locking them tight with formidable fangs.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Fangtooth"
+  },
+  "143": {
+    "scientificName": "Malacosteus niger",
+    "visualDescription": "Deep-sea dragonfish possessing hinged lower jaws lacking a floor and suborbital photophores that emit rare far-red bioluminescent light invisible to other animals.",
+    "habitatBehavior": "Uses its red headlight beam like night-vision goggles to spot red-pigmented deep-sea prey without alerting them to its presence.",
+    "dietNotes": "Preys primarily on calanoid copepods and small bathypelagic lanternfish.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Stoplight_loosejaw"
+  },
+  "144": {
+    "scientificName": "Hydrolagus trolli",
+    "visualDescription": "Ghostly pale blue-gray chimaera with wing-like pectoral fins, whip-like tail, smooth scaleless skin crisscrossed with open sensory grooves, and fused dental grinding plates.",
+    "habitatBehavior": "Glides through the water column above deep submarine canyons and trenches, using sensory canals on its snout to detect minute electrical pulses from buried benthic prey.",
+    "dietNotes": "Grinds hard mollusks, brittle stars, deep sea urchins, and benthic worms.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Pointy-nosed_blue_chimaera"
+  },
+  "145": {
+    "scientificName": "Somniosus microcephalus",
+    "visualDescription": "Massive prehistoric deep-sea shark with cylindrical heavy gray-brown body, tiny rounded fins, milky eyes hosting bioluminescent Ommatokoita parasites, and rows of razor-sharp slicing teeth.",
+    "habitatBehavior": "Prowls lightless abyssal depths down to 7,200 feet in near-freezing waters, possessing the longest confirmed lifespan of any vertebrate on Earth at over 400 years.",
+    "dietNotes": "Apex deep scavenger and ambush hunter taking benthic cod, seals, flounders, skates, and carrion in the deep dark ocean.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Greenland_shark"
+  },
+  "146": {
+    "scientificName": "Pseudoliparis swirei",
+    "visualDescription": "Small translucent pale pinkish-white snailfish with gelatinous scaleless skin revealing subtle internal organ anatomy, blunt bulbous head, and delicate ribbon fins.",
+    "habitatBehavior": "Inhabits the extreme hadal ocean depths of the Mariana Trench between 6,000 and 8,000 meters, thriving under hydrostatic pressures exceeding 1,000 atmospheres.",
+    "dietNotes": "Top scavenger and predator in hadal trenches, consuming vast swarms of benthic amphipods and decapod crustaceans.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Pseudoliparis_swirei"
+  },
+  "147": {
+    "scientificName": "Somniosus pacificus",
+    "visualDescription": "Gigantic sluggish abyssal shark with heavy cylindrical slate-gray to black torso, short rounded snout, small low-set spineless dorsal fins, and small dark eyes.",
+    "habitatBehavior": "Cruises silent sub-arctic continental shelves and deep oceanic trenches up to 6,600 feet down, gliding effortlessly through near-freezing waters.",
+    "dietNotes": "Opportunistic predator taking giant Pacific octopuses, bottom flatfish, crabs, and carrion.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Pacific_sleeper_shark"
+  },
+  "148": {
+    "scientificName": "Albatrossia pectoralis",
+    "visualDescription": "Huge 7-foot deep-sea macrourid rattail with heavy grayish-brown armored head, large reflective sensory eyes, chin barbel, and long tapering whip-like tail.",
+    "habitatBehavior": "Hovers just above deep bathyal and abyssal muddy sea beds along the continental slope between 500 and 3,500 meters.",
+    "dietNotes": "Rootles through sediment for brittle stars, benthic polychaete worms, crabs, and small deepwater fishes.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Giant_grenadier"
+  },
+  "149": {
+    "scientificName": "Mitsukurina owstoni",
+    "visualDescription": "Ancient living fossil shark featuring a long flat blade-like rostrum snout packed with ampullae of Lorenzini, flabby pinkish body, and slingshot jaws lined with sharp needle teeth.",
+    "habitatBehavior": "Stalks lightless continental slopes and submarine canyons between 270 and 1,300 meters deep, hunting with electric sensor detection.",
+    "dietNotes": "Catapults its jaws forward at lightning speed to snatch deep-sea teleosts, cephalopods, and decapod crustaceans.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Goblin_shark"
+  },
+  "150": {
+    "scientificName": "Grimpoteuthis bathypelagica",
+    "visualDescription": "Charming deep-sea umbrella octopus with dusky reddish-orange mantle, eight webbed arms, and a pair of prominent rounded ear-like fins that flap for propulsion.",
+    "habitatBehavior": "Drifts gracefully through the deep bathypelagic and abyssopelagic ocean floor up to 7,000 meters down, foraging above the sediment.",
+    "dietNotes": "Swallows whole deep-sea copepods, isopods, amphipods, and benthic bristle worms.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Dumbo_octopus"
+  },
+  "151": {
+    "scientificName": "Magnapinna sp.",
+    "visualDescription": "Enigmatic deep-sea squid with huge broad spade-shaped lateral fins spread wide, and ten arms and tentacles bent at 90-degree elbows that trail down as incredibly long thin filaments.",
+    "habitatBehavior": "Hovers silently in the water column thousands of meters deep in abyssal trenches, drifting its extremely long tentacles like sticky fishing lines.",
+    "dietNotes": "Traps drifting bathypelagic crustaceans, small squids, and gelatinous organism particles in its trailing arm filaments.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Bigfin_squid"
+  },
+  "152": {
+    "scientificName": "Bathypterois grallator",
+    "visualDescription": "Specialized benthic fish with three extraordinarily elongated, stiff fin rays extending downward from its pelvic and caudal fins, allowing it to stand on the sea floor like a tripod.",
+    "habitatBehavior": "Perches motionlessly facing into deep-sea benthic currents between 1,000 and 6,000 meters deep, waiting for prey to drift into its arching tactile pectoral rays.",
+    "dietNotes": "Gently scoops passing bathypelagic copepods, amphipods, and small benthic crustaceans into its wide mouth.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Bathypterois_grallator"
+  },
+  "153": {
+    "scientificName": "Heterobranchus titan",
+    "visualDescription": "Immense armored swamp catfish with heavy cranial bone plates forming a protective helmet, mottled olive-bronze coloration, a wide cavernous maw, and eight thick sweeping sensory barbels.",
+    "habitatBehavior": "Lurks in oxygen-poor cypress bayous and stagnant river channels beneath floating peat mats, using specialized suctorial breathing organs.",
+    "dietNotes": "Ambush predator capable of engulfing large turtles, water snakes, waterfowl, and substantial river fish.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Lau_(cryptid)"
+  },
+  "154": {
+    "scientificName": "Epinephelus lanceolatus titan",
+    "visualDescription": "Massive, barrel-chested apex reef titan cloaked in weathered mottled bronze and slate-grey scales, featuring a broad armored jaw capable of creating immense suction, thick rounded fins, and gleaming golden amber eyes.",
+    "habitatBehavior": "Inhabits deep outer reef drop-offs, underwater caves, and sunken shipwrecks; fiercely territorial solitary predator known to challenge divers and stalk large marine life.",
+    "dietNotes": "Apex reef ambusher capable of inhaling whole reef sharks, sea turtles, stingrays, and massive spiny lobsters in a single explosive gulp.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Giant_grouper"
+  },
+  "155": {
+    "scientificName": "Hydrolagus trolli",
+    "visualDescription": "Ghostly pale blue-grey chimaera with smooth, scale-free skin patterned by intricate sensory canal grooves across its snout, translucent wing-like pectoral fins, a whip-like tail, and dead milky-white eyes.",
+    "habitatBehavior": "Ancient deep-sea holocephalan roaming steep rocky trenches and seamounts past 6,000 feet; predates dinosaurs by hundreds of millions of years and was first filmed alive in 2016.",
+    "dietNotes": "Grinds deep-sea benthic crabs, mollusks, brittle stars, and benthic polychaetes between its mineralized tooth plates.",
+    "wikiUrl": "https://en.wikipedia.org/wiki/Pointy-nosed_blue_chimaera"
   }
 };

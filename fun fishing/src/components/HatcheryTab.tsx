@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import {
   HatcheryTank,
   HatcheryUpgradeId,
+  HatcheryMutation,
   FeedType,
   TankId,
   FEED_OPTIONS,

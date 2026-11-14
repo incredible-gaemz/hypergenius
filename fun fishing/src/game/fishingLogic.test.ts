@@ -1,6 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  WHALING_UNLOCK_COST,
+  QUALIFYING_WHALING_ROD_IDS,
+  QUALIFYING_WHALING_REEL_IDS,
+  MAX_WHALING_ROD_ID,
+  MAX_WHALING_REEL_ID,
+  MEGA_WHALE_IDS,
+  isMegaWhale,
+  hasQualifyingWhalingRod,
+  hasQualifyingWhalingReel,
+  hasWhalingGear,
+  hasMaxWhalingGear,
+  isWhalingUnlocked,
+  rollWhaleEncounter,
+  WHALE_SPECIES,
+  WHALE_GUIDE_DATA,
+  getWhaleRarityTier,
+} from './whalingLogic.ts';
+import {
   FISH_COLLECTION,
   FISHING_AREAS,
   RODS,
@@ -16,10 +34,11 @@ import {
   TRAP_SLOT_PRICES,
   rollFishEscape,
   getRarityOrder,
+  getLureAreaEffectiveness,
 } from './fishingLogic.ts';
 
-test('FISHING_AREAS contains exactly 6 realistic areas', () => {
-  assert.equal(FISHING_AREAS.length, 6);
+test('FISHING_AREAS contains realistic areas including Abyssal Trench', () => {
+  assert.equal(FISHING_AREAS.length, 7);
   assert.equal(FISHING_AREAS[0].id, 'pond');
   assert.equal(FISHING_AREAS[0].unlockCost, 0); // starter area
   assert.equal(FISHING_AREAS[1].id, 'river');
@@ -27,6 +46,9 @@ test('FISHING_AREAS contains exactly 6 realistic areas', () => {
   assert.equal(FISHING_AREAS[3].id, 'bayou');
   assert.equal(FISHING_AREAS[4].id, 'ocean');
   assert.equal(FISHING_AREAS[5].id, 'reef');
+  assert.equal(FISHING_AREAS[5].unlockCost, 10000);
+  assert.equal(FISHING_AREAS[6].id, 'trench');
+  assert.equal(FISHING_AREAS[6].unlockCost, 150000);
 
   FISHING_AREAS.forEach((area) => {
     assert.ok(area.theme.bgClass);
@@ -36,7 +58,7 @@ test('FISHING_AREAS contains exactly 6 realistic areas', () => {
   });
 });
 
-test('Fish collection has realistic species and prices across 6 areas', () => {
+test('Fish collection has realistic species and prices across all areas', () => {
   assert.ok(FISH_COLLECTION.length >= 100, 'Fish collection should have 100+ species');
 
   const minnow = FISH_COLLECTION.find((f) => f.name === 'Minnow');
@@ -147,10 +169,10 @@ test('Starter trap costs $100 and higher reels provide line and bait protection'
   assert.ok(getRarityOrder('uncommon') > getRarityOrder('common'));
 });
 
-test('Field guide data has complete biological info and Wikipedia links for all 134 species', async () => {
+test('Field guide data has complete biological info and Wikipedia links for all species', async () => {
   const { FISH_GUIDE_DATA } = await import('./fishGuideData');
   
-  assert.equal(FISH_COLLECTION.length, 134, 'Total fish collection must be 134 species');
+  assert.equal(FISH_COLLECTION.length, 155, 'Total fish collection must be 155 species');
   
   for (const fish of FISH_COLLECTION) {
     const guide = FISH_GUIDE_DATA[fish.id];
@@ -173,8 +195,8 @@ test('Field guide data has complete biological info and Wikipedia links for all 
 test('Traps never catch legendary fish and have rare trophy chance', async () => {
   const { calculateTrapCatch, TRAP_TYPES, FISH_COLLECTION } = await import('./fishingLogic');
   
-  // Test across all 6 areas with a high capacity trap soaking for 10 hours
-  const areas = ['pond', 'river', 'lake', 'bayou', 'ocean', 'reef'] as const;
+  // Test across all 7 areas with a high capacity trap soaking for 10 hours
+  const areas = ['pond', 'river', 'lake', 'bayou', 'ocean', 'reef', 'trench'] as const;
   
   for (const areaId of areas) {
     const trap = {
@@ -223,14 +245,16 @@ test('Market orders system generates valid delivery bounties', async () => {
   }
 });
 
-test('Area unlock costs match user requirements: Bayou $200, Ocean $800, Coral Reef $3000', () => {
+test('Area unlock costs match user requirements: Ocean $1000, Coral Reef $10000, Abyssal Trench $150000', () => {
   const bayou = FISHING_AREAS.find((a) => a.id === 'bayou');
   const ocean = FISHING_AREAS.find((a) => a.id === 'ocean');
   const reef = FISHING_AREAS.find((a) => a.id === 'reef');
+  const trench = FISHING_AREAS.find((a) => a.id === 'trench');
 
   assert.equal(bayou?.unlockCost, 200, 'Bayou unlock cost must be exactly $200');
-  assert.equal(ocean?.unlockCost, 800, 'Ocean unlock cost must be exactly $800');
-  assert.equal(reef?.unlockCost, 3000, 'Coral Reef unlock cost must be exactly $3000');
+  assert.equal(ocean?.unlockCost, 1000, 'Ocean unlock cost must be exactly $1000');
+  assert.equal(reef?.unlockCost, 10000, 'Coral Reef unlock cost must be exactly $10000');
+  assert.equal(trench?.unlockCost, 150000, 'Abyssal Trench unlock cost must be exactly $150000');
 });
 
 test('Fly rod is rated for 10 lbs and cannot catch 50 lbs fish, with exponential strain over cap', async () => {
@@ -1269,7 +1293,7 @@ test('Ocean mega-fauna and 0.01 treasure chest mechanics', async () => {
     const f = FISH_COLLECTION.find((fish) => fish.name === name);
     assert.ok(f, `Mega-species "${name}" must exist in FISH_COLLECTION`);
     assert.equal(f.bestLureId, 'dragon_scale', `Mega-species "${name}" must require dragon_scale bait`);
-    assert.ok(f.areaId === 'ocean' || f.areaId === 'reef', `Mega-species "${name}" must inhabit ocean or reef`);
+    assert.ok(f.areaId === 'ocean' || f.areaId === 'reef' || f.areaId === 'trench', `Mega-species "${name}" must inhabit ocean, reef, or trench`);
   }
 
   // The 2 largest rods (extreme_rod and the_one_rod) can land these titans
@@ -1292,6 +1316,191 @@ test('Ocean mega-fauna and 0.01 treasure chest mechanics', async () => {
   });
   assert.notEqual(normalEnc.type, 'treasure', 'Roll >= 0.01 must not trigger treasure');
 });
+
+test('Area bait compatibility, hatchery duration progression, and high-end fleet gear', async () => {
+  const { calculateBreedingDuration } = await import('./hatcheryLogic');
+  const { FLEET_UPGRADES } = await import('./commercialLogic');
+  // 1. Mismatched bait in trench (bobber in deep ocean trench)
+  const bobberInTrench = getLureAreaEffectiveness('bobber', 'trench');
+  assert.equal(bobberInTrench.isMismatched, true, 'Bobber in trench must be flagged as mismatched');
+  assert.ok(bobberInTrench.waitMultiplier >= 3.0, 'Bobber in trench must have at least 3x wait multiplier');
+  assert.ok(bobberInTrench.emptyPenalty >= 0.5, 'Bobber in trench must have high empty hook penalty');
+
+  // Proper deep sea bait in trench (squid, deep glow rig)
+  const squidInTrench = getLureAreaEffectiveness('squid', 'trench');
+  assert.equal(squidInTrench.isMismatched, false, 'Squid in trench must be fully compatible');
+  assert.equal(squidInTrench.waitMultiplier, 1.0, 'Squid in trench must have baseline 1.0x wait multiplier');
+
+  // 2. Hatchery breeding duration scaling by rarity
+  const commonFish = FISH_COLLECTION.find((f) => f.tier === 'common')!;
+  const uncommonFish = FISH_COLLECTION.find((f) => f.tier === 'uncommon')!;
+  const rareFish = FISH_COLLECTION.find((f) => f.tier === 'rare')!;
+  const epicFish = FISH_COLLECTION.find((f) => f.tier === 'epic')!;
+  const legendaryFish = FISH_COLLECTION.find((f) => f.tier === 'legendary')!;
+
+  const tCommon = calculateBreedingDuration(commonFish, 'pellets', []);
+  const tUncommon = calculateBreedingDuration(uncommonFish, 'pellets', []);
+  const tRare = calculateBreedingDuration(rareFish, 'pellets', []);
+  const tEpic = calculateBreedingDuration(epicFish, 'pellets', []);
+  const tLegendary = calculateBreedingDuration(legendaryFish, 'pellets', []);
+
+  assert.ok(tUncommon > tCommon * 2, 'Uncommon breeding must take over 2x common time');
+  assert.ok(tRare > tUncommon * 2, 'Rare breeding must take over 2x uncommon time');
+  assert.ok(tEpic > tRare * 2, 'Epic breeding must take over 2x rare time');
+  assert.ok(tLegendary > tEpic * 2, 'Legendary breeding must take over 2x epic time');
+
+  // 3. New in-between lures exist in catalog
+  const newLures = ['cricket', 'feather_jig', 'cut_bait', 'diamond_jig', 'deep_glow_rig'];
+  for (const lid of newLures) {
+    const l = LURES.find((item) => item.id === lid);
+    assert.ok(l, `New in-between lure "${lid}" must exist in LURES`);
+    assert.ok(l.price > 0, `Lure "${lid}" must have a valid price`);
+  }
+
+  // 4. Ultra-expensive fleet upgrade
+  const crawler = FLEET_UPGRADES.find((u) => u.id === 'abyssal_crawler_suite');
+  assert.ok(crawler, 'abyssal_crawler_suite must exist in FLEET_UPGRADES');
+  assert.equal(crawler.price, 285000, 'abyssal_crawler_suite must cost $285,000');
+});
+
+test('Whaling unlock requirements: at least Thicc rod, Gold Dual reel, and $250,000 permit', () => {
+  assert.equal(WHALING_UNLOCK_COST, 250000, 'Whaling unlock fee must be $250,000');
+
+  // Qualifying rods: at least Thicc rod ($175k), Mastercrafted ($420k), or Heavy Boom ($1M)
+  assert.deepEqual(QUALIFYING_WHALING_ROD_IDS, ['thicc_rod', 'extreme_rod', 'the_one_rod']);
+
+  // Qualifying reels: at least Gold Dual-Speed 130W ($120k) or Hydraulic Winch ($850k)
+  assert.deepEqual(QUALIFYING_WHALING_REEL_IDS, ['quantum_reel', 'singularity_spool']);
+
+  // Beginner gear should not qualify
+  assert.equal(hasQualifyingWhalingRod(['stick', 'bamboo_pole', 'legendary_rod']), false);
+  assert.equal(hasQualifyingWhalingReel(['plastic_spool', 'titanium_reel', 'drag_master']), false);
+  assert.equal(hasWhalingGear(['stick'], ['plastic_spool']), false);
+
+  // Thicc rod + Gold Dual-Speed reel qualify
+  assert.equal(hasQualifyingWhalingRod(['thicc_rod']), true);
+  assert.equal(hasQualifyingWhalingReel(['quantum_reel']), true);
+  assert.equal(hasWhalingGear(['thicc_rod'], ['quantum_reel']), true);
+
+  // Even higher tier rods/reels qualify
+  assert.equal(hasWhalingGear(['extreme_rod'], ['quantum_reel']), true);
+  assert.equal(hasWhalingGear(['the_one_rod'], ['singularity_spool']), true);
+
+  // Unlocked only if permit is purchased ($250,000) and qualifying gear is owned
+  assert.equal(isWhalingUnlocked(['thicc_rod'], ['quantum_reel'], false), false);
+  assert.equal(isWhalingUnlocked(['stick'], ['plastic_spool'], true), false);
+  assert.equal(isWhalingUnlocked(['thicc_rod'], ['quantum_reel'], true), true);
+  assert.equal(isWhalingUnlocked(['the_one_rod'], ['singularity_spool'], true), true);
+});
+
+test('Whales are documented in Field Guide data with complete biological and Wikipedia records', () => {
+  assert.equal(WHALE_SPECIES.length, 11, 'Must have 11 distinct whale species');
+
+  WHALE_SPECIES.forEach((w) => {
+    assert.ok(w.id, 'Whale must have an id');
+    assert.ok(w.name, 'Whale must have a name');
+    assert.ok(w.scientificName, 'Whale must have a scientific name');
+    assert.ok(w.minWeightLbs > 0, 'Whale must have positive min weight');
+    assert.ok(w.maxWeightLbs > w.minWeightLbs, 'Whale max weight must exceed min weight');
+    assert.ok(w.basePrice > 0, 'Whale must have positive base price');
+
+    const tier = getWhaleRarityTier(w);
+    assert.ok(['rare', 'epic', 'legendary'].includes(tier), 'Whale tier must be rare, epic, or legendary');
+
+    // Guide details check
+    const guide = WHALE_GUIDE_DATA[w.id];
+    assert.ok(guide, `Whale "${w.id}" must have an entry in WHALE_GUIDE_DATA`);
+    assert.ok(guide.visualDescription.length > 20, `Whale "${w.id}" must have visual description`);
+    assert.ok(guide.habitatBehavior.length > 20, `Whale "${w.id}" must have habitat description`);
+    assert.ok(guide.dietNotes.length > 15, `Whale "${w.id}" must have diet notes`);
+    assert.ok(guide.wikiUrl.startsWith('https://en.wikipedia.org/wiki/'), `Whale "${w.id}" must have valid Wikipedia URL`);
+  });
+});
+
+test('Mythical fish rarity tier, species attributes, and guide entries', async () => {
+  const { FISH_GUIDE_DATA } = await import('./fishGuideData');
+
+  const mythicalFish = FISH_COLLECTION.filter((f) => f.tier === 'mythical');
+  assert.equal(mythicalFish.length, 3, 'Must have 3 mythical fish');
+
+  const mythicalIds = [153, 154, 155];
+  mythicalIds.forEach((id) => {
+    const f = FISH_COLLECTION.find((fish) => fish.id === id);
+    assert.ok(f, `Mythical fish ID ${id} must exist in collection`);
+    assert.equal(f.tier, 'mythical');
+    assert.ok(f.basePrice >= 10000, 'Mythical fish should be valuable');
+
+    // Guide entry
+    const guide = FISH_GUIDE_DATA[String(id)];
+    assert.ok(guide, `Guide entry for mythical fish ${id} must exist`);
+    assert.ok(guide.scientificName.length > 0);
+    assert.ok(guide.visualDescription.length > 20);
+    assert.ok(guide.habitatBehavior.length > 20);
+    assert.ok(guide.dietNotes.length > 10);
+    assert.ok(guide.wikiUrl.startsWith('https://en.wikipedia.org/wiki/'));
+  });
+
+  // Check rarity ordering
+  assert.equal(getRarityOrder('mythical'), 6);
+  assert.ok(getRarityOrder('mythical') > getRarityOrder('legendary'));
+});
+
+test('Largest whales (Titans) require max rod and max reel to catch', () => {
+  assert.equal(MAX_WHALING_ROD_ID, 'the_one_rod');
+  assert.equal(MAX_WHALING_REEL_ID, 'singularity_spool');
+  assert.deepEqual(MEGA_WHALE_IDS, ['blue_whale', 'fin_whale', 'bowhead_whale', 'sperm_whale']);
+
+  // Mega whale check
+  MEGA_WHALE_IDS.forEach((id) => {
+    assert.equal(isMegaWhale(id), true, `${id} must be flagged as mega whale`);
+  });
+  assert.equal(isMegaWhale('minke_whale'), false);
+  assert.equal(isMegaWhale('beluga_whale'), false);
+  assert.equal(isMegaWhale('gray_whale'), false);
+
+  // hasMaxWhalingGear checks
+  assert.equal(hasMaxWhalingGear([], []), false);
+  assert.equal(hasMaxWhalingGear(['thicc_rod'], ['quantum_reel']), false);
+  assert.equal(hasMaxWhalingGear(['extreme_rod'], ['quantum_reel']), false);
+  assert.equal(hasMaxWhalingGear(['the_one_rod'], ['quantum_reel']), false);
+  assert.equal(hasMaxWhalingGear(['thicc_rod'], ['singularity_spool']), false);
+  assert.equal(hasMaxWhalingGear(['the_one_rod'], ['singularity_spool']), true);
+
+  // Without max gear, rolling whale encounters NEVER yields a mega whale
+  for (let i = 0; i < 200; i++) {
+    const enc = rollWhaleEncounter(['thicc_rod'], ['quantum_reel']);
+    assert.equal(
+      isMegaWhale(enc.whale.id),
+      false,
+      `Without max gear, should not roll titan whale ${enc.whale.name}`
+    );
+  }
+
+  // With max gear, mega whales CAN be rolled
+  let rolledMega = false;
+  for (let i = 0; i < 500; i++) {
+    const enc = rollWhaleEncounter(['the_one_rod'], ['singularity_spool']);
+    if (isMegaWhale(enc.whale.id)) {
+      rolledMega = true;
+      break;
+    }
+  }
+  assert.equal(rolledMega, true, 'With max gear, titan whales must be rollable in encounters');
+});
+
+test('Deep sea stuff (Abyssal Trench catches) takes 2x as long to reel in', () => {
+  const bigRod = RODS.find((r) => r.id === 'big_game_rod') || RODS[3];
+  const reel = REELS.find((r) => r.id === 'bearing_reel') || REELS[3];
+
+  const surfaceDuration = calculateReelDuration(25.0, bigRod, reel, false, 'rare', 'lake');
+  const deepSeaDuration = calculateReelDuration(25.0, bigRod, reel, false, 'rare', 'trench');
+
+  // Deep sea duration should be 2x the standard duration
+  const ratio = deepSeaDuration / surfaceDuration;
+  assert.ok(Math.abs(ratio - 2.0) < 0.1, `Deep sea duration must be 2x standard (got ${ratio.toFixed(2)})`);
+});
+
+
 
 
 

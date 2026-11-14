@@ -23,7 +23,6 @@ import {
   BoatDefinition,
   FLEET_UPGRADES,
   FleetUpgrade,
-  COMMERCIAL_BAITS,
   OwnedBoat,
   getBoatSpriteUrl,
 } from '../game/commercialLogic';
@@ -71,7 +70,7 @@ export const Shop: React.FC<ShopProps> = ({
 }) => {
   const [shopMode, setShopMode] = useState<'personal' | 'commercial'>('personal');
   const [personalTab, setPersonalTab] = useState<'rods' | 'reels' | 'lures'>('rods');
-  const [commercialTab, setCommercialTab] = useState<'boats' | 'supplies' | 'upgrades'>('boats');
+  const [commercialTab, setCommercialTab] = useState<'boats' | 'upgrades'>('boats');
 
   // Sequential progression: next unlockable index in each gear tree
   const nextRodIndex = RODS.findIndex((r) => !ownedRodIds.includes(r.id));
@@ -478,16 +477,6 @@ export const Shop: React.FC<ShopProps> = ({
               Vessels &amp; Boats
             </button>
             <button
-              onClick={() => setCommercialTab('supplies')}
-              className={`px-3 py-1.5 border cursor-pointer ${
-                commercialTab === 'supplies'
-                  ? 'border-emerald-600/80 bg-emerald-950/40 text-emerald-300 font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
-              }`}
-            >
-              Bulk Fleet Provisions
-            </button>
-            <button
               onClick={() => setCommercialTab('upgrades')}
               className={`px-3 py-1.5 border cursor-pointer ${
                 commercialTab === 'upgrades'
@@ -495,7 +484,7 @@ export const Shop: React.FC<ShopProps> = ({
                   : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
-              Vessel Tech Upgrades
+              Vessel Upgrades
             </button>
           </div>
 
@@ -573,34 +562,6 @@ export const Shop: React.FC<ShopProps> = ({
                   </div>
                 );
               })}
-
-            {/* BULK FLEET PROVISIONS */}
-            {commercialTab === 'supplies' &&
-              COMMERCIAL_BAITS.map((bait) => (
-                <div
-                  key={bait.id}
-                  className="p-3 border border-[#2a2e38] bg-[#16181f] flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-sm text-[#f1f3f5]">
-                      {bait.name}
-                    </div>
-                    <div className="text-[11px] text-[#8c94a2]">
-                      {bait.description}
-                    </div>
-                    <div className="text-[11px] text-emerald-300">
-                      Commercial bulk provisioning · Selected per expedition in the Fleet tab
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 text-right">
-                    <div className="font-bold text-emerald-400 text-sm">
-                      {bait.price > 0 ? `$${bait.price.toLocaleString()}` : 'Free'}
-                    </div>
-                    <div className="text-[10px] text-[#717885]">per voyage</div>
-                  </div>
-                </div>
-              ))}
 
             {/* FLEET UPGRADES */}
             {commercialTab === 'upgrades' &&

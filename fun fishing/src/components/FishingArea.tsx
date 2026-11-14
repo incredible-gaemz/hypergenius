@@ -127,10 +127,10 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
           } flex flex-col items-center justify-center text-center py-3 transition-all duration-300`}
         >
         {castState === 'idle' && (
-          <div className="space-y-3">
+          <div className="space-y-3 w-full flex flex-col items-center">
             <button
               onClick={onCast}
-              className={`w-64 sm:w-80 ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
+              className={`w-[88%] max-w-xs sm:w-80 min-h-[50px] touch-manipulation ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
             >
               Cast Line
             </button>
@@ -148,11 +148,6 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
                     Use Live Bait ({liveBaitCharges} left)
                   </span>
                 </label>
-                <div className="text-[10px] text-sky-400/90 mt-1">
-                  {useLiveBait
-                    ? 'Faster strikes · attracts trophy game'
-                    : 'Off (saving bait)'}
-                </div>
               </div>
             )}
           </div>
@@ -191,10 +186,10 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
         )}
 
         {isBite && (
-          <div className="space-y-3">
+          <div className="space-y-3 w-full flex flex-col items-center">
             <button
               onClick={onReel}
-              className={`w-64 sm:w-80 ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
+              className={`w-[88%] max-w-xs sm:w-80 min-h-[50px] touch-manipulation ${isFullscreen ? 'py-4 sm:py-5 text-lg shadow-2xl' : 'py-3.5 px-6 text-base'} font-bold tracking-wide cursor-pointer transition-all active:scale-[0.98] ${getAreaThemeButtonClass(activeArea.id)}`}
             >
               Reel In!
             </button>

@@ -75,6 +75,7 @@ interface TownTabProps {
   onBuyRestaurantExpansion: (expansionId: string) => void;
   onRenameRestaurant: (name: string) => void;
   onRunDinnerService: (prepStyleId?: string, allowedDishIds?: string[]) => DinnerServiceResult | null;
+  onAcquireRestaurantDeed?: () => void;
   autoRushCountdownSec?: number;
   onToggleRestaurantAutomation?: (setting: 'autoDinnerRush' | 'autoRestockFromBox' | 'autoProcureWholesale') => void;
   onSelectPrepStyle?: (prepStyleId: string) => void;
@@ -114,6 +115,7 @@ export const TownTab: React.FC<TownTabProps> = ({
   onBuyRestaurantExpansion,
   onRenameRestaurant,
   onRunDinnerService,
+  onAcquireRestaurantDeed,
   autoRushCountdownSec = 25,
   onToggleRestaurantAutomation,
   onSelectPrepStyle,
@@ -918,7 +920,55 @@ export const TownTab: React.FC<TownTabProps> = ({
       )}
 
       {/* 5. RESTAURANT SUBTAB */}
-      {activeSubTab === 'restaurant' && (
+      {activeSubTab === 'restaurant' && !restaurantState.unlocked && (
+        <div className="border border-amber-600/60 bg-[#161820] p-6 text-center space-y-4">
+          <div className="space-y-1.5">
+            <span className="text-[10px] px-2 py-0.5 border border-amber-500 bg-amber-950 text-amber-300 font-bold uppercase tracking-wider">
+              Harbor Restaurant
+            </span>
+            <h2 className="text-base font-bold text-[#f1f3f5] tracking-wide">
+              Waterfront Seafood Kitchen
+            </h2>
+            <p className="text-xs text-[#8c94a2] max-w-lg mx-auto leading-relaxed">
+              Buy the commercial deed to open the restaurant. Stock fish from your box, run dinner service, hire staff, and earn daily profits.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-lg mx-auto text-left text-[11px] pt-1">
+            <div className="p-2.5 border border-[#2c303c] bg-[#121419] space-y-1">
+              <span className="font-bold text-amber-300">Prepare Meals</span>
+              <p className="text-[10px] text-[#8c94a2]">Turn fresh catches into cooked dishes for higher sell values.</p>
+            </div>
+            <div className="p-2.5 border border-[#2c303c] bg-[#121419] space-y-1">
+              <span className="font-bold text-sky-300">Earn Stars</span>
+              <p className="text-[10px] text-[#8c94a2]">Build restaurant reputation to unlock additional seating and kitchen upgrades.</p>
+            </div>
+            <div className="p-2.5 border border-[#2c303c] bg-[#121419] space-y-1">
+              <span className="font-bold text-emerald-300">Hire Staff</span>
+              <p className="text-[10px] text-[#8c94a2]">Hire line cooks and servers to handle dinner service automatically.</p>
+            </div>
+          </div>
+
+          <div className="pt-2 flex flex-col items-center gap-2">
+            <button
+              disabled={money < 5000}
+              onClick={onAcquireRestaurantDeed}
+              className={`px-6 py-2.5 font-bold border text-xs tracking-wide transition-colors ${
+                money >= 5000
+                  ? 'border-amber-500 bg-amber-950 hover:bg-amber-900 text-amber-200 cursor-pointer shadow-md'
+                  : 'border-[#2d313c] bg-[#14161c] text-[#555a64] cursor-not-allowed'
+              }`}
+            >
+              Acquire Commercial Deed · $5,000
+            </button>
+            <span className="text-[11px] text-[#717885]">
+              {money >= 5000 ? 'You have the funds to acquire this enterprise!' : `Need $${(5000 - money).toLocaleString()} more to purchase.`}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {activeSubTab === 'restaurant' && restaurantState.unlocked && (
         <div className="space-y-4 text-xs">
           {/* Restaurant Header & Status Banner */}
           <div className="border border-[#2d313c] bg-[#14161c] p-3 space-y-2.5">
@@ -980,6 +1030,9 @@ export const TownTab: React.FC<TownTabProps> = ({
                 </span>
                 <span className="text-[#8c94a2]">
                   Reputation: <strong className="text-sky-300">{restaurantState.reputation} Rep</strong>
+                </span>
+                <span className="text-[#8c94a2]">
+                  Tier: <strong className="text-amber-400">{Math.min(5, Math.max(1, Math.floor(restaurantState.reputation / 25) + 1))}-Star ({'*'.repeat(Math.min(5, Math.max(1, Math.floor(restaurantState.reputation / 25) + 1)))})</strong>
                 </span>
                 <span className="text-[#8c94a2]">
                   Seating: <strong className="text-amber-300">{maxTableCapacity} Tables</strong>
@@ -1051,11 +1104,44 @@ export const TownTab: React.FC<TownTabProps> = ({
           {/* VIEW A: KITCHEN & DINNER SERVICE */}
           {restaurantSubTab === 'kitchen' && (
             <div className="space-y-4">
+              {/* Quick 1-Click Supply Station */}
+              <div className="border border-[#2d323f] bg-[#12151c] p-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-4 text-xs">
+                  <div>
+                    <span className="text-[#8c94a2]">Kitchen Stock: </span>
+                    <strong className="text-emerald-300 font-bold">{totalPantryFishCount} Portions Ready</strong>
+                  </div>
+                  <div>
+                    <span className="text-[#8c94a2]">Tackle Box: </span>
+                    <strong className="text-[#f1f3f5] font-bold">{inventory.length} Fish available</strong>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {inventory.length > 0 && (
+                    <button
+                      onClick={onStockAllFromBox}
+                      className="px-3 py-1.5 font-bold border border-sky-600 bg-sky-950/80 hover:bg-sky-900 text-sky-200 cursor-pointer text-xs transition-colors"
+                    >
+                      Stock All from Box · {inventory.length} Fish
+                    </button>
+                  )}
+                  {totalPantryFishCount > 0 && onUnstockAllToBox && (
+                    <button
+                      onClick={onUnstockAllToBox}
+                      className="px-3 py-1.5 font-semibold border border-[#383d4a] bg-[#16181f] hover:border-amber-700 hover:text-amber-200 text-[#8c94a2] cursor-pointer text-xs transition-colors"
+                    >
+                      Return All to Box · {totalPantryFishCount} Fish
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {/* Step 1: Prep Style Selector Station */}
               <div className="border border-[#282b34] bg-[#14161c] p-3 space-y-2.5">
                 <div className="flex items-center justify-between border-b border-[#23262f] pb-1.5">
                   <span className="font-bold text-[#f1f3f5] text-xs uppercase tracking-wider">
-                    Step 1 · Choose Culinary Prep Style
+                    Preparation Style
                   </span>
                   <span className="text-amber-400 font-semibold text-[11px]">
                     Active: {selectedPrepStyle.name}

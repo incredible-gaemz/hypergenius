@@ -38,6 +38,9 @@ import {
   getLureSpriteUrl,
   getAreaBannerUrl,
   getWaitSpeedLabel,
+  getFishSpriteUrl,
+  getRarityBadgeStyle,
+  getLureAreaEffectiveness,
 } from './game/fishingLogic';
 import { soundManager } from './game/audioLogic';
 import { preloadGameAssets, preloadCriticalGameAssets } from './game/preloadAssets';
@@ -51,11 +54,22 @@ import { Guide } from './components/Guide';
 import { CommercialTab } from './components/CommercialTab';
 import { HatcheryTab } from './components/HatcheryTab';
 import { TownTab } from './components/TownTab';
+import { WhalingTab } from './components/WhalingTab';
+import {
+  isWhalingUnlocked,
+  hasQualifyingWhalingRod,
+  hasQualifyingWhalingReel,
+  WHALING_UNLOCK_COST,
+  WhaleCatalogEntry,
+  WHALE_SPECIES,
+  CaughtWhale,
+} from './game/whalingLogic';
 import {
   HatcheryTank,
   TankId,
   FeedType,
   HatcheryUpgradeId,
+  HatcheryMutation,
   INITIAL_HATCHERY_TANKS,
   HATCHERY_UPGRADES,
   FEED_OPTIONS,
@@ -108,6 +122,7 @@ import {
   BoatDefinition,
   COMMERCIAL_BAITS,
   generateJobSeekers,
+  getBoatRetireValue,
 } from './game/commercialLogic';
 
 const STORAGE_KEY = 'cozy_reel_save_v10';
@@ -235,6 +250,20 @@ export default function App() {
     return 'none';
   });
 
+  const [whalingUnlocked, setWhalingUnlocked] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && typeof JSON.parse(saved).whalingUnlocked === 'boolean') {
+        return JSON.parse(saved).whalingUnlocked;
+      }
+    } catch {}
+    return false;
+  });
+
+  const hasWhaleRod = hasQualifyingWhalingRod(ownedRodIds);
+  const hasWhaleReel = hasQualifyingWhalingReel(ownedReelIds);
+  const isWhalingAvailable = isWhalingUnlocked(ownedRodIds, ownedReelIds, whalingUnlocked);
+
   const [inventory, setInventory] = useState<CaughtFish[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -259,6 +288,30 @@ export default function App() {
     } catch {}
     return {};
   });
+
+  const [whaleCatalog, setWhaleCatalog] = useState<Record<string, WhaleCatalogEntry>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && JSON.parse(saved).whaleCatalog) {
+        return JSON.parse(saved).whaleCatalog;
+      }
+    } catch {}
+    return {};
+  });
+
+  const handleWhaleCaught = (whale: CaughtWhale) => {
+    setWhaleCatalog((prev) => {
+      const existing = prev[whale.speciesId] || { caughtCount: 0, maxWeight: 0 };
+      return {
+        ...prev,
+        [whale.speciesId]: {
+          caughtCount: existing.caughtCount + 1,
+          maxWeight: Math.max(existing.maxWeight, whale.weightLbs),
+          firstCaughtAt: existing.firstCaughtAt || Date.now(),
+        },
+      };
+    });
+  };
 
   // Trapping state
   const [unlockedTrapSlots, setUnlockedTrapSlots] = useState<number>(() => {
@@ -383,6 +436,15 @@ export default function App() {
   const [isLoadingAssets, setIsLoadingAssets] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStatusText, setLoadingStatusText] = useState('Preparing rods, reels & lures...');
+  const [loadingFish] = useState(() => {
+    const candidates = FISH_COLLECTION.filter(
+      (f) =>
+        (f.areaId === 'pond' || f.areaId === 'lake' || f.areaId === 'river') &&
+        (f.tier === 'common' || f.tier === 'uncommon')
+    );
+    if (candidates.length === 0) return FISH_COLLECTION[0];
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -546,6 +608,7 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState<Tab>('fish');
+  const [fishingSubTab, setFishingSubTab] = useState<'rod' | 'whaling'>('rod');
 
   // Civic Investments & Economy Influence
   const [civicInvestments, setCivicInvestments] = useState<CivicInvestmentId[]>(() => {
@@ -598,12 +661,19 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && JSON.parse(saved).restaurantState) {
-        return JSON.parse(saved).restaurantState;
+        const parsed = JSON.parse(saved).restaurantState;
+        const wasUnlocked =
+          parsed.unlocked ??
+          (parsed.totalMealsServed > 0 || parsed.totalEarnings > 0 || parsed.reputation > 0);
+        return {
+          ...parsed,
+          unlocked: wasUnlocked,
+        };
       }
     } catch {}
     return {
       name: 'The Salty Anchor Tavern & Grill',
-      unlocked: true,
+      unlocked: false, // Late-game milestone enterprise ($5,000 deed)
       pantry: {},
       hiredStaffIds: [],
       unlockedExpansionIds: [],
@@ -691,7 +761,7 @@ export default function App() {
     ownedBoats.length
   );
 
-  // Dev Code: Typing 3157458141 normally anywhere on keyboard gives $10,000
+  // Dev Code: Typing 3157458141 normally anywhere on keyboard unlocks everything
   const [devCodeBanner, setDevCodeBanner] = useState<string | null>(null);
 
   useEffect(() => {
@@ -707,9 +777,123 @@ export default function App() {
       if (e.key >= '0' && e.key <= '9') {
         keyBuffer = (keyBuffer + e.key).slice(-15);
         if (keyBuffer.endsWith(targetCode)) {
-          setMoney((prev) => prev + 10000);
-          setDevCodeBanner('DEV CHEAT ACTIVATED: +$10,000 Credited to Account!');
-          setTimeout(() => setDevCodeBanner(null), 4500);
+          // 1. Wealth: Add $1,000,000
+          setMoney((prev) => Math.max(prev + 1000000, 1000000));
+
+          // 2. All Fishing Areas
+          setUnlockedAreaIds(FISHING_AREAS.map((a) => a.id));
+
+          // 3. All Tackle: Rods, Reels, Lures
+          setOwnedRodIds(RODS.map((r) => r.id));
+          setOwnedReelIds(REELS.map((r) => r.id));
+          setOwnedLureIds(LURES.map((l) => l.id));
+
+          // 4. Maximum Trap Slots
+          setUnlockedTrapSlots(TRAP_SLOT_PRICES.length);
+
+          // 5. Commercial Fleet, Business Name, Upgrades, & Crew
+          setCommercialBusinessName((prev) => prev || 'Harbor Commercial Fleet');
+          setOwnedUpgradeIds(FLEET_UPGRADES.map((u) => u.id));
+          setOwnedBoats((prev) => {
+            const ownedDefIds = new Set(prev.map((b) => b.boatDefId));
+            const newBoats: OwnedBoat[] = [...prev];
+            BOATS_CATALOG.forEach((def, idx) => {
+              if (!ownedDefIds.has(def.id)) {
+                newBoats.push({
+                  instanceId: `boat_dev_${def.id}_${Date.now()}_${idx}`,
+                  boatDefId: def.id,
+                  customName: def.name,
+                  assignedCrewIds: [],
+                  installedUpgradeIds: FLEET_UPGRADES.map((u) => u.id),
+                  expedition: null,
+                });
+              }
+            });
+            return newBoats;
+          });
+          setHiredCrew((prev) => {
+            const existingIds = new Set(prev.map((c) => c.id));
+            const combined = [...prev];
+            for (const c of HIREABLE_CREW) {
+              if (!existingIds.has(c.id)) {
+                combined.push(c);
+                existingIds.add(c.id);
+              }
+            }
+            return combined;
+          });
+
+          // 6. Hatchery: Unlocked, All 4 Tanks Open, All Upgrades, 200 Live Bait Charges
+          setHatcheryUnlocked(true);
+          setHatcheryUpgrades(HATCHERY_UPGRADES.map((u) => u.id));
+          setLiveBaitCharges((prev) => Math.max(prev, 200));
+          setHatcheryTanks((prev) =>
+            prev.map((tank) => ({
+              ...tank,
+              unlocked: true,
+            }))
+          );
+
+          // 7. Town Civic Investments (All Funded)
+          setCivicInvestments(CIVIC_INVESTMENTS.map((c) => c.id));
+
+          // 8. Town Restaurant (Unlocked, All Expansions, Staff Candidates Hired)
+          setRestaurantState((prev) => ({
+            ...prev,
+            unlocked: true,
+            unlockedExpansionIds: RESTAURANT_EXPANSIONS.map((e) => e.id),
+            hiredStaffIds: RESTAURANT_STAFF_CANDIDATES.map((s) => s.id),
+            reputation: Math.max(prev.reputation || 0, 500),
+          }));
+
+          // 9. Angler Guild (Active Subscription & High Reputation Across All Guilds)
+          setClubState((prev) => ({
+            ...prev,
+            currentClubId: prev.currentClubId || 'casters',
+            isSubscriptionActive: true,
+            subscriptionDueAt: Date.now() + GUILD_SUBSCRIPTION_CYCLE_MS * 12,
+            reputationPoints: {
+              casters: Math.max(prev.reputationPoints?.casters || 0, 5000),
+              commercial: Math.max(prev.reputationPoints?.commercial || 0, 5000),
+              breeders: Math.max(prev.reputationPoints?.breeders || 0, 5000),
+              explorers: Math.max(prev.reputationPoints?.explorers || 0, 5000),
+            },
+          }));
+
+          // 10. Fish Catalog: 100% Discovered with Trophy Catches for Complete Field Guide
+          setCatalog((prev) => {
+            const next = { ...prev };
+            FISH_COLLECTION.forEach((fish) => {
+              const existing = next[fish.id];
+              next[fish.id] = {
+                caughtCount: Math.max(1, existing?.caughtCount || 1),
+                maxWeight: Math.max(fish.trophyWeight, existing?.maxWeight || fish.maxWeight),
+                hasTrophy: true,
+                firstCaughtAt: existing?.firstCaughtAt || Date.now(),
+                unlockedMutations: existing?.unlockedMutations || [],
+              };
+            });
+            return next;
+          });
+
+          // 11. Whaling Permit Unlocked & 100% Whales in Guide
+          setWhalingUnlocked(true);
+          setWhaleCatalog(() => {
+            const next: Record<string, WhaleCatalogEntry> = {};
+            WHALE_SPECIES.forEach((w) => {
+              next[w.id] = {
+                caughtCount: 1,
+                maxWeight: w.maxWeightLbs,
+                firstCaughtAt: Date.now(),
+              };
+            });
+            return next;
+          });
+
+          setDevCodeBanner(
+            'DEV CODE ACTIVATED: Everything Unlocked! All Areas, Rods, Reels, Baits, Traps, Boats, Whaling, Hatchery, Restaurant, Guild, & 100% Fish Guide +$1,000,000!'
+          );
+          setTimeout(() => setDevCodeBanner(null), 6000);
           keyBuffer = '';
         }
       }
@@ -721,8 +905,12 @@ export default function App() {
 
   // Ambient soundscape for active area
   useEffect(() => {
-    soundManager.playAreaAmbience(activeArea.id);
-  }, [activeArea.id]);
+    if (activeTab === 'fish' && fishingSubTab === 'whaling' && isWhalingAvailable) {
+      soundManager.playAreaAmbience('ocean');
+    } else {
+      soundManager.playAreaAmbience(activeArea.id);
+    }
+  }, [activeArea.id, activeTab, fishingSubTab, isWhalingAvailable]);
 
   // Reeling SFX when reeling
   useEffect(() => {
@@ -1013,6 +1201,8 @@ export default function App() {
           clubState,
           townBounties,
           restaurantState,
+          whalingUnlocked,
+          whaleCatalog,
         })
       );
     } catch {}
@@ -1048,6 +1238,8 @@ export default function App() {
     clubState,
     townBounties,
     restaurantState,
+    whalingUnlocked,
+    whaleCatalog,
   ]);
 
   // Clean up timers
@@ -1076,7 +1268,7 @@ export default function App() {
     setPendingTreasureGold(null);
     setCastState('waiting');
 
-    const duration = rollWaitTime(equippedRod);
+    const duration = rollWaitTime(equippedRod, equippedLure, activeArea.id);
     const weatherSpeedMult = weatherId === 'rain' || weatherId === 'overcast' ? 0.85 : 1.0;
     const isLiveBaitActive = useLiveBait && liveBaitCharges > 0;
     const hatcheryBaitMult = isLiveBaitActive ? 0.60 : 1.0;
@@ -1279,7 +1471,7 @@ export default function App() {
           setShowResetConfirm(false);
           return;
         }
-        if (activeTab === 'fish' && (castState === 'cast' || castState === 'nibble')) {
+        if (activeTab === 'fish' && (castState === 'waiting' || castState === 'nibble')) {
           e.preventDefault();
           handleCancelCast();
           return;
@@ -1447,6 +1639,51 @@ export default function App() {
     setTraps((prev) =>
       prev.map((t, idx) =>
         idx === slotIndex
+          ? { ...t, placedAt: Date.now(), lastCheckedAt: Date.now() }
+          : t
+      )
+    );
+  };
+
+  const handleHarvestAllTraps = () => {
+    const soakBonus = isClubPerkActive(clubState, 'commercial') ? 1.10 : 1.0;
+    const allCatches: CaughtFish[] = [];
+    const harvestedIndices: number[] = [];
+
+    traps.slice(0, unlockedTrapSlots).forEach((trap, slotIndex) => {
+      const harvest = calculateTrapCatch(trap, Date.now(), soakBonus);
+      if (harvest.count > 0 && harvest.fishes.length > 0) {
+        allCatches.push(...harvest.fishes);
+        harvestedIndices.push(slotIndex);
+      }
+    });
+
+    if (allCatches.length === 0) return;
+
+    setInventory((prev) => [...allCatches, ...prev]);
+
+    setCatalog((prev) => {
+      const next = { ...prev };
+      allCatches.forEach((fish) => {
+        const cur = next[fish.fishId] || {
+          caughtCount: 0,
+          maxWeight: 0,
+          hasTrophy: false,
+          firstCaughtAt: Date.now(),
+        };
+        next[fish.fishId] = {
+          caughtCount: cur.caughtCount + 1,
+          maxWeight: Math.max(cur.maxWeight, fish.weight),
+          hasTrophy: cur.hasTrophy || fish.isTrophy,
+          firstCaughtAt: cur.firstCaughtAt,
+        };
+      });
+      return next;
+    });
+
+    setTraps((prev) =>
+      prev.map((t, idx) =>
+        harvestedIndices.includes(idx)
           ? { ...t, placedAt: Date.now(), lastCheckedAt: Date.now() }
           : t
       )
@@ -2218,6 +2455,9 @@ export default function App() {
   const handleRetireBoat = (boatInstanceId: string) => {
     const boat = ownedBoats.find((b) => b.instanceId === boatInstanceId);
     if (!boat || boat.expedition) return;
+    const boatDef = BOATS_CATALOG.find((b) => b.id === boat.boatDefId) || BOATS_CATALOG[0];
+    const { value } = getBoatRetireValue(boat, boatDef);
+    setMoney((prev) => prev + value);
     setOwnedBoats((prev) => prev.filter((b) => b.instanceId !== boatInstanceId));
   };
 
@@ -2427,6 +2667,15 @@ export default function App() {
   };
 
   // Town Restaurant Handlers
+  const handleAcquireRestaurantDeed = () => {
+    if (money < 5000) return;
+    setMoney((prev) => prev - 5000);
+    setRestaurantState((prev) => ({
+      ...prev,
+      unlocked: true,
+    }));
+  };
+
   const handleStockFishToPantry = (speciesId: number, count = 1) => {
     const matching = inventory.filter((f) => f.fishId === speciesId);
     if (matching.length === 0) return;
@@ -2647,6 +2896,7 @@ export default function App() {
     setEquippedLureId('none');
     setInventory([]);
     setCatalog({});
+    setWhaleCatalog({});
     setUnlockedTrapSlots(0);
     setTraps(DEFAULT_TRAPS);
     setWeatherId('clear');
@@ -2659,6 +2909,7 @@ export default function App() {
     setHatcheryTanks(INITIAL_HATCHERY_TANKS);
     setHatcheryUpgrades([]);
     setHatcheryUnlocked(false);
+    setWhalingUnlocked(false);
     setLiveBaitCharges(0);
     setCommercialBusinessName(null);
     setRestaurantState({
@@ -2717,11 +2968,11 @@ export default function App() {
             </p>
           </div>
 
-          <div className="py-2 flex items-center justify-center">
+          <div className="py-2 flex flex-col items-center justify-center">
             <img
-              src="./fish/rainbow_trout.png"
-              alt="Loading"
-              className="w-20 h-16 object-contain animate-pulse"
+              src={getFishSpriteUrl(loadingFish) || './fish/rainbow_trout.png'}
+              alt={loadingFish.name}
+              className="w-24 h-16 object-contain animate-pulse"
               style={{ imageRendering: 'pixelated' }}
             />
           </div>
@@ -2825,10 +3076,10 @@ export default function App() {
         )}
 
         {/* Navigation Tabs (9 Tabs: Fish, Box, Shop, Traps, Hatchery, Fleet, Town, Areas, Guide) */}
-        <nav className="flex overflow-x-auto no-scrollbar gap-1 sm:grid sm:grid-cols-9 sm:gap-1 text-[11px] sm:text-xs py-0.5">
+        <nav className="flex overflow-x-auto no-scrollbar gap-1.5 sm:grid sm:grid-cols-9 sm:gap-1 text-[11px] sm:text-xs py-1">
           <button
             onClick={() => setActiveTab('fish')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'fish'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2838,7 +3089,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('inventory')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'inventory'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2929,6 +3180,132 @@ export default function App() {
 
         {/* Tab Content - Persistent Panels to Prevent Image Reloading / Flashing */}
         <div className={activeTab === 'fish' ? 'space-y-3' : 'hidden'}>
+          {/* Sub-Tabs: Rod & Reel vs Whaling */}
+          <div className="flex items-center gap-2 border-b border-[#232730] pb-2 text-xs">
+            <button
+              onClick={() => setFishingSubTab('rod')}
+              className={`px-3.5 py-1.5 font-bold cursor-pointer transition-colors ${
+                fishingSubTab === 'rod'
+                  ? 'border-b-2 border-sky-400 text-sky-200 bg-sky-950/40'
+                  : 'text-[#8c94a2] hover:text-[#c0c5ce]'
+              }`}
+            >
+              Rod & Reel
+            </button>
+            <button
+              onClick={() => setFishingSubTab('whaling')}
+              className={`px-3.5 py-1.5 font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
+                fishingSubTab === 'whaling'
+                  ? 'border-b-2 border-blue-400 text-blue-200 bg-blue-950/40'
+                  : 'text-[#8c94a2] hover:text-blue-300'
+              }`}
+            >
+              Whaling
+              {!isWhalingAvailable && (
+                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 border border-amber-500/50 bg-amber-950/60 text-amber-300">
+                  Locked
+                </span>
+              )}
+            </button>
+          </div>
+
+          {fishingSubTab === 'whaling' ? (
+            !isWhalingAvailable ? (
+              <div className="border border-[#2a2d34] bg-[#14161b] p-5 text-[#e3e6eb] space-y-4 text-xs">
+                <div className="border-b border-[#252830] pb-3">
+                  <div className="text-sm font-bold text-[#f1f3f5]">Whaling (Locked)</div>
+                  <div className="text-[#8c94a2] text-xs mt-1">
+                    Whaling requires heavy gear and a commercial whaling permit.
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-w-md">
+                  <div className="flex items-center justify-between p-3 border border-[#232730] bg-[#101217]">
+                    <div>
+                      <div className="font-bold text-[#f1f3f5]">Heavy Rod</div>
+                      <div className="text-[11px] text-[#717885]">At least Thicc rod ($175,000+)</div>
+                    </div>
+                    <span
+                      className={`font-bold px-2 py-0.5 text-xs ${
+                        hasWhaleRod ? 'text-emerald-400' : 'text-amber-400'
+                      }`}
+                    >
+                      {hasWhaleRod ? 'Owned' : 'Needed'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border border-[#232730] bg-[#101217]">
+                    <div>
+                      <div className="font-bold text-[#f1f3f5]">Heavy Reel</div>
+                      <div className="text-[11px] text-[#717885]">At least Gold Dual reel ($120,000+)</div>
+                    </div>
+                    <span
+                      className={`font-bold px-2 py-0.5 text-xs ${
+                        hasWhaleReel ? 'text-emerald-400' : 'text-amber-400'
+                      }`}
+                    >
+                      {hasWhaleReel ? 'Owned' : 'Needed'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border border-[#232730] bg-[#101217]">
+                    <div>
+                      <div className="font-bold text-[#f1f3f5]">Whaling Permit</div>
+                      <div className="text-[11px] text-[#717885]">${WHALING_UNLOCK_COST.toLocaleString()} one-time license</div>
+                    </div>
+                    <span
+                      className={`font-bold px-2 py-0.5 text-xs ${
+                        whalingUnlocked ? 'text-emerald-400' : 'text-amber-400'
+                      }`}
+                    >
+                      {whalingUnlocked ? 'Unlocked' : `$${WHALING_UNLOCK_COST.toLocaleString()}`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {!whalingUnlocked && (
+                    <button
+                      onClick={() => {
+                        if (hasWhaleRod && hasWhaleReel && money >= WHALING_UNLOCK_COST) {
+                          setMoney((prev) => prev - WHALING_UNLOCK_COST);
+                          setWhalingUnlocked(true);
+                        }
+                      }}
+                      disabled={!hasWhaleRod || !hasWhaleReel || money < WHALING_UNLOCK_COST}
+                      className={`px-4 py-2 font-bold border transition-colors touch-manipulation min-h-[40px] ${
+                        hasWhaleRod && hasWhaleReel && money >= WHALING_UNLOCK_COST
+                          ? 'border-emerald-500 bg-emerald-950 hover:bg-emerald-900 text-emerald-100 cursor-pointer'
+                          : 'border-[#333842] bg-[#1a1c22] text-[#6b7280] cursor-not-allowed'
+                      }`}
+                    >
+                      {money < WHALING_UNLOCK_COST && hasWhaleRod && hasWhaleReel
+                        ? `Need $${(WHALING_UNLOCK_COST - money).toLocaleString()} more`
+                        : `Unlock Whaling ($${WHALING_UNLOCK_COST.toLocaleString()})`}
+                    </button>
+                  )}
+
+                  {(!hasWhaleRod || !hasWhaleReel) && (
+                    <button
+                      onClick={() => setActiveTab('shop')}
+                      className="px-4 py-2 border border-sky-500 bg-sky-950 hover:bg-sky-900 text-sky-100 font-bold cursor-pointer touch-manipulation min-h-[40px]"
+                    >
+                      Go to Tackle Shop
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <WhalingTab
+                money={money}
+                ownedRodIds={ownedRodIds}
+                ownedReelIds={ownedReelIds}
+                onAddMoney={(amt) => setMoney((prev) => prev + amt)}
+                onWhaleCaught={handleWhaleCaught}
+              />
+            )
+          ) : (
+            <div className="space-y-3">
             {/* Gear & Setup Bar */}
             <div
               className={`border-2 ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3.5 text-xs space-y-3 transition-colors`}
@@ -3014,21 +3391,31 @@ export default function App() {
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 min-w-0 flex-1">
                     <span className="text-[#8c94a2] font-semibold text-[11px] sm:text-xs shrink-0">Bait:</span>
-                    <select
-                      value={equippedLureId}
-                      onChange={(e) => handleEquipLure(e.target.value)}
-                      aria-label="Equipped Bait or Lure"
-                      className="w-full border-2 border-[#323640] bg-[#141518] px-2 py-1 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none text-xs truncate"
-                    >
-                      {ownedLureIds.map((id) => {
-                        const l = LURES.find((lure) => lure.id === id);
-                        return (
-                          <option key={id} value={id}>
-                            {l?.name}
-                          </option>
-                        );
-                      })}
-                    </select>
+                    <div className="w-full min-w-0">
+                      <select
+                        value={equippedLureId}
+                        onChange={(e) => handleEquipLure(e.target.value)}
+                        aria-label="Equipped Bait or Lure"
+                        className="w-full border-2 border-[#323640] bg-[#141518] px-2 py-1 text-[#f1f3f5] font-bold cursor-pointer focus:outline-none text-xs truncate"
+                      >
+                        {ownedLureIds.map((id) => {
+                          const l = LURES.find((lure) => lure.id === id);
+                          return (
+                            <option key={id} value={id}>
+                              {l?.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      {getLureAreaEffectiveness(equippedLureId, activeArea.id).isMismatched && (
+                        <div
+                          className="text-[10px] text-amber-400 font-semibold truncate pt-0.5"
+                          title={getLureAreaEffectiveness(equippedLureId, activeArea.id).warningText}
+                        >
+                          Slow bites in {activeArea.name}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3062,7 +3449,9 @@ export default function App() {
               onClaimTreasure={handleClaimTreasure}
               onResetToIdle={() => setCastState('idle')}
             />
-        </div>
+          </div>
+        )}
+      </div>
 
         <div className={activeTab === 'areas' ? 'block' : 'hidden'}>
           <AreasTab
@@ -3083,6 +3472,7 @@ export default function App() {
             unlockedTrapSlots={unlockedTrapSlots}
             unlockedAreaIds={unlockedAreaIds}
             onHarvestTrap={handleHarvestTrap}
+            onHarvestAllTraps={handleHarvestAllTraps}
             onSetTrapArea={handleSetTrapArea}
             onBaitTrap={handleBaitTrap}
             onBaitTrapWithFish={handleBaitTrapWithFish}
@@ -3144,6 +3534,7 @@ export default function App() {
             onBuyRestaurantExpansion={handleBuyRestaurantExpansion}
             onRenameRestaurant={handleRenameRestaurant}
             onRunDinnerService={handleRunDinnerService}
+            onAcquireRestaurantDeed={handleAcquireRestaurantDeed}
             autoRushCountdownSec={autoRushCountdownSec}
             onToggleRestaurantAutomation={handleToggleRestaurantAutomation}
             onSelectPrepStyle={handleSelectPrepStyle}
@@ -3211,6 +3602,7 @@ export default function App() {
         <div className={activeTab === 'guide' ? 'block' : 'hidden'}>
           <Guide
             catalogMap={catalog}
+            whaleCatalog={whaleCatalog}
             currentWeather={currentWeather}
             inventory={inventory}
             hatcheryTanks={hatcheryTanks}
