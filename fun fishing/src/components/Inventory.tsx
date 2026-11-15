@@ -139,7 +139,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <div className="flex items-center justify-between text-xs text-[#8c94a2]">
           <span>Held Fish Summary · {groupedFish.length} Types</span>
           <span className="text-[11px]">
-            Tip: Supply town contracts, stock the restaurant pantry, or breed in Hatchery.
+            Tip: Supply town contracts, build commercial fleet hauls, or breed in Hatchery.
           </span>
         </div>
 

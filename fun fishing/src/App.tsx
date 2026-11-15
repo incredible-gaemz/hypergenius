@@ -100,13 +100,6 @@ import {
   getRumorSpecies,
 } from './game/weatherRumorLogic';
 import {
-  RestaurantState,
-  RESTAURANT_EXPANSIONS,
-  RESTAURANT_STAFF_CANDIDATES,
-  runDinnerService,
-  DinnerServiceResult,
-} from './game/restaurantLogic';
-import {
   OwnedBoat,
   CrewMember,
   FleetUpgrade,
@@ -656,32 +649,7 @@ export default function App() {
     return generateTownBounties();
   });
 
-  // Town Restaurant state
-  const [restaurantState, setRestaurantState] = useState<RestaurantState>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved && JSON.parse(saved).restaurantState) {
-        const parsed = JSON.parse(saved).restaurantState;
-        const wasUnlocked =
-          parsed.unlocked ??
-          (parsed.totalMealsServed > 0 || parsed.totalEarnings > 0 || parsed.reputation > 0);
-        return {
-          ...parsed,
-          unlocked: wasUnlocked,
-        };
-      }
-    } catch {}
-    return {
-      name: 'The Salty Anchor Tavern & Grill',
-      unlocked: false, // Late-game milestone enterprise ($5,000 deed)
-      pantry: {},
-      hiredStaffIds: [],
-      unlockedExpansionIds: [],
-      totalMealsServed: 0,
-      totalEarnings: 0,
-      reputation: 0,
-    };
-  });
+
 
   // Weather countdown timer (measured 360s / 6-minute cycle)
   const [weatherShiftRemainingSec, setWeatherShiftRemainingSec] = useState<number>(360);
@@ -837,14 +805,7 @@ export default function App() {
           // 7. Town Civic Investments (All Funded)
           setCivicInvestments(CIVIC_INVESTMENTS.map((c) => c.id));
 
-          // 8. Town Restaurant (Unlocked, All Expansions, Staff Candidates Hired)
-          setRestaurantState((prev) => ({
-            ...prev,
-            unlocked: true,
-            unlockedExpansionIds: RESTAURANT_EXPANSIONS.map((e) => e.id),
-            hiredStaffIds: RESTAURANT_STAFF_CANDIDATES.map((s) => s.id),
-            reputation: Math.max(prev.reputation || 0, 500),
-          }));
+
 
           // 9. Angler Guild (Active Subscription & High Reputation Across All Guilds)
           setClubState((prev) => ({
@@ -891,7 +852,7 @@ export default function App() {
           });
 
           setDevCodeBanner(
-            'DEV CODE ACTIVATED: Everything Unlocked! All Areas, Rods, Reels, Baits, Traps, Boats, Whaling, Hatchery, Restaurant, Guild, & 100% Fish Guide +$1,000,000!'
+            'DEV CODE ACTIVATED: Everything Unlocked! All Areas, Rods, Reels, Baits, Traps, Boats, Whaling, Hatchery, Guild, & 100% Fish Guide +$1,000,000!'
           );
           setTimeout(() => setDevCodeBanner(null), 6000);
           keyBuffer = '';
@@ -1098,70 +1059,6 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Restaurant staff background automation timer (Leo, Rosa, Milo, Genevieve)
-  const [autoRushCountdownSec, setAutoRushCountdownSec] = useState<number>(25);
-  const handleRunDinnerServiceRef = useRef<
-    ((prepStyleId?: string, allowedDishIds?: string[]) => DinnerServiceResult | null) | null
-  >(null);
-
-  useEffect(() => {
-    let tickCount = 0;
-    const timer = setInterval(() => {
-      tickCount += 1;
-      setRestaurantState((curRest) => {
-        if (!curRest.unlocked) return curRest;
-
-        const hasRosa = curRest.hiredStaffIds.includes('staff_chef_rosa');
-        const hasGenevieve = curRest.hiredStaffIds.includes('staff_host_genevieve');
-
-        // 1. Genevieve Dupond Auto-Procure Wholesale: Every ~12s if pantry is 0, auto-buys wholesale Yellow Perch at discount
-        if (hasGenevieve && curRest.autoProcureWholesale !== false && tickCount % 12 === 0) {
-          const totalPantry = Object.values(curRest.pantry).reduce((s, c) => s + c, 0);
-          if (totalPantry === 0) {
-            setMoney((curMoney) => {
-              const discountedPrice = 14;
-              const qty = 3;
-              const cost = discountedPrice * qty;
-              if (curMoney >= cost + 40) {
-                setTimeout(() => {
-                  setRestaurantState((prev) => ({
-                    ...prev,
-                    pantry: {
-                      ...prev.pantry,
-                      54: (prev.pantry[54] || 0) + qty,
-                    },
-                  }));
-                }, 0);
-                return curMoney - cost;
-              }
-              return curMoney;
-            });
-          }
-        }
-
-        // 3. Chef Rosa Perez Auto-Dinner Rush: Counts down and automatically serves diners every 25s
-        if (hasRosa && curRest.autoDinnerRush !== false) {
-          setAutoRushCountdownSec((sec) => {
-            if (sec <= 1) {
-              const totalPantry = Object.values(curRest.pantry).reduce((s, c) => s + c, 0);
-              if (totalPantry > 0) {
-                setTimeout(() => {
-                  handleRunDinnerServiceRef.current?.(curRest.activePrepStyleId || 'pan_fry');
-                }, 0);
-              }
-              return 25;
-            }
-            return sec - 1;
-          });
-        }
-
-        return curRest;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   // Auto-Save progress to local storage
   useEffect(() => {
     try {
@@ -1200,7 +1097,6 @@ export default function App() {
           civicInvestments,
           clubState,
           townBounties,
-          restaurantState,
           whalingUnlocked,
           whaleCatalog,
         })
@@ -1237,7 +1133,6 @@ export default function App() {
     civicInvestments,
     clubState,
     townBounties,
-    restaurantState,
     whalingUnlocked,
     whaleCatalog,
   ]);
@@ -2666,214 +2561,6 @@ export default function App() {
     );
   };
 
-  // Town Restaurant Handlers
-  const handleAcquireRestaurantDeed = () => {
-    if (money < 5000) return;
-    setMoney((prev) => prev - 5000);
-    setRestaurantState((prev) => ({
-      ...prev,
-      unlocked: true,
-    }));
-  };
-
-  const handleStockFishToPantry = (speciesId: number, count = 1) => {
-    const matching = inventory.filter((f) => f.fishId === speciesId);
-    if (matching.length === 0) return;
-    const toTake = matching.slice(0, count);
-    const takeIds = new Set(toTake.map((f) => f.catchId));
-
-    setInventory((prev) => prev.filter((f) => !takeIds.has(f.catchId)));
-    setRestaurantState((prev) => ({
-      ...prev,
-      pantry: {
-        ...prev.pantry,
-        [speciesId]: (prev.pantry[speciesId] || 0) + toTake.length,
-      },
-    }));
-  };
-
-  const handleStockAllFromBox = () => {
-    if (inventory.length === 0) return;
-    const counts: Record<number, number> = {};
-    for (const f of inventory) {
-      counts[f.fishId] = (counts[f.fishId] || 0) + 1;
-    }
-    setInventory([]);
-    setRestaurantState((prev) => {
-      const nextPantry = { ...prev.pantry };
-      for (const [sId, qty] of Object.entries(counts)) {
-        const idNum = Number(sId);
-        nextPantry[idNum] = (nextPantry[idNum] || 0) + qty;
-      }
-      return {
-        ...prev,
-        pantry: nextPantry,
-      };
-    });
-  };
-
-  const handleUnstockFishFromPantry = (speciesId: number, count = 1) => {
-    const currentCount = restaurantState.pantry[speciesId] || 0;
-    if (currentCount <= 0) return;
-    const toReturn = Math.min(currentCount, count);
-
-    const species = FISH_COLLECTION.find((f) => f.id === speciesId);
-    if (!species) return;
-
-    const returnedFish: CaughtFish[] = [];
-    const now = Date.now();
-    for (let i = 0; i < toReturn; i++) {
-      returnedFish.push({
-        catchId: `pantry_return_${now}_${i}_${Math.random().toString(36).substring(2, 6)}`,
-        fishId: species.id,
-        name: species.name,
-        tier: species.tier,
-        weight: Number(((species.minWeight + species.maxWeight) / 2).toFixed(2)),
-        isTrophy: false,
-        value: species.basePrice,
-        caughtAt: now,
-        areaId: species.areaId,
-      });
-    }
-
-    setInventory((prev) => [...returnedFish, ...prev]);
-    setRestaurantState((prev) => ({
-      ...prev,
-      pantry: {
-        ...prev.pantry,
-        [speciesId]: currentCount - toReturn,
-      },
-    }));
-  };
-
-  const handleUnstockAllToBox = () => {
-    const returnedFish: CaughtFish[] = [];
-    const now = Date.now();
-    for (const [sIdStr, count] of Object.entries(restaurantState.pantry)) {
-      const sId = Number(sIdStr);
-      const species = FISH_COLLECTION.find((f) => f.id === sId);
-      if (!species || count <= 0) continue;
-      for (let i = 0; i < count; i++) {
-        returnedFish.push({
-          catchId: `pantry_return_all_${now}_${sId}_${i}`,
-          fishId: species.id,
-          name: species.name,
-          tier: species.tier,
-          weight: Number(((species.minWeight + species.maxWeight) / 2).toFixed(2)),
-          isTrophy: false,
-          value: species.basePrice,
-          caughtAt: now,
-          areaId: species.areaId,
-        });
-      }
-    }
-    if (returnedFish.length === 0) return;
-    setInventory((prev) => [...returnedFish, ...prev]);
-    setRestaurantState((prev) => ({
-      ...prev,
-      pantry: {},
-    }));
-  };
-
-  const handleBuyWholesaleFish = (speciesId: number, pricePerFish: number, count = 1) => {
-    const cost = pricePerFish * count;
-    if (money < cost) return;
-    setMoney((m) => m - cost);
-    setRestaurantState((prev) => ({
-      ...prev,
-      pantry: {
-        ...prev.pantry,
-        [speciesId]: (prev.pantry[speciesId] || 0) + count,
-      },
-    }));
-  };
-
-  const handleHireRestaurantStaff = (staffId: string) => {
-    const candidate = RESTAURANT_STAFF_CANDIDATES.find((s) => s.id === staffId);
-    if (!candidate || money < candidate.wagePerService || restaurantState.hiredStaffIds.includes(staffId)) return;
-    setMoney((m) => m - candidate.wagePerService);
-    setRestaurantState((prev) => ({
-      ...prev,
-      hiredStaffIds: [...prev.hiredStaffIds, staffId],
-    }));
-  };
-
-  const handleBuyRestaurantExpansion = (expansionId: string) => {
-    const exp = RESTAURANT_EXPANSIONS.find((e) => e.id === expansionId);
-    if (!exp || money < exp.cost || restaurantState.unlockedExpansionIds.includes(expansionId)) return;
-    setMoney((m) => m - exp.cost);
-    setRestaurantState((prev) => ({
-      ...prev,
-      unlockedExpansionIds: [...prev.unlockedExpansionIds, expansionId],
-    }));
-  };
-
-  const handleRenameRestaurant = (name: string) => {
-    if (!name.trim()) return;
-    setRestaurantState((prev) => ({
-      ...prev,
-      name: name.trim(),
-    }));
-  };
-
-  const handleRunDinnerService = (
-    prepStyleId = 'pan_fry',
-    allowedDishIds?: string[]
-  ): DinnerServiceResult | null => {
-    const hiredStaff = RESTAURANT_STAFF_CANDIDATES.filter((s) =>
-      restaurantState.hiredStaffIds.includes(s.id)
-    );
-    const unlockedExpansions = RESTAURANT_EXPANSIONS.filter((e) =>
-      restaurantState.unlockedExpansionIds.includes(e.id)
-    );
-
-    const result = runDinnerService(
-      restaurantState.pantry,
-      hiredStaff,
-      unlockedExpansions,
-      prepStyleId,
-      allowedDishIds
-    );
-
-    if (result.mealsServedCount === 0) return null;
-
-    setMoney((m) => m + result.netProfit);
-    setRestaurantState((prev) => {
-      const nextPantry = { ...prev.pantry };
-      for (const [fishIdStr, consumedQty] of Object.entries(result.pantryConsumed)) {
-        const fId = Number(fishIdStr);
-        nextPantry[fId] = Math.max(0, (nextPantry[fId] || 0) - consumedQty);
-      }
-      return {
-        ...prev,
-        pantry: nextPantry,
-        totalMealsServed: prev.totalMealsServed + result.mealsServedCount,
-        totalEarnings: prev.totalEarnings + result.netProfit,
-        reputation: prev.reputation + result.mealsServedCount * 2,
-      };
-    });
-
-    return result;
-  };
-
-  handleRunDinnerServiceRef.current = handleRunDinnerService;
-
-  const handleToggleRestaurantAutomation = (
-    setting: 'autoDinnerRush' | 'autoRestockFromBox' | 'autoProcureWholesale'
-  ) => {
-    setRestaurantState((prev) => ({
-      ...prev,
-      [setting]: prev[setting] === false ? true : false,
-    }));
-  };
-
-  const handleSelectPrepStyle = (prepStyleId: string) => {
-    setRestaurantState((prev) => ({
-      ...prev,
-      activePrepStyleId: prepStyleId,
-    }));
-  };
-
   // Reset Game Progress
   const handleConfirmReset = () => {
     if (waitTimerRef.current) clearInterval(waitTimerRef.current);
@@ -2912,16 +2599,7 @@ export default function App() {
     setWhalingUnlocked(false);
     setLiveBaitCharges(0);
     setCommercialBusinessName(null);
-    setRestaurantState({
-      name: 'The Salty Anchor Tavern & Grill',
-      unlocked: true,
-      pantry: {},
-      hiredStaffIds: [],
-      unlockedExpansionIds: [],
-      totalMealsServed: 0,
-      totalEarnings: 0,
-      reputation: 0,
-    });
+
     setCommercialStats({
       totalFleetRevenue: 0,
       totalExpeditionsCount: 0,
@@ -3506,7 +3184,6 @@ export default function App() {
             townBounties={townBounties}
             civicInvestments={civicInvestments}
             clubState={clubState}
-            restaurantState={restaurantState}
             currentAreaId={selectedAreaId}
             currentWeatherId={weatherId}
             weatherShiftRemainingSec={weatherShiftRemainingSec}
@@ -3520,19 +3197,6 @@ export default function App() {
             onRenewSubscription={handleRenewSubscription}
             onToggleAutoRenew={handleToggleAutoRenew}
             onResignClub={handleResignClub}
-            onStockFishToPantry={handleStockFishToPantry}
-            onStockAllFromBox={handleStockAllFromBox}
-            onUnstockFishFromPantry={handleUnstockFishFromPantry}
-            onUnstockAllToBox={handleUnstockAllToBox}
-            onBuyWholesaleFish={handleBuyWholesaleFish}
-            onHireRestaurantStaff={handleHireRestaurantStaff}
-            onBuyRestaurantExpansion={handleBuyRestaurantExpansion}
-            onRenameRestaurant={handleRenameRestaurant}
-            onRunDinnerService={handleRunDinnerService}
-            onAcquireRestaurantDeed={handleAcquireRestaurantDeed}
-            autoRushCountdownSec={autoRushCountdownSec}
-            onToggleRestaurantAutomation={handleToggleRestaurantAutomation}
-            onSelectPrepStyle={handleSelectPrepStyle}
           />
         </div>
 
