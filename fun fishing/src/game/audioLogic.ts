@@ -61,6 +61,12 @@ class SoundManager {
     this.initialized = true;
 
     const unlock = () => {
+      // Warm up reelAudio on first user interaction so it's unlocked for immediate playback
+      if (!this.reelAudio) {
+        this.reelAudio = new Audio('./audio/reel.mp3');
+        this.reelAudio.preload = 'auto';
+        this.reelAudio.load();
+      }
       if (this.currentAreaId && !this.muted && this.ambientTracks.length > 0) {
         for (const audio of this.ambientTracks) {
           if (audio.paused) {
@@ -318,22 +324,30 @@ class SoundManager {
     this.reelLoopStart = Math.random() * maxStart;
     this.reelLoopEnd = this.reelLoopStart + sliceDuration;
 
-    try {
-      this.reelAudio.currentTime = this.reelLoopStart;
-    } catch {}
-
     // Looping boundary handler to loop this specific random section
     this.reelTimeListener = () => {
       if (!this.reelAudio) return;
       if (this.reelAudio.currentTime >= this.reelLoopEnd) {
-        this.reelAudio.currentTime = this.reelLoopStart;
+        try {
+          this.reelAudio.currentTime = this.reelLoopStart;
+        } catch {}
       }
     };
     this.reelAudio.addEventListener('timeupdate', this.reelTimeListener);
 
+    // If seeking fails or throws (e.g. metadata not loaded yet), play from current position
     try {
-      this.reelAudio.play().catch(() => {});
+      if (this.reelAudio.readyState >= 1) {
+        this.reelAudio.currentTime = this.reelLoopStart;
+      }
     } catch {}
+
+    const playPromise = this.reelAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Retry play on next user action if autoplay policy briefly blocked it
+      });
+    }
   }
 
   public stopReelingSfx() {
