@@ -260,6 +260,12 @@ class SoundManager {
       case 'bayou':
         trackConfigs = [{ src: './audio/marsh.mp3', volume: base }];
         break;
+      case 'glacial':
+        trackConfigs = [
+          { src: './audio/river.mp3', volume: base * 0.7 },
+          { src: './audio/lake.mp3', volume: base * 0.8 },
+        ];
+        break;
       case 'river':
         trackConfigs = [
           { src: './audio/river.mp3', volume: base * 0.95 },

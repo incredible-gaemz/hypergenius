@@ -1236,5 +1236,89 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
       "habitatBehavior": "Reigns supreme in ancient flooded bayous and slow-moving river oxbows, surfacing periodically with a distinctive resonant gulp.",
       "dietNotes": "Apex carnivore that inhales large fish, turtles, crustaceans, and small birds with explosive suction.",
       "wikiUrl": "https://en.wikipedia.org/wiki/Arapaima"
+  },
+  "176": {
+      "scientificName": "Salvelinus alpinus",
+      "visualDescription": "Cold-water salmonid with an olive-slate back and brilliant fiery red-orange flanks adorned with pale pink spots and bright white fin margins.",
+      "habitatBehavior": "Inhabits glacial melt rivers, subarctic tarns, and coastal fiords; survives beneath winter lake ice.",
+      "dietNotes": "Feeds on aquatic insect larvae, freshwater snails, amphipods, and small schooling fish.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Arctic_char"
+  },
+  "177": {
+      "scientificName": "Gadus morhua",
+      "visualDescription": "Heavily built benthopelagic fish with greenish-brown mottled skin, three distinct dorsal fins, a pale white lateral line, and a chin barbel.",
+      "habitatBehavior": "Schools along cold rocky continental shelves, banks, and coastal fjord channels in the North Atlantic.",
+      "dietNotes": "Predatory carnivore hunting capelin, herring, sand lances, and deep-water crabs.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Atlantic_cod"
+  },
+  "178": {
+      "scientificName": "Stenodus leucichthys",
+      "visualDescription": "Immense silvery coregonid known as the Eskimo Tarpon, featuring large reflective scales and an aggressively undershot lower jaw.",
+      "habitatBehavior": "Cruises muddy subarctic rivers and glacial estuaries across the Arctic basin; leaps when hooked.",
+      "dietNotes": "Voracious predator feeding primarily on other fish such as whitefish, smelt, and pike.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Beloribitsa"
+  },
+  "179": {
+      "scientificName": "Pollachius virens",
+      "visualDescription": "Streamlined, muscular gadid with dark olive-black back, silvery-grey flanks, a stark white lateral line, and a slight chin barbel.",
+      "habitatBehavior": "Fast-swimming pelagic schooling fish hunting midwater baitfish over coastal banks and deep rocky ledges.",
+      "dietNotes": "Chases herring, sprat, sand eels, and euphausiids in vigorous hunting packs.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Pollachius_virens"
+  },
+  "180": {
+      "scientificName": "Melanogrammus aeglefinus",
+      "visualDescription": "Sleek silvery-grey marine groundfish with a prominent dark black lateral line and a distinct dark thumbprint blotch above the pectoral fin.",
+      "habitatBehavior": "Dwells in cold North Atlantic waters over deep gravel, sand, and shell bottoms between 130 and 450 feet.",
+      "dietNotes": "Bottom browser that roots out brittle stars, sea urchins, mollusks, and benthic worms.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Haddock"
+  },
+  "181": {
+      "scientificName": "Anarhichas lupus",
+      "visualDescription": "Ferocious eel-like predator with powerful crushing jaws armed with prominent forward-pointing canine fangs and dark blue-grey banding.",
+      "habitatBehavior": "Inhabits rocky crevices, boulder fields, and deep caves along frigid North Atlantic fjord walls; blood contains natural antifreeze.",
+      "dietNotes": "Crushes hard-shelled sea urchins, large green crabs, deep-sea whelks, and queen scallops.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Atlantic_wolffish"
+  },
+  "182": {
+      "scientificName": "Coregonus autumnalis",
+      "visualDescription": "Slender, silver-scaled subarctic whitefish with dark olive-slate back and deeply forked tail fin.",
+      "habitatBehavior": "Anadromous wanderer roaming coastal brackish Arctic seas, migrating upstream into glacial rivers to spawn.",
+      "dietNotes": "Filters copepods, amphipods, mysids, and aquatic insect larvae from cold waters.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Arctic_cisco"
+  },
+  "183": {
+      "scientificName": "Cyclopterus lumpus",
+      "visualDescription": "Portly, ball-shaped marine fish covered in ridges of hard bony tubercles, featuring modified pelvic fins that form a powerful suction disc on its chest.",
+      "habitatBehavior": "Anchors itself to rocky ledges and kelp beds in cold subarctic waters, riding tidal surges effortlessly.",
+      "dietNotes": "Feeds on comb jellies, ctenophores, small amphipods, and floating pelagic crustaceans.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Cyclopterus_lumpus"
+  },
+  "184": {
+      "scientificName": "Osmerus mordax",
+      "visualDescription": "Translucent, slender shimmering silver-purple forage fish with prominent canine teeth in its mouth and a faint cucumber-like aroma.",
+      "habitatBehavior": "Schools in frigid coastal bays, estuaries, and deep glacial lakes, ascending streams immediately upon ice melt.",
+      "dietNotes": "Feeds on zooplankton, mysid shrimp, and small aquatic insect larvae.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Rainbow_smelt"
+  },
+  "185": {
+      "scientificName": "Myoxocephalus scorpius",
+      "visualDescription": "Broad-headed, spiny benthic sculpin covered in sharp thorn-like defensive spines, wide fan-like pectoral fins, and mottled brown camouflage.",
+      "habitatBehavior": "Well-camouflaged bottom dweller resting on subarctic gravel, boulders, and seaweed beds.",
+      "dietNotes": "Ambush predator swallowing crabs, shrimp, sand eels, and small bottom fish whole.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Shorthorn_sculpin"
+  },
+  "186": {
+      "scientificName": "Liopsetta glacialis",
+      "visualDescription": "Small oval right-eyed flatfish with rough scales, mottled muddy-olive upper side with dark spots, and stark white blind side.",
+      "habitatBehavior": "Thrives on mud and silt bottoms in freezing arctic fjords and estuaries, tolerating brackish river mouths.",
+      "dietNotes": "Preys on benthic amphipods, small bivalve mollusks, and marine polychaete worms.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Arctic_flounder"
+  },
+  "187": {
+      "scientificName": "Lamna ditropis",
+      "visualDescription": "Muscular, heavy-bodied apex predator resembling a compact great white shark, with slate-grey dorsal skin, blotched white belly, and large dark predatory eyes.",
+      "habitatBehavior": "Endothermic subarctic hunter capable of maintaining body temperature well above freezing water; prowls glacial fjords and open northern seas.",
+      "dietNotes": "Apex hunter targeting Pacific salmon, sablefish, squid, and herring.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Salmon_shark"
   }
 };

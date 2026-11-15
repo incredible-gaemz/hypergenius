@@ -37,18 +37,20 @@ import {
   getLureAreaEffectiveness,
 } from './fishingLogic.ts';
 
-test('FISHING_AREAS contains realistic areas including Abyssal Trench', () => {
-  assert.equal(FISHING_AREAS.length, 7);
+test('FISHING_AREAS contains realistic areas including Glacial Fjord and Abyssal Trench', () => {
+  assert.equal(FISHING_AREAS.length, 8);
   assert.equal(FISHING_AREAS[0].id, 'pond');
   assert.equal(FISHING_AREAS[0].unlockCost, 0); // starter area
   assert.equal(FISHING_AREAS[1].id, 'river');
   assert.equal(FISHING_AREAS[2].id, 'lake');
   assert.equal(FISHING_AREAS[3].id, 'bayou');
-  assert.equal(FISHING_AREAS[4].id, 'ocean');
-  assert.equal(FISHING_AREAS[5].id, 'reef');
-  assert.equal(FISHING_AREAS[5].unlockCost, 10000);
-  assert.equal(FISHING_AREAS[6].id, 'trench');
-  assert.equal(FISHING_AREAS[6].unlockCost, 150000);
+  assert.equal(FISHING_AREAS[4].id, 'glacial');
+  assert.equal(FISHING_AREAS[4].unlockCost, 500);
+  assert.equal(FISHING_AREAS[5].id, 'ocean');
+  assert.equal(FISHING_AREAS[6].id, 'reef');
+  assert.equal(FISHING_AREAS[6].unlockCost, 10000);
+  assert.equal(FISHING_AREAS[7].id, 'trench');
+  assert.equal(FISHING_AREAS[7].unlockCost, 150000);
 
   FISHING_AREAS.forEach((area) => {
     assert.ok(area.theme.bgClass);
@@ -172,7 +174,7 @@ test('Starter trap costs $100 and higher reels provide line and bait protection'
 test('Field guide data has complete biological info and Wikipedia links for all species', async () => {
   const { FISH_GUIDE_DATA } = await import('./fishGuideData');
   
-  assert.equal(FISH_COLLECTION.length, 175, 'Total fish collection must be 175 species');
+  assert.equal(FISH_COLLECTION.length, 187, 'Total fish collection must be 187 species');
   
   for (const fish of FISH_COLLECTION) {
     const guide = FISH_GUIDE_DATA[fish.id];

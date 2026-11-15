@@ -214,6 +214,22 @@ export const FISHING_AREAS: FishingAreaDef[] = [
     },
   },
   {
+    id: 'glacial',
+    name: 'Glacial Fjord',
+    description: 'Sub-zero subarctic fjord fed by mountain glaciers, icy waters, and arctic gamefish.',
+    unlockCost: 500,
+    requiredSpecies: 24,
+    theme: {
+      name: 'Glacial Fjord',
+      bgClass: 'bg-[#0b161c]',
+      panelClass: 'bg-[#101f28]',
+      borderClass: 'border-[#1b3545]',
+      accentClass: 'text-cyan-300',
+      accentBgClass: 'bg-cyan-950/40 border-cyan-500/70',
+      textMutedClass: 'text-[#7098b0]',
+    },
+  },
+  {
     id: 'ocean',
     name: 'Coastal Ocean',
     description: 'Atlantic coastal pier and tidal surf where salt gamefish, flounder, and bass hunt.',
@@ -307,7 +323,7 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 25, name: 'Cutthroat Trout', tier: 'uncommon', minWeight: 0.9, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 16, bestLureId: 'mayfly', areaId: 'river' },
   { id: 26, name: 'Golden Trout', tier: 'uncommon', minWeight: 0.6, maxWeight: 4.0, trophyWeight: 5.5, basePrice: 22, bestLureId: 'mayfly', areaId: 'river' },
   { id: 27, name: 'Mountain Whitefish', tier: 'uncommon', minWeight: 0.7, maxWeight: 3.8, trophyWeight: 5.0, basePrice: 15, bestLureId: 'cricket', areaId: 'river' },
-  { id: 28, name: 'Arctic Grayling', tier: 'uncommon', minWeight: 0.8, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 24, bestLureId: 'mayfly', areaId: 'river' },
+  { id: 28, name: 'Arctic Grayling', tier: 'uncommon', minWeight: 0.8, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 24, bestLureId: 'mayfly', areaId: 'glacial' },
   { id: 29, name: 'River Walleye', tier: 'uncommon', minWeight: 1.2, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 18, bestLureId: 'jig', areaId: 'river' },
   { id: 30, name: 'Sauger', tier: 'uncommon', minWeight: 1.0, maxWeight: 5.5, trophyWeight: 7.0, basePrice: 16, bestLureId: 'jig', areaId: 'river' },
   { id: 31, name: 'Fallfish', tier: 'uncommon', minWeight: 0.8, maxWeight: 3.0, trophyWeight: 4.0, basePrice: 11, bestLureId: 'worm', areaId: 'river' },
@@ -359,7 +375,7 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 71, name: 'Pacific Sardine', tier: 'common', minWeight: 0.2, maxWeight: 0.8, trophyWeight: 1.1, basePrice: 6, bestLureId: 'minnow', areaId: 'ocean' },
   { id: 72, name: 'Striped Mullet', tier: 'common', minWeight: 1.0, maxWeight: 4.0, trophyWeight: 5.5, basePrice: 10, bestLureId: 'bread_crust', areaId: 'ocean' },
   { id: 73, name: 'Summer Flounder', tier: 'common', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 18, bestLureId: 'jig', areaId: 'ocean' },
-  { id: 74, name: 'Winter Flounder', tier: 'common', minWeight: 1.0, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 16, bestLureId: 'jig', areaId: 'ocean' },
+  { id: 74, name: 'Winter Flounder', tier: 'common', minWeight: 1.0, maxWeight: 6.0, trophyWeight: 8.0, basePrice: 16, bestLureId: 'jig', areaId: 'glacial' },
   { id: 75, name: 'Black Sea Bass', tier: 'common', minWeight: 1.2, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 18, bestLureId: 'feather_jig', areaId: 'ocean' },
   { id: 76, name: 'Sheepshead', tier: 'uncommon', minWeight: 2.0, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 28, bestLureId: 'crawfish', areaId: 'ocean' },
   { id: 77, name: 'Speckled Sea Trout', tier: 'uncommon', minWeight: 1.5, maxWeight: 8.5, trophyWeight: 11.5, basePrice: 26, bestLureId: 'minnow', areaId: 'ocean' },
@@ -370,7 +386,7 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 82, name: 'Snook', tier: 'rare', minWeight: 4.0, maxWeight: 28.0, trophyWeight: 36.0, basePrice: 65, bestLureId: 'feather_jig', areaId: 'ocean' },
   { id: 83, name: 'Tarpon', tier: 'rare', minWeight: 15.0, maxWeight: 140.0, trophyWeight: 190.0, basePrice: 95, bestLureId: 'shad', areaId: 'ocean' },
   { id: 84, name: 'Cobia', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 98.0, basePrice: 85, bestLureId: 'diamond_jig', areaId: 'ocean' },
-  { id: 85, name: 'Pacific Halibut', tier: 'rare', minWeight: 15.0, maxWeight: 180.0, trophyWeight: 240.0, basePrice: 95, bestLureId: 'diamond_jig', areaId: 'ocean' },
+  { id: 85, name: 'Pacific Halibut', tier: 'rare', minWeight: 15.0, maxWeight: 180.0, trophyWeight: 240.0, basePrice: 95, bestLureId: 'diamond_jig', areaId: 'glacial' },
   { id: 86, name: 'King (Chinook) Salmon', tier: 'rare', minWeight: 8.0, maxWeight: 50.0, trophyWeight: 65.0, basePrice: 75, bestLureId: 'shad', areaId: 'ocean' },
   { id: 87, name: 'Yellowfin Tuna', tier: 'epic', minWeight: 20.0, maxWeight: 160.0, trophyWeight: 210.0, basePrice: 220, bestLureId: 'squid', areaId: 'ocean' },
   { id: 88, name: 'Bluefin Tuna', tier: 'epic', minWeight: 50.0, maxWeight: 550.0, trophyWeight: 720.0, basePrice: 450, bestLureId: 'squid', areaId: 'ocean' },
@@ -398,7 +414,7 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 108, name: 'Sailfish', tier: 'epic', minWeight: 30.0, maxWeight: 140.0, trophyWeight: 180.0, basePrice: 320, bestLureId: 'squid', areaId: 'reef' },
   { id: 109, name: 'Grand Sovereign Marlin', tier: 'legendary', minWeight: 150.0, maxWeight: 1100.0, trophyWeight: 1450.0, basePrice: 2500, bestLureId: 'dragon_scale', areaId: 'reef' },
   { id: 110, name: 'Longear Sunfish', tier: 'common', minWeight: 0.3, maxWeight: 1.6, trophyWeight: 2.1, basePrice: 4, bestLureId: 'cricket', areaId: 'pond' },
-  { id: 111, name: 'Dolly Varden Trout', tier: 'rare', minWeight: 1.5, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 35, bestLureId: 'spinner', areaId: 'river' },
+  { id: 111, name: 'Dolly Varden Trout', tier: 'rare', minWeight: 1.5, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 35, bestLureId: 'spinner', areaId: 'glacial' },
   { id: 112, name: 'Splake', tier: 'rare', minWeight: 2.0, maxWeight: 14.0, trophyWeight: 18.0, basePrice: 40, bestLureId: 'crankbait', areaId: 'lake' },
   { id: 113, name: 'Redfin Pickerel', tier: 'uncommon', minWeight: 0.5, maxWeight: 2.5, trophyWeight: 3.2, basePrice: 18, bestLureId: 'minnow', areaId: 'bayou' },
   { id: 114, name: 'Florida Pompano', tier: 'rare', minWeight: 1.5, maxWeight: 8.0, trophyWeight: 10.5, basePrice: 45, bestLureId: 'feather_jig', areaId: 'ocean' },
@@ -465,6 +481,19 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 173, name: 'Thresher Shark', tier: 'rare', minWeight: 90.0, maxWeight: 500.0, trophyWeight: 650.0, basePrice: 920, bestLureId: 'squid', areaId: 'ocean' },
   { id: 174, name: 'Smalltooth Sawfish', tier: 'epic', minWeight: 120.0, maxWeight: 700.0, trophyWeight: 880.0, basePrice: 1850, bestLureId: 'cut_bait', areaId: 'bayou' },
   { id: 175, name: 'Arapaima', tier: 'epic', minWeight: 70.0, maxWeight: 380.0, trophyWeight: 460.0, basePrice: 2100, bestLureId: 'cut_bait', areaId: 'bayou' },
+  // --- GLACIAL FJORD NEW SPECIES (IDs 176-187) ---
+  { id: 176, name: 'Arctic Char', tier: 'uncommon', minWeight: 2.0, maxWeight: 15.0, trophyWeight: 20.0, basePrice: 38, bestLureId: 'spoon', areaId: 'glacial' },
+  { id: 177, name: 'Atlantic Cod', tier: 'common', minWeight: 3.0, maxWeight: 35.0, trophyWeight: 48.0, basePrice: 25, bestLureId: 'jig', areaId: 'glacial' },
+  { id: 178, name: 'Inconnu (Sheefish)', tier: 'uncommon', minWeight: 6.0, maxWeight: 30.0, trophyWeight: 40.0, basePrice: 45, bestLureId: 'crankbait', areaId: 'glacial' },
+  { id: 179, name: 'Atlantic Pollock', tier: 'common', minWeight: 2.5, maxWeight: 22.0, trophyWeight: 30.0, basePrice: 22, bestLureId: 'jig', areaId: 'glacial' },
+  { id: 180, name: 'Haddock', tier: 'common', minWeight: 1.5, maxWeight: 9.0, trophyWeight: 12.0, basePrice: 18, bestLureId: 'clam_strip', areaId: 'glacial' },
+  { id: 181, name: 'Atlantic Wolffish', tier: 'rare', minWeight: 8.0, maxWeight: 40.0, trophyWeight: 52.0, basePrice: 110, bestLureId: 'squid', areaId: 'glacial' },
+  { id: 182, name: 'Arctic Cisco', tier: 'common', minWeight: 0.8, maxWeight: 3.5, trophyWeight: 4.8, basePrice: 14, bestLureId: 'bread_crust', areaId: 'glacial' },
+  { id: 183, name: 'Lumpfish', tier: 'common', minWeight: 1.0, maxWeight: 8.0, trophyWeight: 11.0, basePrice: 16, bestLureId: 'worm', areaId: 'glacial' },
+  { id: 184, name: 'Rainbow Smelt', tier: 'common', minWeight: 0.1, maxWeight: 0.6, trophyWeight: 0.85, basePrice: 8, bestLureId: 'cricket', areaId: 'glacial' },
+  { id: 185, name: 'Shorthorn Sculpin', tier: 'common', minWeight: 0.5, maxWeight: 3.0, trophyWeight: 4.0, basePrice: 12, bestLureId: 'worm', areaId: 'glacial' },
+  { id: 186, name: 'Arctic Flounder', tier: 'common', minWeight: 0.8, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 15, bestLureId: 'clam_strip', areaId: 'glacial' },
+  { id: 187, name: 'Salmon Shark', tier: 'epic', minWeight: 100.0, maxWeight: 450.0, trophyWeight: 580.0, basePrice: 980, bestLureId: 'squid', areaId: 'glacial' },
 ];
 
 /**
@@ -543,6 +572,8 @@ export function getAreaThemeButtonClass(areaId: string): string {
       return 'border-2 border-teal-500 bg-teal-950/80 hover:bg-teal-900 hover:border-teal-400 text-teal-100 shadow-lg shadow-teal-950/50';
     case 'bayou':
       return 'border-2 border-amber-600 bg-amber-950/80 hover:bg-amber-900 hover:border-amber-500 text-amber-100 shadow-lg shadow-amber-950/50';
+    case 'glacial':
+      return 'border-2 border-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 hover:border-cyan-200 text-cyan-100 shadow-lg shadow-cyan-950/50';
     case 'ocean':
       return 'border-2 border-blue-500 bg-blue-950/80 hover:bg-blue-900 hover:border-blue-400 text-blue-100 shadow-lg shadow-blue-950/50';
     case 'reef':
@@ -2355,6 +2386,43 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('arapaima') || id === 175) {
     return './fish/arapaima.png';
+  }
+  // --- GLACIAL FJORD NEW SPECIES (IDs 176-187) ---
+  if (name.includes('arctic char') || id === 176) {
+    return './fish/arctic_char.png';
+  }
+  if (name.includes('atlantic cod') || id === 177) {
+    return './fish/atlantic_cod.png';
+  }
+  if (name.includes('inconnu') || name.includes('sheefish') || id === 178) {
+    return './fish/inconnu_sheefish.png';
+  }
+  if (name.includes('pollock') || id === 179) {
+    return './fish/atlantic_pollock.png';
+  }
+  if (name.includes('haddock') || id === 180) {
+    return './fish/haddock.png';
+  }
+  if (name.includes('wolffish') || id === 181) {
+    return './fish/atlantic_wolffish.png';
+  }
+  if (name.includes('arctic cisco') || id === 182) {
+    return './fish/arctic_cisco.png';
+  }
+  if (name.includes('lumpfish') || id === 183) {
+    return './fish/lumpfish.png';
+  }
+  if (name.includes('rainbow smelt') || id === 184) {
+    return './fish/rainbow_smelt.png';
+  }
+  if (name.includes('sculpin') || id === 185) {
+    return './fish/shorthorn_sculpin.png';
+  }
+  if (name.includes('arctic flounder') || id === 186) {
+    return './fish/arctic_flounder.png';
+  }
+  if (name.includes('salmon shark') || id === 187) {
+    return './fish/salmon_shark.png';
   }
 
   // Mythical Relics & Cryptids
