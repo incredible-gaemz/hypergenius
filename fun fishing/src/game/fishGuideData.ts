@@ -1096,5 +1096,145 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
     "habitatBehavior": "Ancient deep-sea holocephalan roaming steep rocky trenches and seamounts past 6,000 feet; predates dinosaurs by hundreds of millions of years and was first filmed alive in 2016.",
     "dietNotes": "Grinds deep-sea benthic crabs, mollusks, brittle stars, and benthic polychaetes between its mineralized tooth plates.",
     "wikiUrl": "https://en.wikipedia.org/wiki/Pointy-nosed_blue_chimaera"
+  },
+  "156": {
+      "scientificName": "Salmo salar",
+      "visualDescription": "Elegantly streamlined anadromous salmon with steel-blue and silver flanks adorned with distinctive black cross-shaped spots and a pale white belly.",
+      "habitatBehavior": "Migrates from open subarctic North Atlantic feeding grounds upstream into rapid, cold gravel-bedded rivers to spawn.",
+      "dietNotes": "Preys voraciously on capelin, herring, sand lances, and river aquatic invertebrates.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Atlantic_salmon"
+  },
+  "157": {
+      "scientificName": "Oncorhynchus nerka",
+      "visualDescription": "Vibrant crimson-bodied salmon with an emerald-green head, humpback spawning profile, and hooked kype jaws developed during upstream runs.",
+      "habitatBehavior": "Spawns in clear glacial river tributaries and lake chains, feeding in vast oceanic circles for several years prior.",
+      "dietNotes": "Specialized filter-feeder that strains zooplankton, copepods, krill, and small crustacean larvae.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Sockeye_salmon"
+  },
+  "158": {
+      "scientificName": "Cheilopogon melanurus",
+      "visualDescription": "Streamlined iridescent indigo-blue surface cruiser with enormously enlarged, translucent wing-like pectoral fins capable of extended aerial glides.",
+      "habitatBehavior": "Schools near the tropical and temperate sea surface; leaps into the air and glides over wave tops to escape pursuing predators.",
+      "dietNotes": "Feeds on surface copepods, plankton, floating seaweed organisms, and larval fishes.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Flying_fish"
+  },
+  "159": {
+      "scientificName": "Ophiodon elongatus",
+      "visualDescription": "Mottled brown and emerald-tinted green apex predator with a massive tooth-studded maw, continuous dorsal fin, and occasional turquoise-blue flesh.",
+      "habitatBehavior": "Territorial ambush hunter hugging deep rocky reefs, sunken boulders, and kelp forests across the North Pacific.",
+      "dietNotes": "Aggressively ambushes herring, rockfish, flatfish, squid, and crabs.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Lingcod"
+  },
+  "160": {
+      "scientificName": "Sarda sarda",
+      "visualDescription": "Fast, muscular pelagic predator with gleaming metallic blue-green back, silvery flanks, and five to seven dark narrow longitudinal stripes sloping across its upper side.",
+      "habitatBehavior": "High-speed schooling coastal predator found chasing baitfish schools in offshore tidal currents and rips.",
+      "dietNotes": "Hunts schooling anchovies, silversides, sardines, squid, and mackerel in explosive surface frenzies.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Atlantic_bonito"
+  },
+  "161": {
+      "scientificName": "Pygocentrus nattereri",
+      "visualDescription": "Deep-bodied disc-like characin shimmering in silver and speckled gold, featuring a brilliant fiery red-orange throat, muscular jaw, and razor-sharp interlocking triangular teeth.",
+      "habitatBehavior": "Inhabits murky backwater oxbow lakes, flooded cypress swamps, and sluggish creeks, schooling tightly in warm shallows.",
+      "dietNotes": "Opportunistic carnivore feeding on fish, insects, crustaceans, and carcasses with ferocious precision.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Red-bellied_piranha"
+  },
+  "162": {
+      "scientificName": "Cichla ocellaris",
+      "visualDescription": "Muscular gamefish with warm olive-gold scales, three broad vertical black tiger bands, and a prominent black-and-gold halo eyespot at the base of its tail.",
+      "habitatBehavior": "Dominant cichlid prowling warm slow-moving bayous, river margins, and canals with intense visual aggression.",
+      "dietNotes": "Explosive surface predator hunting shad, minnows, sunfish, and frogs.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Peacock_bass"
+  },
+  "163": {
+      "scientificName": "Osteoglossum bicirrhosum",
+      "visualDescription": "Prehistoric ribbon-bodied surface dweller covered in large pearlescent scales, twin barbels protruding from its lower jaw, and an upward-directed drawbridge mouth.",
+      "habitatBehavior": "Cruises calmly beneath floating vegetative canopies; famously leaps several feet clear of the water to snatch prey from overhanging branches.",
+      "dietNotes": "Feeds on surface insects, beetles, crabs, spiders, and small unsuspecting fish.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Silver_arowana"
+  },
+  "164": {
+      "scientificName": "Astronotus ocellatus",
+      "visualDescription": "Stocky velvet-dark cichlid adorned with intricate fiery red-orange marbling and a distinct orange-ringed black ocellus spot near the caudal peduncle.",
+      "habitatBehavior": "Intelligent, highly curious cichlid claiming shelter around submerged cypress roots, fallen timber, and pond rocks.",
+      "dietNotes": "Omnivorous browser feeding on snails, river clams, small fish, worms, and benthic larvae.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Oscar_(fish)"
+  },
+  "165": {
+      "scientificName": "Hypostomus plecostomus",
+      "visualDescription": "Heavily armored suckermouth catfish with geometric bony dermal plates, mottled earthy-brown skin, and an expansive sailfin dorsal crest.",
+      "habitatBehavior": "Clings to submerged timber, stone ledges, and muddy bottoms with its powerful suctorial disc mouth.",
+      "dietNotes": "Scrapes algae, biofilm, detritus, and aquatic vegetation from hard surfaces.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Hypostomus_plecostomus"
+  },
+  "166": {
+      "scientificName": "Electrophorus electricus",
+      "visualDescription": "Elongated serpentine knifefish with smooth muddy-grey skin, yellowish-orange throat, flattened skull, and specialized bioelectric organ tissues lining four-fifths of its body.",
+      "habitatBehavior": "Nocturnal air-breather navigating murky bayou sloughs and oxygen-depleted swamps with steady low-voltage electrolocation pulses.",
+      "dietNotes": "Delivers sudden high-voltage discharges up to 860 volts to stun amphibians, catfish, and crustaceans.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Electric_eel"
+  },
+  "167": {
+      "scientificName": "Toxotes jaculatrix",
+      "visualDescription": "Compact, silver-sheened fish with bold black teardrop vertical stripes, a flattened dorsal line, and large mobile eyes oriented toward the water surface.",
+      "habitatBehavior": "Dwells in peaceful mangrove margins and calm ponds; shoots high-velocity water droplets up to six feet into air to knock insects into the water.",
+      "dietNotes": "Insectivore specializing in terrestrial crickets, moths, beetles, and aquatic spiders.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Archerfish"
+  },
+  "168": {
+      "scientificName": "Remora remora",
+      "visualDescription": "Slender, dark grey marine hitchhiker with an oval, slatted laminated suction disc atop its head used to latch onto pelagic hosts.",
+      "habitatBehavior": "Commensal voyager that anchors itself onto sharks, rays, billfish, and boat hulls to hitchhike across ocean expanses.",
+      "dietNotes": "Consumes host food scraps, parasitic copepods, and passing pelagic zooplankton.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Common_remora"
+  },
+  "169": {
+      "scientificName": "Bodianus pulcher",
+      "visualDescription": "Dramatic wrasse with striking color zones: jet-black head and tail flanking a brilliant crimson-red midbody, white chin, and prominent canine teeth.",
+      "habitatBehavior": "Inhabits Pacific kelp forests and rocky coastal reefs, using strong teeth to dislodge hard-shelled prey from rocks.",
+      "dietNotes": "Feeds on sea urchins, crabs, spiny lobsters, barnacles, and mollusks.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/California_sheephead"
+  },
+  "170": {
+      "scientificName": "Strongylura marina",
+      "visualDescription": "Slender, needle-thin marine surface dweller with translucent green-blue back, silvery belly, and elongated beaked jaws densely packed with sharp teeth.",
+      "habitatBehavior": "Skims tranquil coastal estuaries, bays, and pier shallows, leaping across the surface when startled.",
+      "dietNotes": "Lightning-fast ambusher of killifish, silversides, and juvenile anchovies.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Atlantic_needlefish"
+  },
+  "171": {
+      "scientificName": "Triakis semifasciata",
+      "visualDescription": "Slender, bronze-toned houndshark distinguished by striking black saddle bands and dark leopard-like spots scattered along its back and sides.",
+      "habitatBehavior": "Peaceful benthic shark cruising sandy flats, bays, and kelp beds, often in loose nomadic schools.",
+      "dietNotes": "Roots out fat innkeeper worms, crabs, shrimp, clams, and small flatfish from bottom sediments.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Leopard_shark"
+  },
+  "172": {
+      "scientificName": "Isurus oxyrinchus",
+      "visualDescription": "The fastest shark in the sea, possessing an aerodynamic hydrofoil body cloaked in brilliant metallic cobalt blue, snow-white underside, and slender curved fangs.",
+      "habitatBehavior": "High-octane pelagic hunter capable of burst speeds over 45 mph and legendary acrobatic jumps when hooked.",
+      "dietNotes": "Hunts fast pelagic prey including bluefish, swordfish, tuna, squid, and smaller sharks.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Shortfin_mako_shark"
+  },
+  "173": {
+      "scientificName": "Alopias vulpinus",
+      "visualDescription": "Graceful deep-blue pelagic shark distinguished by an enormous, scythe-like upper tail lobe measuring as long as the rest of its entire body.",
+      "habitatBehavior": "Roams open coastal waters and ocean drop-offs, using its whip-like caudal fin like a flail to stun schooling baitfish.",
+      "dietNotes": "Stuns and corrals mackerel, herring, bluefish, and squid with sonic caudal tail strikes.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Common_thresher"
+  },
+  "174": {
+      "scientificName": "Pristis pectinata",
+      "visualDescription": "Prehistoric ray with a heavy shark-like silhouette and a long, flattened blade-like snout armed with 25 to 32 pairs of sharp lateral rostral teeth.",
+      "habitatBehavior": "Inhabits shallow coastal bays, brackish lagoons, and mangrove swamps, swinging its saw side-to-side through schools of fish.",
+      "dietNotes": "Disables mullets, menhaden, and crabs with rapid slashing sweeps of its toothed rostrum.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Smalltooth_sawfish"
+  },
+  "175": {
+      "scientificName": "Arapaima gigas",
+      "visualDescription": "Colossal armored freshwater titan with a broad greenish-bronze bony skull, massive red-edged scales forming a crimson tail flank, and air-breathing labyrinth lungs.",
+      "habitatBehavior": "Reigns supreme in ancient flooded bayous and slow-moving river oxbows, surfacing periodically with a distinctive resonant gulp.",
+      "dietNotes": "Apex carnivore that inhales large fish, turtles, crustaceans, and small birds with explosive suction.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Arapaima"
   }
 };

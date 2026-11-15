@@ -172,7 +172,7 @@ test('Starter trap costs $100 and higher reels provide line and bait protection'
 test('Field guide data has complete biological info and Wikipedia links for all species', async () => {
   const { FISH_GUIDE_DATA } = await import('./fishGuideData');
   
-  assert.equal(FISH_COLLECTION.length, 155, 'Total fish collection must be 155 species');
+  assert.equal(FISH_COLLECTION.length, 175, 'Total fish collection must be 175 species');
   
   for (const fish of FISH_COLLECTION) {
     const guide = FISH_GUIDE_DATA[fish.id];

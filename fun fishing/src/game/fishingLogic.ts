@@ -444,6 +444,27 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 153, name: 'Lau Swamp Catfish', tier: 'mythical', minWeight: 350.0, maxWeight: 1100.0, trophyWeight: 1350.0, basePrice: 11000, bestLureId: 'cut_bait', areaId: 'bayou' },
   { id: 154, name: 'Queensland Titan Grouper', tier: 'mythical', minWeight: 500.0, maxWeight: 1500.0, trophyWeight: 1800.0, basePrice: 14000, bestLureId: 'squid', areaId: 'ocean' },
   { id: 155, name: 'Abyssal Ghost Chimaera', tier: 'mythical', minWeight: 60.0, maxWeight: 240.0, trophyWeight: 290.0, basePrice: 17500, bestLureId: 'deep_glow_rig', areaId: 'trench' },
+  // --- EXPANSION PACK (IDs 156-175) ---
+  { id: 156, name: 'Atlantic Salmon', tier: 'common', minWeight: 3.5, maxWeight: 18.0, trophyWeight: 25.0, basePrice: 18, bestLureId: 'spoon', areaId: 'river' },
+  { id: 157, name: 'Sockeye Salmon', tier: 'common', minWeight: 3.0, maxWeight: 12.0, trophyWeight: 15.0, basePrice: 16, bestLureId: 'spinner', areaId: 'river' },
+  { id: 158, name: 'Atlantic Flying Fish', tier: 'common', minWeight: 0.4, maxWeight: 1.8, trophyWeight: 2.4, basePrice: 10, bestLureId: 'bread_crust', areaId: 'ocean' },
+  { id: 159, name: 'Pacific Lingcod', tier: 'uncommon', minWeight: 5.0, maxWeight: 35.0, trophyWeight: 45.0, basePrice: 42, bestLureId: 'jig', areaId: 'ocean' },
+  { id: 160, name: 'Atlantic Bonito', tier: 'common', minWeight: 2.5, maxWeight: 12.0, trophyWeight: 16.0, basePrice: 20, bestLureId: 'spoon', areaId: 'ocean' },
+  { id: 161, name: 'Red-bellied Piranha', tier: 'common', minWeight: 0.5, maxWeight: 3.5, trophyWeight: 4.8, basePrice: 14, bestLureId: 'worm', areaId: 'bayou' },
+  { id: 162, name: 'Peacock Bass', tier: 'common', minWeight: 1.5, maxWeight: 14.0, trophyWeight: 18.0, basePrice: 22, bestLureId: 'crankbait', areaId: 'bayou' },
+  { id: 163, name: 'Silver Arowana', tier: 'uncommon', minWeight: 3.0, maxWeight: 16.0, trophyWeight: 22.0, basePrice: 55, bestLureId: 'cricket', areaId: 'bayou' },
+  { id: 164, name: 'Oscar Cichlid', tier: 'common', minWeight: 0.8, maxWeight: 4.0, trophyWeight: 5.2, basePrice: 12, bestLureId: 'worm', areaId: 'pond' },
+  { id: 165, name: 'Plecostomus', tier: 'common', minWeight: 1.0, maxWeight: 6.5, trophyWeight: 8.5, basePrice: 11, bestLureId: 'sweet_corn', areaId: 'pond' },
+  { id: 166, name: 'Electric Eel', tier: 'rare', minWeight: 8.0, maxWeight: 45.0, trophyWeight: 55.0, basePrice: 160, bestLureId: 'cut_bait', areaId: 'bayou' },
+  { id: 167, name: 'Archerfish', tier: 'common', minWeight: 0.2, maxWeight: 1.2, trophyWeight: 1.6, basePrice: 9, bestLureId: 'cricket', areaId: 'pond' },
+  { id: 168, name: 'Remora', tier: 'common', minWeight: 1.0, maxWeight: 5.5, trophyWeight: 7.0, basePrice: 15, bestLureId: 'squid', areaId: 'reef' },
+  { id: 169, name: 'California Sheephead', tier: 'common', minWeight: 2.0, maxWeight: 18.0, trophyWeight: 24.0, basePrice: 26, bestLureId: 'clam_strip', areaId: 'ocean' },
+  { id: 170, name: 'Atlantic Needlefish', tier: 'common', minWeight: 0.3, maxWeight: 1.5, trophyWeight: 2.1, basePrice: 8, bestLureId: 'bread_crust', areaId: 'ocean' },
+  { id: 171, name: 'Leopard Shark', tier: 'uncommon', minWeight: 6.0, maxWeight: 35.0, trophyWeight: 45.0, basePrice: 65, bestLureId: 'cut_bait', areaId: 'ocean' },
+  { id: 172, name: 'Shortfin Mako Shark', tier: 'rare', minWeight: 80.0, maxWeight: 450.0, trophyWeight: 580.0, basePrice: 850, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 173, name: 'Thresher Shark', tier: 'rare', minWeight: 90.0, maxWeight: 500.0, trophyWeight: 650.0, basePrice: 920, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 174, name: 'Smalltooth Sawfish', tier: 'epic', minWeight: 120.0, maxWeight: 700.0, trophyWeight: 880.0, basePrice: 1850, bestLureId: 'cut_bait', areaId: 'bayou' },
+  { id: 175, name: 'Arapaima', tier: 'epic', minWeight: 70.0, maxWeight: 380.0, trophyWeight: 460.0, basePrice: 2100, bestLureId: 'cut_bait', areaId: 'bayou' },
 ];
 
 /**
@@ -2273,6 +2294,68 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   if (!fish) return null;
   const id = fish.fishId ?? fish.id;
   const name = (fish.name || '').toLowerCase();
+
+  // --- NEW 20 SPECIES (IDs 156-175) ---
+  if (name.includes('atlantic salmon') || id === 156) {
+    return './fish/atlantic_salmon.png';
+  }
+  if (name.includes('sockeye salmon') || id === 157) {
+    return './fish/sockeye_salmon.png';
+  }
+  if (name.includes('flying fish') || id === 158) {
+    return './fish/atlantic_flying_fish.png';
+  }
+  if (name.includes('lingcod') || id === 159) {
+    return './fish/pacific_lingcod.png';
+  }
+  if (name.includes('bonito') || id === 160) {
+    return './fish/atlantic_bonito.png';
+  }
+  if (name.includes('piranha') || id === 161) {
+    return './fish/red_bellied_piranha.png';
+  }
+  if (name.includes('peacock bass') || id === 162) {
+    return './fish/peacock_bass.png';
+  }
+  if (name.includes('arowana') || id === 163) {
+    return './fish/silver_arowana.png';
+  }
+  if (name.includes('oscar') || id === 164) {
+    return './fish/oscar_cichlid.png';
+  }
+  if (name.includes('plecostomus') || id === 165) {
+    return './fish/plecostomus.png';
+  }
+  if (name.includes('electric eel') || id === 166) {
+    return './fish/electric_eel.png';
+  }
+  if (name.includes('archerfish') || id === 167) {
+    return './fish/archerfish.png';
+  }
+  if (name.includes('remora') || id === 168) {
+    return './fish/remora.png';
+  }
+  if (name.includes('sheephead') || id === 169) {
+    return './fish/california_sheephead.png';
+  }
+  if (name.includes('needlefish') || id === 170) {
+    return './fish/atlantic_needlefish.png';
+  }
+  if (name.includes('leopard shark') || id === 171) {
+    return './fish/leopard_shark.png';
+  }
+  if (name.includes('mako shark') || id === 172) {
+    return './fish/shortfin_mako_shark.png';
+  }
+  if (name.includes('thresher shark') || id === 173) {
+    return './fish/thresher_shark.png';
+  }
+  if (name.includes('sawfish') || id === 174) {
+    return './fish/smalltooth_sawfish.png';
+  }
+  if (name.includes('arapaima') || id === 175) {
+    return './fish/arapaima.png';
+  }
 
   // Mythical Relics & Cryptids
   if (name.includes('lau swamp') || name.includes('lau catfish') || id === 153) {
