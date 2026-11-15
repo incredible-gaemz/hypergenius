@@ -74,7 +74,8 @@ interface CommercialTabProps {
   onUnassignCrewFromSalvageBoat?: (boatInstanceId: string, crewId: string) => void;
   onStartSalvageExpedition?: (boatInstanceId: string, wreckSiteId: string) => void;
   onClaimSalvageExpedition?: (expeditionId: string) => void;
-  onListTreasureOnAuction?: (treasureInstanceId: string) => void;
+  onListTreasureOnAuction?: (treasureInstanceId: string, startingBid: number) => void;
+  onRelistAuctionTreasure?: (auctionId: string) => void;
   onCollectAuctionProceeds?: (auctionId: string) => void;
 }
 
@@ -112,6 +113,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   onStartSalvageExpedition,
   onClaimSalvageExpedition,
   onListTreasureOnAuction,
+  onRelistAuctionTreasure,
   onCollectAuctionProceeds,
 }) => {
   const [subTab, setSubTab] = useState<'fleet' | 'salvage' | 'crew' | 'stats'>('fleet');
@@ -899,6 +901,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
           onStartSalvageExpedition={onStartSalvageExpedition || (() => {})}
           onClaimSalvageExpedition={onClaimSalvageExpedition || (() => {})}
           onListTreasureOnAuction={onListTreasureOnAuction || (() => {})}
+          onRelistAuctionTreasure={onRelistAuctionTreasure || (() => {})}
           onCollectAuctionProceeds={onCollectAuctionProceeds || (() => {})}
         />
       )}

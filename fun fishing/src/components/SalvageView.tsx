@@ -55,6 +55,12 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   const [nowTick, setNowTick] = useState<number>(Date.now());
 
   useEffect(() => {
+    // Preload wreck banner images so they appear instantaneously upon unlock
+    SUNKEN_WRECK_SITES.forEach((w) => {
+      const img = new Image();
+      img.src = w.bannerImage;
+    });
+
     const timer = setInterval(() => {
       setNowTick(Date.now());
     }, 1000);
@@ -282,13 +288,22 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                 >
                   {/* Top Image Banner */}
                   <div className="relative w-full h-36 sm:h-44 bg-[#0a0c10] border-b border-[#2d323e] overflow-hidden">
-                    {isUnlocked ? (
-                      <img
-                        src={wreck.bannerImage}
-                        alt={wreck.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
+                    <img
+                      src={wreck.bannerImage}
+                      alt={wreck.name}
+                      loading="eager"
+                      decoding="async"
+                      className={`w-full h-full object-cover transition-opacity duration-200 ${
+                        isUnlocked ? 'block' : 'hidden'
+                      }`}
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (target.src.endsWith('.webp')) {
+                          target.src = target.src.replace('.webp', '.png');
+                        }
+                      }}
+                    />
+                    {!isUnlocked && (
                       <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-[#08090d] text-center space-y-1">
                         <span className="text-xs font-mono tracking-widest text-[#555d6b] uppercase">
                           Uncharted Coordinates
@@ -730,7 +745,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
 
                         {isUnsold && (
                           <button
-                            onClick={() => onRelistAuctionTreasure(auc.auctionId)}
+                            onClick={() => (onRelistAuctionTreasure ? onRelistAuctionTreasure(auc.auctionId) : null)}
                             className="w-full sm:w-auto px-3 py-1.5 min-h-[36px] border border-amber-600 bg-amber-950 hover:bg-amber-900 text-amber-200 font-bold text-xs cursor-pointer transition-colors touch-manipulation text-center"
                           >
                             Relist Artifact

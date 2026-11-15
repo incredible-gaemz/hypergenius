@@ -84,7 +84,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 0, // Unlocked immediately upon purchasing $20,000 salvage charter
     totalTreasureCount: 13,
     description: 'Wrecked on coastal oyster shoals during an autumn storm, shallow and accessible.',
-    bannerImage: './wrecks/smugglers_sloop.png',
+    bannerImage: './wrecks/smugglers_sloop.webp',
     baseVoyageDurationSec: 60,
     treasureIds: [
       'barnacle_rum_bottle',
@@ -110,7 +110,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 3500,
     totalTreasureCount: 15,
     description: 'Driven onto jagged barrier reefs, its cannons and armory lie strewn across coral ridges.',
-    bannerImage: './wrecks/resolute_frigate.png',
+    bannerImage: './wrecks/resolute_frigate.webp',
     baseVoyageDurationSec: 110,
     treasureIds: [
       'iron_cannonball',
@@ -138,7 +138,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 8000,
     totalTreasureCount: 16,
     description: 'Sunk along the continental shelf loaded with colonial silver ingots and bullion.',
-    bannerImage: './wrecks/san_sebastian.png',
+    bannerImage: './wrecks/san_sebastian.webp',
     baseVoyageDurationSec: 190,
     treasureIds: [
       'lead_sounding_weight',
@@ -167,7 +167,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 15000,
     totalTreasureCount: 17,
     description: 'Crushed in pack ice along a fjord shelf, holding trade goods and gold-rush vaults.',
-    bannerImage: './wrecks/arctic_star.png',
+    bannerImage: './wrecks/arctic_star.webp',
     baseVoyageDurationSec: 280,
     treasureIds: [
       'scrimshaw_whale_tooth',
@@ -197,7 +197,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 28000,
     totalTreasureCount: 16,
     description: 'Resting upright on deep oceanic silt with secure military safes and chronometers.',
-    bannerImage: './wrecks/u_boat_9.png',
+    bannerImage: './wrecks/u_boat_9.webp',
     baseVoyageDurationSec: 400,
     treasureIds: [
       'brass_porthole_frame',
@@ -226,7 +226,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 50000,
     totalTreasureCount: 19,
     description: 'Lies half-buried on an abyssal cliff with massive brass instruments and strongboxes.',
-    bannerImage: './wrecks/leviathan_ironclad.png',
+    bannerImage: './wrecks/leviathan_ironclad.webp',
     baseVoyageDurationSec: 560,
     treasureIds: [
       'tarnished_silver_spoons',
@@ -258,7 +258,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     unlockCost: 95000,
     totalTreasureCount: 21,
     description: 'The ultimate deep salvage site split on the hadal seabed with immense historic wealth.',
-    bannerImage: './wrecks/fitzgerald_deep.png',
+    bannerImage: './wrecks/fitzgerald_deep.webp',
     baseVoyageDurationSec: 780,
     treasureIds: [
       'brass_marine_telescope',
@@ -1316,13 +1316,18 @@ export function calculateExpeditionDurationSec(
 export function createAuctionListing(
   treasure: RecoveredTreasure,
   startingBid: number,
-  durationSec = 50
+  durationSec = 45
 ): ActiveAuctionListing {
   const def = TREASURE_CATALOG.find((t) => t.id === treasure.treasureDefId) || TREASURE_CATALOG[0];
   
-  // Random collector willingness to pay: between 0.85x and 1.95x base estimated value
-  const buyerWillingnessMultiplier = 0.85 + Math.random() * 1.1;
-  const maxBuyerWillingness = Math.round(def.baseEstimatedValue * buyerWillingnessMultiplier);
+  // Realistic collector demand: collectors willing to pay between 1.15x and 1.85x base estimated value
+  const baseMultiplier = 1.15 + Math.random() * 0.70;
+  // 25% chance of intense bidding war / museum curator demand (can reach up to 2.8x)
+  const isBiddingWar = Math.random() < 0.25;
+  const surgeMultiplier = isBiddingWar ? 0.35 + Math.random() * 0.65 : 0;
+  
+  const totalWillingnessMultiplier = baseMultiplier + surgeMultiplier;
+  const maxBuyerWillingness = Math.round(def.baseEstimatedValue * totalWillingnessMultiplier);
 
   const bidderNames = [
     'Lord Alistair Sterling',
@@ -1338,11 +1343,17 @@ export function createAuctionListing(
   ];
   const highestBidderName = bidderNames[Math.floor(Math.random() * bidderNames.length)];
 
+  // Item only goes unsold if the reserve/starting bid exceeds what collectors are willing to pay.
+  // Since minimum willingness is 1.15x estimated value, putting $10 or +10% above estimated price will always receive bids!
   const isTooHigh = startingBid > maxBuyerWillingness;
+  
   let finalHammerPrice = startingBid;
   if (!isTooHigh) {
-    const surge = 0.88 + Math.random() * 0.24;
-    finalHammerPrice = Math.round(Math.max(startingBid, maxBuyerWillingness * surge));
+    // Competitive bidding escalation above starting bid towards max willingness
+    const climbRatio = 0.60 + Math.random() * 0.40;
+    finalHammerPrice = Math.round(
+      Math.max(startingBid, startingBid + (maxBuyerWillingness - startingBid) * climbRatio)
+    );
   }
 
   const now = Date.now();
