@@ -1401,6 +1401,49 @@ test('Deep sea stuff (Abyssal Trench catches) takes 2x as long to reel in', () =
   assert.ok(Math.abs(ratio - 2.0) < 0.1, `Deep sea duration must be 2x standard (got ${ratio.toFixed(2)})`);
 });
 
+test('Guide sorting metrics: average size, length calculation, and catch recency', async () => {
+  const {
+    getSpeciesAvgWeight,
+    getSpeciesAvgLengthInches,
+    formatLength,
+    getWhaleAvgLengthFeet,
+    getSpeciesRecentCatchTime,
+  } = await import('../components/Guide');
+  const { FISH_COLLECTION } = await import('./fishingLogic');
+  const { WHALE_SPECIES } = await import('./whalingLogic');
+
+  const minnow = FISH_COLLECTION.find((f) => f.name === 'Minnow')!;
+  const bass = FISH_COLLECTION.find((f) => f.name === 'Pond Largemouth Bass')!;
+  const marlin = FISH_COLLECTION.find((f) => f.name === 'Blue Marlin')!;
+
+  // 1. Average weights
+  assert.ok(getSpeciesAvgWeight(minnow) < getSpeciesAvgWeight(bass));
+  assert.ok(getSpeciesAvgWeight(bass) < getSpeciesAvgWeight(marlin));
+
+  // 2. Average lengths
+  const minnowLen = getSpeciesAvgLengthInches(minnow);
+  const bassLen = getSpeciesAvgLengthInches(bass);
+  const marlinLen = getSpeciesAvgLengthInches(marlin);
+  assert.ok(minnowLen >= 3 && minnowLen <= 10, 'Minnow length should be ~4-9 inches');
+  assert.ok(bassLen >= 14 && bassLen <= 26, 'Largemouth bass should be ~16-22 inches');
+  assert.ok(marlinLen > 60, 'Blue marlin should be over 5 feet');
+
+  // 3. Format length
+  assert.equal(formatLength(14.5), '14.5 in');
+  assert.equal(formatLength(48.0), '4.0 ft');
+
+  // 4. Whale length
+  const blueWhale = WHALE_SPECIES.find((w) => w.id === 'blue_whale')!;
+  const whaleLen = getWhaleAvgLengthFeet(blueWhale);
+  assert.ok(whaleLen > 70 && whaleLen < 110, 'Blue whale should be ~80-95 feet');
+
+  // 5. Catch recency
+  const recentTime = getSpeciesRecentCatchTime(1, { caughtCount: 1, maxWeight: 0.1, hasTrophy: false, firstCaughtAt: 1000 }, [
+    { catchId: 'c1', fishId: 1, name: 'Minnow', tier: 'common', weight: 0.1, isTrophy: false, value: 5, caughtAt: 5000, areaId: 'pond' },
+  ]);
+  assert.equal(recentTime, 5000, 'Must pick the latest caughtAt timestamp from inventory or catalog');
+});
+
 
 
 

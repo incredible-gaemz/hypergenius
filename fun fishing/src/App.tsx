@@ -100,6 +100,16 @@ import {
   getRumorSpecies,
 } from './game/weatherRumorLogic';
 import {
+  SalvageState,
+  INITIAL_SALVAGE_STATE,
+  SALVAGE_BOATS_CATALOG,
+  SUNKEN_WRECK_SITES,
+  rollRecoveredTreasuresForVoyage,
+  calculateExpeditionDurationSec,
+  createAuctionListing,
+  getDiscoveredArtifactIds,
+} from './game/salvageLogic';
+import {
   OwnedBoat,
   CrewMember,
   FleetUpgrade,
@@ -430,11 +440,7 @@ export default function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStatusText, setLoadingStatusText] = useState('Preparing rods, reels & lures...');
   const [loadingFish] = useState(() => {
-    const candidates = FISH_COLLECTION.filter(
-      (f) =>
-        (f.areaId === 'pond' || f.areaId === 'lake' || f.areaId === 'river') &&
-        (f.tier === 'common' || f.tier === 'uncommon')
-    );
+    const candidates = FISH_COLLECTION.filter((f) => f.tier === 'common');
     if (candidates.length === 0) return FISH_COLLECTION[0];
     return candidates[Math.floor(Math.random() * candidates.length)];
   });
@@ -637,6 +643,75 @@ export default function App() {
       isSubscriptionActive: false,
     };
   });
+
+  // Deep Sea Shipwreck Salvage State
+  const [salvageState, setSalvageState] = useState<SalvageState>(() => {
+    try {
+      const saved = localStorage.getItem('cozy_reel_salvage_state_v1');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return INITIAL_SALVAGE_STATE;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cozy_reel_salvage_state_v1', JSON.stringify(salvageState));
+    } catch {}
+  }, [salvageState]);
+
+  // Live auction bidding and salvage expedition ticker
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSalvageState((prev) => {
+        if (!prev.unlocked) return prev;
+        const now = Date.now();
+        let changed = false;
+
+        const updatedAuctions = prev.activeAuctions.map((auc) => {
+          if (auc.status === 'sold' || auc.status === 'unsold') return auc;
+          if (now >= auc.concludesAt) {
+            changed = true;
+            const isUnsold = auc.startPrice > auc.maxBuyerWillingness || auc.bidsPlacedCount === 0;
+            return {
+              ...auc,
+              currentBid: isUnsold ? auc.startPrice : auc.finalHammerPrice,
+              status: (isUnsold ? 'unsold' : 'sold') as const,
+            };
+          }
+
+          if (auc.startPrice > auc.maxBuyerWillingness) {
+            // Price set higher than collectors are willing to pay; no bids placed
+            return auc;
+          }
+
+          const elapsed = now - auc.startedAt;
+          const progress = Math.min(1, Math.max(0, elapsed / (auc.durationSec * 1000)));
+          const targetBid = Math.round(
+            auc.startPrice + (auc.finalHammerPrice - auc.startPrice) * progress
+          );
+
+          if (targetBid > auc.currentBid) {
+            changed = true;
+            return {
+              ...auc,
+              currentBid: targetBid,
+              bidsPlacedCount: Math.max(auc.bidsPlacedCount, Math.floor(progress * 6) + 1),
+            };
+          }
+          return auc;
+        });
+
+        if (changed) {
+          return {
+            ...prev,
+            activeAuctions: updatedAuctions,
+          };
+        }
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Town Community Bounties
   const [townBounties, setTownBounties] = useState<TownBounty[]>(() => {
@@ -1450,6 +1525,7 @@ export default function App() {
     );
     setMoney((prev) => prev + totalVal);
     setInventory([]);
+    setSalvageState(INITIAL_SALVAGE_STATE);
   };
 
   const handleUnlockArea = (area: FishingAreaDef) => {
@@ -2561,6 +2637,166 @@ export default function App() {
     );
   };
 
+  // Salvage Charter & Expedition Handlers
+  const handleUnlockSalvageCharter = () => {
+    if (money < 20000) return;
+    setMoney((prev) => prev - 20000);
+    setSalvageState((prev) => ({ ...prev, unlocked: true }));
+  };
+
+  const handleBuySalvageBoat = (boatDefId: string) => {
+    const def = SALVAGE_BOATS_CATALOG.find((b) => b.id === boatDefId);
+    if (!def || money < def.cost) return;
+    setMoney((prev) => prev - def.cost);
+    setSalvageState((prev) => ({
+      ...prev,
+      ownedSalvageBoatInstances: [
+        ...prev.ownedSalvageBoatInstances,
+        {
+          instanceId: `sb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          boatDefId,
+          purchasedAt: Date.now(),
+          assignedCrewIds: [],
+        },
+      ],
+    }));
+  };
+
+  const handleUnlockWreckSite = (siteId: string) => {
+    const wreck = SUNKEN_WRECK_SITES.find((w) => w.id === siteId);
+    if (!wreck || money < wreck.unlockCost || salvageState.unlockedWreckIds.includes(siteId)) return;
+    setMoney((prev) => prev - wreck.unlockCost);
+    setSalvageState((prev) => ({
+      ...prev,
+      unlockedWreckIds: [...prev.unlockedWreckIds, siteId],
+    }));
+  };
+
+  const handleAssignCrewToSalvageBoat = (boatInstanceId: string, crewId: string) => {
+    setSalvageState((prev) => {
+      const boat = prev.ownedSalvageBoatInstances.find((b) => b.instanceId === boatInstanceId);
+      if (!boat) return prev;
+      const def =
+        SALVAGE_BOATS_CATALOG.find((b) => b.id === boat.boatDefId) || SALVAGE_BOATS_CATALOG[0];
+      if (boat.assignedCrewIds.length >= def.maxCrew || boat.assignedCrewIds.includes(crewId)) return prev;
+
+      return {
+        ...prev,
+        ownedSalvageBoatInstances: prev.ownedSalvageBoatInstances.map((b) =>
+          b.instanceId === boatInstanceId
+            ? { ...b, assignedCrewIds: [...b.assignedCrewIds, crewId] }
+            : b
+        ),
+      };
+    });
+  };
+
+  const handleUnassignCrewFromSalvageBoat = (boatInstanceId: string, crewId: string) => {
+    setSalvageState((prev) => ({
+      ...prev,
+      ownedSalvageBoatInstances: prev.ownedSalvageBoatInstances.map((b) =>
+        b.instanceId === boatInstanceId
+          ? { ...b, assignedCrewIds: b.assignedCrewIds.filter((id) => id !== crewId) }
+          : b
+      ),
+    }));
+  };
+
+  const handleStartSalvageExpedition = (boatInstanceId: string, wreckSiteId: string) => {
+    const boat = salvageState.ownedSalvageBoatInstances.find((b) => b.instanceId === boatInstanceId);
+    const wreck = SUNKEN_WRECK_SITES.find((w) => w.id === wreckSiteId);
+    if (!boat || !wreck || boat.assignedCrewIds.length === 0) return;
+
+    const isBoatBusy = salvageState.activeExpeditions.some((e) => e.boatInstanceId === boatInstanceId);
+    const isWreckBusy = salvageState.activeExpeditions.some((e) => e.wreckSiteId === wreckSiteId);
+    if (isBoatBusy || isWreckBusy) return;
+
+    const boatDef =
+      SALVAGE_BOATS_CATALOG.find((b) => b.id === boat.boatDefId) || SALVAGE_BOATS_CATALOG[0];
+    const durationSec = calculateExpeditionDurationSec(wreck, boatDef);
+    const now = Date.now();
+
+    setSalvageState((prev) => ({
+      ...prev,
+      activeExpeditions: [
+        ...prev.activeExpeditions,
+        {
+          expeditionId: `exp_${now}_${Math.random().toString(36).substring(2, 7)}`,
+          boatInstanceId,
+          boatDefId: boat.boatDefId,
+          wreckSiteId,
+          assignedCrewIds: [...boat.assignedCrewIds],
+          startTime: now,
+          durationSec,
+          endTime: now + durationSec * 1000,
+        },
+      ],
+    }));
+  };
+
+  const handleClaimSalvageExpedition = (expeditionId: string) => {
+    const exp = salvageState.activeExpeditions.find((e) => e.expeditionId === expeditionId);
+    if (!exp) return;
+    const wreck = SUNKEN_WRECK_SITES.find((w) => w.id === exp.wreckSiteId);
+    const boatDef = SALVAGE_BOATS_CATALOG.find((b) => b.id === exp.boatDefId);
+    if (!wreck || !boatDef) return;
+
+    const recovered = rollRecoveredTreasuresForVoyage(wreck, boatDef, salvageState);
+    const newFoundCount = (salvageState.wreckTreasureFoundCounts[wreck.id] || 0) + recovered.length;
+    const newDiscoveredIds = Array.from(
+      new Set([
+        ...(salvageState.discoveredArtifactIds || []),
+        ...recovered.map((r) => r.treasureDefId),
+      ])
+    );
+
+    setSalvageState((prev) => ({
+      ...prev,
+      activeExpeditions: prev.activeExpeditions.filter((e) => e.expeditionId !== expeditionId),
+      recoveredVaultTreasures: [...prev.recoveredVaultTreasures, ...recovered],
+      wreckTreasureFoundCounts: {
+        ...prev.wreckTreasureFoundCounts,
+        [wreck.id]: newFoundCount,
+      },
+      discoveredArtifactIds: newDiscoveredIds,
+      totalExpeditionsCompleted: prev.totalExpeditionsCompleted + 1,
+    }));
+  };
+
+  const handleListTreasureOnAuction = (treasureInstanceId: string, startingBid: number) => {
+    const treasure = salvageState.recoveredVaultTreasures.find((t) => t.instanceId === treasureInstanceId);
+    if (!treasure) return;
+
+    const listing = createAuctionListing(treasure, startingBid, 45);
+    setSalvageState((prev) => ({
+      ...prev,
+      recoveredVaultTreasures: prev.recoveredVaultTreasures.filter((t) => t.instanceId !== treasureInstanceId),
+      activeAuctions: [listing, ...prev.activeAuctions],
+    }));
+  };
+
+  const handleRelistAuctionTreasure = (auctionId: string) => {
+    const auction = salvageState.activeAuctions.find((a) => a.auctionId === auctionId);
+    if (!auction) return;
+    setSalvageState((prev) => ({
+      ...prev,
+      activeAuctions: prev.activeAuctions.filter((a) => a.auctionId !== auctionId),
+      recoveredVaultTreasures: [auction.treasure, ...prev.recoveredVaultTreasures],
+    }));
+  };
+
+  const handleCollectAuctionProceeds = (auctionId: string) => {
+    const auction = salvageState.activeAuctions.find((a) => a.auctionId === auctionId);
+    if (!auction) return;
+
+    setMoney((prev) => prev + auction.finalHammerPrice);
+    setSalvageState((prev) => ({
+      ...prev,
+      activeAuctions: prev.activeAuctions.filter((a) => a.auctionId !== auctionId),
+      totalEarningsFromAuctions: (prev.totalEarningsFromAuctions || 0) + auction.finalHammerPrice,
+    }));
+  };
+
   // Reset Game Progress
   const handleConfirmReset = () => {
     if (waitTimerRef.current) clearInterval(waitTimerRef.current);
@@ -2570,6 +2806,7 @@ export default function App() {
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem('cozy_reel_save_v7');
+      localStorage.removeItem('cozy_reel_salvage_state_v1');
     } catch {}
 
     setMoney(0);
@@ -2646,13 +2883,16 @@ export default function App() {
             </p>
           </div>
 
-          <div className="py-2 flex flex-col items-center justify-center">
+          <div className="py-4 flex flex-col items-center justify-center">
             <img
               src={getFishSpriteUrl(loadingFish) || './fish/rainbow_trout.png'}
               alt={loadingFish.name}
-              className="w-24 h-16 object-contain animate-pulse"
+              className="w-64 h-36 max-w-full object-contain animate-pulse"
               style={{ imageRendering: 'pixelated' }}
             />
+            <span className="text-[11px] text-[#717885] mt-1.5 italic tracking-wide">
+              {loadingFish.name}
+            </span>
           </div>
 
           <div className="space-y-2 text-left">
@@ -2777,7 +3017,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('shop')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'shop'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2787,7 +3027,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('traps')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'traps'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2797,7 +3037,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('hatchery')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center relative ${
               activeTab === 'hatchery'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2805,12 +3045,12 @@ export default function App() {
           >
             <span>Hatchery</span>
             {readyHatcheryCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 rounded-full" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('fleet')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center relative ${
               activeTab === 'fleet'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2818,12 +3058,12 @@ export default function App() {
           >
             <span>Fleet</span>
             {readyHaulsCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 rounded-full" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('town')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap relative ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center relative ${
               activeTab === 'town'
                 ? 'border-amber-600 bg-amber-950/60 text-amber-200'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2831,12 +3071,12 @@ export default function App() {
           >
             <span>Town</span>
             {isRumorActive && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-400 rounded-full" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('areas')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'areas'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2846,7 +3086,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab('guide')}
-            className={`shrink-0 px-3.5 py-2 sm:px-1 border text-center font-bold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-3.5 py-2.5 sm:py-2 sm:px-1 min-h-[42px] border text-center font-bold cursor-pointer transition-colors whitespace-nowrap touch-manipulation flex items-center justify-center ${
               activeTab === 'guide'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#23262d] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -2862,7 +3102,7 @@ export default function App() {
           <div className="flex items-center gap-2 border-b border-[#232730] pb-2 text-xs">
             <button
               onClick={() => setFishingSubTab('rod')}
-              className={`px-3.5 py-1.5 font-bold cursor-pointer transition-colors ${
+              className={`px-3.5 py-2 min-h-[38px] flex items-center justify-center font-bold cursor-pointer transition-colors touch-manipulation ${
                 fishingSubTab === 'rod'
                   ? 'border-b-2 border-sky-400 text-sky-200 bg-sky-950/40'
                   : 'text-[#8c94a2] hover:text-[#c0c5ce]'
@@ -2872,7 +3112,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setFishingSubTab('whaling')}
-              className={`px-3.5 py-1.5 font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 min-h-[38px] flex items-center justify-center font-bold cursor-pointer transition-colors touch-manipulation ${
                 fishingSubTab === 'whaling'
                   ? 'border-b-2 border-blue-400 text-blue-200 bg-blue-950/40'
                   : 'text-[#8c94a2] hover:text-blue-300'
@@ -3223,6 +3463,17 @@ export default function App() {
             onCallInEarly={handleCallInEarly}
             onRetireBoat={handleRetireBoat}
             onGiveCrewBonus={handleGiveCrewBonus}
+            salvageState={salvageState}
+            onUnlockSalvageCharter={handleUnlockSalvageCharter}
+            onBuySalvageBoat={handleBuySalvageBoat}
+            onUnlockWreckSite={handleUnlockWreckSite}
+            onAssignCrewToSalvageBoat={handleAssignCrewToSalvageBoat}
+            onUnassignCrewFromSalvageBoat={handleUnassignCrewFromSalvageBoat}
+            onStartSalvageExpedition={handleStartSalvageExpedition}
+            onClaimSalvageExpedition={handleClaimSalvageExpedition}
+            onListTreasureOnAuction={handleListTreasureOnAuction}
+            onRelistAuctionTreasure={handleRelistAuctionTreasure}
+            onCollectAuctionProceeds={handleCollectAuctionProceeds}
           />
         </div>
 
@@ -3265,6 +3516,7 @@ export default function App() {
             currentWeather={currentWeather}
             inventory={inventory}
             hatcheryTanks={hatcheryTanks}
+            discoveredArtifactIds={getDiscoveredArtifactIds(salvageState)}
           />
         </div>
 

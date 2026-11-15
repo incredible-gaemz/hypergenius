@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { SalvageView } from './SalvageView';
+import { SalvageState, INITIAL_SALVAGE_STATE } from '../game/salvageLogic';
 import {
   BOATS_CATALOG,
   CrewMember,
@@ -64,6 +66,16 @@ interface CommercialTabProps {
   onGiveCrewBonus?: (crewId: string, amount: number) => void;
   commercialBusinessName?: string | null;
   onStartCommercialBusiness?: (name: string) => void;
+  salvageState?: SalvageState;
+  onUnlockSalvageCharter?: () => void;
+  onBuySalvageBoat?: (boatDefId: string) => void;
+  onUnlockWreckSite?: (siteId: string) => void;
+  onAssignCrewToSalvageBoat?: (boatInstanceId: string, crewId: string) => void;
+  onUnassignCrewFromSalvageBoat?: (boatInstanceId: string, crewId: string) => void;
+  onStartSalvageExpedition?: (boatInstanceId: string, wreckSiteId: string) => void;
+  onClaimSalvageExpedition?: (expeditionId: string) => void;
+  onListTreasureOnAuction?: (treasureInstanceId: string) => void;
+  onCollectAuctionProceeds?: (auctionId: string) => void;
 }
 
 export const CommercialTab: React.FC<CommercialTabProps> = ({
@@ -91,8 +103,18 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   onGiveCrewBonus,
   commercialBusinessName = null,
   onStartCommercialBusiness,
+  salvageState = INITIAL_SALVAGE_STATE,
+  onUnlockSalvageCharter,
+  onBuySalvageBoat,
+  onUnlockWreckSite,
+  onAssignCrewToSalvageBoat,
+  onUnassignCrewFromSalvageBoat,
+  onStartSalvageExpedition,
+  onClaimSalvageExpedition,
+  onListTreasureOnAuction,
+  onCollectAuctionProceeds,
 }) => {
-  const [subTab, setSubTab] = useState<'fleet' | 'crew' | 'stats'>('fleet');
+  const [subTab, setSubTab] = useState<'fleet' | 'salvage' | 'crew' | 'stats'>('fleet');
   const [charterNameInput, setCharterNameInput] = useState('');
 
   const [docksCooldownSec, setDocksCooldownSec] = useState<number>(() => {
@@ -285,7 +307,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   return (
     <div className="border border-[#2a2d34] bg-[#181a1f] p-4 text-[#e3e6eb] space-y-4">
       {/* Top Header & Sub-navigation */}
-      <div className="border-b border-[#292d36] pb-3 text-xs flex flex-wrap items-center justify-between gap-2">
+      <div className="border-b border-[#292d36] pb-3 text-xs flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
           <span className="font-bold text-[#f1f3f5] text-sm">{commercialBusinessName}</span>
           <span className="text-[11px] text-[#8c94a2]">
@@ -293,10 +315,10 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="grid grid-cols-4 sm:flex items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
           <button
             onClick={() => setSubTab('fleet')}
-            className={`px-3 py-1.5 border text-xs font-bold cursor-pointer transition-colors ${
+            className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'fleet'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#262932] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -305,8 +327,18 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             Fleet
           </button>
           <button
+            onClick={() => setSubTab('salvage')}
+            className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
+              subTab === 'salvage'
+                ? 'border-amber-600/70 bg-[#2b241c] text-amber-200'
+                : 'border-[#262932] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
+            }`}
+          >
+            Expeditions
+          </button>
+          <button
             onClick={() => setSubTab('crew')}
-            className={`px-3 py-1.5 border text-xs font-bold cursor-pointer transition-colors ${
+            className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'crew'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#262932] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -316,7 +348,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
           </button>
           <button
             onClick={() => setSubTab('stats')}
-            className={`px-3 py-1.5 border text-xs font-bold cursor-pointer transition-colors ${
+            className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'stats'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
                 : 'border-[#262932] bg-[#16181d] text-[#717885] hover:text-[#c0c5ce]'
@@ -830,7 +862,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                                 currentTargetFishId
                               )
                             }
-                            className={`px-4 py-1.5 font-bold border text-xs transition-colors ${
+                            className={`w-full sm:w-auto px-4 py-2 min-h-[38px] font-bold border text-xs transition-colors touch-manipulation text-center ${
                               assignedCrew.length > 0 && canAffordDispatch
                                 ? 'border-emerald-600/80 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 cursor-pointer'
                                 : 'border-[#282a32] bg-[#141518] text-[#555a64] cursor-not-allowed'
@@ -851,6 +883,24 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {/* SALVAGE SUBTAB */}
+      {subTab === 'salvage' && (
+        <SalvageView
+          money={money}
+          hiredCrew={hiredCrew}
+          salvageState={salvageState}
+          onUnlockSalvageCharter={onUnlockSalvageCharter || (() => {})}
+          onBuySalvageBoat={onBuySalvageBoat || (() => {})}
+          onUnlockWreckSite={onUnlockWreckSite || (() => {})}
+          onAssignCrewToSalvageBoat={onAssignCrewToSalvageBoat || (() => {})}
+          onUnassignCrewFromSalvageBoat={onUnassignCrewFromSalvageBoat || (() => {})}
+          onStartSalvageExpedition={onStartSalvageExpedition || (() => {})}
+          onClaimSalvageExpedition={onClaimSalvageExpedition || (() => {})}
+          onListTreasureOnAuction={onListTreasureOnAuction || (() => {})}
+          onCollectAuctionProceeds={onCollectAuctionProceeds || (() => {})}
+        />
       )}
 
       {/* CREW SUBTAB */}

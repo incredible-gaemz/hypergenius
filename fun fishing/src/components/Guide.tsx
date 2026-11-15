@@ -21,6 +21,11 @@ import {
 import { FISH_GUIDE_DATA, FishGuideDetails } from '../game/fishGuideData';
 import { HatcheryTank, HatcheryMutation } from '../game/hatcheryLogic';
 import {
+  TREASURE_CATALOG,
+  TreasureItemDef,
+  getTreasureSpriteUrl,
+} from '../game/salvageLogic';
+import {
   WHALE_SPECIES,
   WhaleSpecies,
   WhaleCatalogEntry,
@@ -35,9 +40,92 @@ interface GuideProps {
   currentWeather?: WeatherDef;
   inventory?: CaughtFish[];
   hatcheryTanks?: HatcheryTank[];
+  discoveredArtifactIds?: string[];
 }
 
 type GuideFilterStatus = 'all' | 'unlocked' | 'locked';
+export type GuideSortOption = 'default' | 'recently_caught' | 'avg_size' | 'avg_length' | 'number_caught';
+
+export function getSpeciesAvgWeight(fish: FishSpecies): number {
+  return Math.round(((fish.minWeight + fish.maxWeight) / 2) * 10) / 10;
+}
+
+export function getSpeciesAvgLengthInches(fish: FishSpecies): number {
+  const avgWeight = (fish.minWeight + fish.maxWeight) / 2;
+  const name = fish.name.toLowerCase();
+
+  let k = 11.5;
+  if (
+    name.includes('eel') ||
+    name.includes('oarfish') ||
+    name.includes('needlefish') ||
+    name.includes('pipefish')
+  ) {
+    k = 24.0;
+  } else if (
+    name.includes('pike') ||
+    name.includes('pickerel') ||
+    name.includes('muskie') ||
+    name.includes('barracuda') ||
+    name.includes('gar') ||
+    name.includes('smelt') ||
+    name.includes('swordfish') ||
+    name.includes('marlin') ||
+    name.includes('sailfish') ||
+    name.includes('taimen')
+  ) {
+    k = 16.5;
+  } else if (
+    name.includes('sunfish') ||
+    name.includes('bluegill') ||
+    name.includes('crappie') ||
+    name.includes('flounder') ||
+    name.includes('halibut') ||
+    name.includes('turbot') ||
+    name.includes('plaice') ||
+    name.includes('sole') ||
+    name.includes('pompano') ||
+    name.includes('angelfish') ||
+    name.includes('discus') ||
+    name.includes('lumpfish') ||
+    name.includes('blobfish') ||
+    name.includes('isopod')
+  ) {
+    k = 8.8;
+  }
+
+  const lengthInches = Math.round(k * Math.cbrt(avgWeight) * 10) / 10;
+  return Math.max(2.0, lengthInches);
+}
+
+export function formatLength(inches: number): string {
+  if (inches >= 36) {
+    const feet = (inches / 12).toFixed(1);
+    return `${feet} ft`;
+  }
+  return `${inches.toFixed(1)} in`;
+}
+
+export function getWhaleAvgLengthFeet(whale: WhaleSpecies): number {
+  const avgWeight = (whale.minWeightLbs + whale.maxWeightLbs) / 2;
+  return Math.round(1.35 * Math.cbrt(avgWeight) * 10) / 10;
+}
+
+export function getSpeciesRecentCatchTime(
+  fishId: number,
+  catalogEntry?: CatalogEntry,
+  inventory?: CaughtFish[]
+): number {
+  let mostRecent = catalogEntry?.firstCaughtAt || 0;
+  if (inventory && inventory.length > 0) {
+    for (const item of inventory) {
+      if (item.fishId === fishId && item.caughtAt > mostRecent) {
+        mostRecent = item.caughtAt;
+      }
+    }
+  }
+  return mostRecent;
+}
 
 const ALL_MUTATIONS: Array<{
   id: HatcheryMutation;
@@ -89,11 +177,15 @@ export const Guide: React.FC<GuideProps> = ({
   currentWeather,
   inventory,
   hatcheryTanks,
+  discoveredArtifactIds = [],
 }) => {
+  const [guideTab, setGuideTab] = useState<'fish' | 'artifacts'>('fish');
+  const [inspectedArtifact, setInspectedArtifact] = useState<TreasureItemDef | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState<string>('all');
   const [selectedTier, setSelectedTier] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<GuideFilterStatus>('all');
+  const [sortBy, setSortBy] = useState<GuideSortOption>('default');
   const [inspectedFish, setInspectedFish] = useState<FishSpecies | null>(null);
   const [inspectedWhale, setInspectedWhale] = useState<WhaleSpecies | null>(null);
   const [inspectedTab, setInspectedTab] = useState<'profile' | 'mutations'>('profile');
@@ -112,6 +204,13 @@ export const Guide: React.FC<GuideProps> = ({
     return WHALE_SPECIES.filter((w) => (whaleCatalog?.[w.id]?.caughtCount || 0) >= 1).length;
   }, [whaleCatalog]);
 
+  const hasDiscoveredArtifacts = (discoveredArtifactIds?.length || 0) > 0;
+
+  const discoveredArtifacts = useMemo(() => {
+    if (!hasDiscoveredArtifacts || !discoveredArtifactIds) return [];
+    return TREASURE_CATALOG.filter((t) => discoveredArtifactIds.includes(t.id));
+  }, [hasDiscoveredArtifacts, discoveredArtifactIds]);
+
   const hasCaughtWhale = unlockedWhaleCount > 0;
   const totalSpecies = hasCaughtWhale ? totalFishCount + totalWhaleCount : totalFishCount;
   const totalUnlockedCount = hasCaughtWhale ? unlockedFishCount + unlockedWhaleCount : unlockedFishCount;
@@ -123,6 +222,7 @@ export const Guide: React.FC<GuideProps> = ({
       if (e.key === 'Escape') {
         setInspectedFish(null);
         setInspectedWhale(null);
+        setInspectedArtifact(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -134,7 +234,7 @@ export const Guide: React.FC<GuideProps> = ({
     if (effectiveArea === 'whaling') {
       return [];
     }
-    return FISH_COLLECTION.filter((fish) => {
+    const list = FISH_COLLECTION.filter((fish) => {
       // Area filter
       if (effectiveArea !== 'all' && fish.areaId !== effectiveArea) {
         return false;
@@ -162,7 +262,45 @@ export const Guide: React.FC<GuideProps> = ({
       }
       return true;
     });
-  }, [searchQuery, selectedArea, selectedTier, statusFilter, catalogMap]);
+
+    list.sort((a, b) => {
+      if (sortBy === 'recently_caught') {
+        const timeA = getSpeciesRecentCatchTime(a.id, catalogMap[a.id], inventory);
+        const timeB = getSpeciesRecentCatchTime(b.id, catalogMap[b.id], inventory);
+        if (timeB !== timeA) {
+          return timeB - timeA;
+        }
+        return a.id - b.id;
+      }
+      if (sortBy === 'avg_size') {
+        const sizeA = (a.minWeight + a.maxWeight) / 2;
+        const sizeB = (b.minWeight + b.maxWeight) / 2;
+        if (sizeB !== sizeA) {
+          return sizeB - sizeA;
+        }
+        return a.id - b.id;
+      }
+      if (sortBy === 'avg_length') {
+        const lenA = getSpeciesAvgLengthInches(a);
+        const lenB = getSpeciesAvgLengthInches(b);
+        if (lenB !== lenA) {
+          return lenB - lenA;
+        }
+        return a.id - b.id;
+      }
+      if (sortBy === 'number_caught') {
+        const countA = catalogMap[a.id]?.caughtCount || 0;
+        const countB = catalogMap[b.id]?.caughtCount || 0;
+        if (countB !== countA) {
+          return countB - countA;
+        }
+        return a.id - b.id;
+      }
+      return a.id - b.id;
+    });
+
+    return list;
+  }, [searchQuery, effectiveArea, selectedTier, statusFilter, sortBy, catalogMap, inventory]);
 
   // Filtered whale list (hidden until player catches at least 1 whale)
   const filteredWhales = useMemo(() => {
@@ -172,7 +310,7 @@ export const Guide: React.FC<GuideProps> = ({
     if (effectiveArea !== 'all' && effectiveArea !== 'whaling') {
       return [];
     }
-    return WHALE_SPECIES.filter((whale) => {
+    const list = WHALE_SPECIES.filter((whale) => {
       const tier = getWhaleRarityTier(whale);
       if (selectedTier !== 'all' && tier !== selectedTier) {
         return false;
@@ -189,7 +327,37 @@ export const Guide: React.FC<GuideProps> = ({
       }
       return true;
     });
-  }, [searchQuery, selectedArea, selectedTier, statusFilter, whaleCatalog]);
+
+    list.sort((a, b) => {
+      if (sortBy === 'recently_caught') {
+        const timeA = whaleCatalog?.[a.id]?.firstCaughtAt || 0;
+        const timeB = whaleCatalog?.[b.id]?.firstCaughtAt || 0;
+        if (timeB !== timeA) return timeB - timeA;
+        return a.id.localeCompare(b.id);
+      }
+      if (sortBy === 'avg_size') {
+        const sizeA = (a.minWeightLbs + a.maxWeightLbs) / 2;
+        const sizeB = (b.minWeightLbs + b.maxWeightLbs) / 2;
+        if (sizeB !== sizeA) return sizeB - sizeA;
+        return a.id.localeCompare(b.id);
+      }
+      if (sortBy === 'avg_length') {
+        const lenA = getWhaleAvgLengthFeet(a);
+        const lenB = getWhaleAvgLengthFeet(b);
+        if (lenB !== lenA) return lenB - lenA;
+        return a.id.localeCompare(b.id);
+      }
+      if (sortBy === 'number_caught') {
+        const countA = whaleCatalog?.[a.id]?.caughtCount || 0;
+        const countB = whaleCatalog?.[b.id]?.caughtCount || 0;
+        if (countB !== countA) return countB - countA;
+        return a.id.localeCompare(b.id);
+      }
+      return a.id.localeCompare(b.id);
+    });
+
+    return list;
+  }, [searchQuery, effectiveArea, selectedTier, statusFilter, sortBy, whaleCatalog, hasCaughtWhale]);
 
   const activeGuideDetails: FishGuideDetails | null = useMemo(() => {
     if (!inspectedFish) return null;
@@ -275,7 +443,85 @@ export const Guide: React.FC<GuideProps> = ({
 
   return (
     <div className="space-y-4 select-none">
-      {/* Header Summary */}
+      {/* Top Tab Bar: Only visible when at least 1 artifact is discovered */}
+      {hasDiscoveredArtifacts && (
+        <div className="grid grid-cols-2 sm:flex items-center gap-1.5 border-b border-[#292d37] pb-2 text-xs">
+          <button
+            onClick={() => setGuideTab('fish')}
+            className={`px-3 py-2 min-h-[38px] flex items-center justify-center font-bold border transition-colors cursor-pointer touch-manipulation text-center ${
+              guideTab === 'fish'
+                ? 'border-emerald-600 bg-emerald-950/70 text-emerald-300'
+                : 'border-[#292d37] bg-[#161820] text-[#8c94a2] hover:text-[#c0c5ce]'
+            }`}
+          >
+            Fish & Wildlife
+          </button>
+          <button
+            onClick={() => setGuideTab('artifacts')}
+            className={`px-3 py-2 min-h-[38px] flex items-center justify-center font-bold border transition-colors cursor-pointer touch-manipulation text-center ${
+              guideTab === 'artifacts'
+                ? 'border-amber-600 bg-amber-950/70 text-amber-300'
+                : 'border-[#292d37] bg-[#161820] text-[#8c94a2] hover:text-[#c0c5ce]'
+            }`}
+          >
+            Artifacts ({discoveredArtifacts.length})
+          </button>
+        </div>
+      )}
+
+      {/* ARTIFACTS VIEW */}
+      {hasDiscoveredArtifacts && guideTab === 'artifacts' ? (
+        <div className="space-y-4">
+          <div className="border border-[#2d323e] bg-[#14161c] p-3.5 sm:p-4 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-bold text-[#f1f3f5] uppercase tracking-wide pixel-title">
+                Recovered Shipwreck Artifacts
+              </h2>
+              <div className="text-[11px] text-[#8c94a2] mt-0.5">
+                Click any recovered relic to inspect it closely and study its history.
+              </div>
+            </div>
+            <span className="text-xs px-2.5 py-1 border border-amber-600/70 bg-amber-950/60 text-amber-300 font-bold self-start sm:self-auto">
+              {discoveredArtifacts.length} / {TREASURE_CATALOG.length} Discovered
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
+            {discoveredArtifacts.map((artifact) => {
+              return (
+                <div
+                  key={artifact.id}
+                  onClick={() => setInspectedArtifact(artifact)}
+                  className="border border-[#2a2d36] hover:border-amber-500/80 bg-[#161820] hover:bg-[#1a1d26] p-2.5 sm:p-3 text-center cursor-pointer transition-all flex flex-col justify-between items-center group touch-manipulation"
+                >
+                  <div className="w-full h-20 sm:h-24 flex items-center justify-center p-1 bg-[#101217] border border-[#23262f] overflow-hidden mb-2">
+                    <img
+                      src={getTreasureSpriteUrl(artifact.id)}
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                      alt={artifact.name}
+                      className="max-h-16 sm:max-h-20 max-w-full object-contain group-hover:scale-105 transition-transform"
+                      style={{ imageRendering: 'pixelated' }}
+                    />
+                  </div>
+
+                  <div className="space-y-1 w-full min-w-0">
+                    <div className="font-bold text-xs text-[#f1f3f5] truncate" title={artifact.name}>
+                      {artifact.name}
+                    </div>
+                    <div className="text-[10px] sm:text-[11px] text-[#8c94a2] truncate">
+                      {artifact.historicalPeriod}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Header Summary */}
       <div className="border border-[#2d323e] bg-[#14161c] p-3.5 sm:p-4 text-xs space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
@@ -352,7 +598,7 @@ export const Guide: React.FC<GuideProps> = ({
         </div>
 
         {/* Filter Controls */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 pt-1 text-xs">
           <input
             type="text"
             placeholder="Search discovered fish, whales, or waters..."
@@ -400,6 +646,18 @@ export const Guide: React.FC<GuideProps> = ({
             <option value="unlocked">Discovered Only</option>
             <option value="locked">Undiscovered Only</option>
           </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as GuideSortOption)}
+            className="border border-[#2d323c] bg-[#181a22] px-2.5 py-1.5 text-[#f1f3f5] focus:outline-none cursor-pointer font-medium"
+          >
+            <option value="default">Sort: Default (ID)</option>
+            <option value="recently_caught">Sort: Recently Caught</option>
+            <option value="avg_size">Sort: Avg. Size</option>
+            <option value="avg_length">Sort: Avg. Length</option>
+            <option value="number_caught">Sort: Number Caught</option>
+          </select>
         </div>
       </div>
 
@@ -421,7 +679,7 @@ export const Guide: React.FC<GuideProps> = ({
               >
                 {/* Visual Fish Sprite Preview */}
                 <div className="w-16 h-14 shrink-0 bg-[#0c0e12] border border-[#232732] flex items-center justify-center p-1 overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={getFishSpriteUrl(fish) || undefined}
                     alt={fish.name}
                     className="w-full h-full object-contain select-none group-hover:scale-105 transition-transform"
@@ -489,7 +747,7 @@ export const Guide: React.FC<GuideProps> = ({
             >
               {/* Undiscovered Fish Silhouette */}
               <div className="w-16 h-14 shrink-0 bg-[#0a0b0e] border border-[#1a1c22] flex items-center justify-center p-1 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={getFishSpriteUrl(fish) || undefined}
                   alt="Undiscovered Fish"
                   className="w-full h-full object-contain select-none opacity-20 brightness-0"
@@ -541,7 +799,7 @@ export const Guide: React.FC<GuideProps> = ({
               >
                 {/* Visual Whale Sprite Preview */}
                 <div className="w-16 h-14 shrink-0 bg-[#090d15] border border-blue-950 flex items-center justify-center p-1 overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={getWhaleSpriteUrl(whale.id)}
                     alt={whale.name}
                     className="w-full h-full object-contain select-none group-hover:scale-105 transition-transform"
@@ -604,7 +862,7 @@ export const Guide: React.FC<GuideProps> = ({
               className="p-3 border border-[#21242b] hover:border-[#383f50] bg-[#131518] hover:bg-[#161820] text-[#555d6b] flex items-center gap-3 text-xs cursor-pointer transition-colors"
             >
               <div className="w-16 h-14 shrink-0 bg-[#0a0b0e] border border-[#1a1c22] flex items-center justify-center p-1 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={getWhaleSpriteUrl(whale.id)}
                   alt="Undiscovered Cetacean"
                   className="w-full h-full object-contain select-none opacity-20 brightness-0"
@@ -720,7 +978,7 @@ export const Guide: React.FC<GuideProps> = ({
                 {/* Pixel Art Sprite Preview */}
                 {getFishSpriteUrl(inspectedFish) && (
                   <div className="py-3 px-4 border border-[#282b34] bg-[#121418] flex items-center justify-center">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={getFishSpriteUrl(inspectedFish)!}
                       alt={inspectedFish.name}
                       className="h-28 w-auto max-w-full object-contain select-none"
@@ -836,7 +1094,7 @@ export const Guide: React.FC<GuideProps> = ({
                       <div className="pt-1 border-t border-[#1e2128] flex items-center justify-between">
                         <span className="text-[#717885]">Recommended Lure/Bait:</span>
                         <div className="flex items-center gap-1.5 font-bold text-emerald-300">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={getLureSpriteUrl(inspectedLure.id)}
                             alt={inspectedLure.name}
                             className="w-6 h-6 object-contain select-none"
@@ -1051,7 +1309,7 @@ export const Guide: React.FC<GuideProps> = ({
                       </div>
 
                       <div className="py-3 flex items-center justify-center min-h-[120px]">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={getFishSpriteUrl(inspectedFish)!}
                           alt={inspectedFish.name}
                           className="h-28 w-auto max-w-full object-contain select-none transition-all"
@@ -1110,7 +1368,7 @@ export const Guide: React.FC<GuideProps> = ({
                         <div className="flex items-center gap-3">
                           {/* Rendered mutant sprite */}
                           <div className="w-16 h-14 shrink-0 flex items-center justify-center bg-[#0c0e12] border border-[#22252e] p-1">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={getFishSpriteUrl(inspectedFish)!}
                               alt={m.name}
                               className="w-full h-full object-contain select-none"
@@ -1206,7 +1464,7 @@ export const Guide: React.FC<GuideProps> = ({
 
             {/* Pixel Art Sprite Preview */}
             <div className="py-4 px-4 border border-[#252d3d] bg-[#0c1018] flex items-center justify-center">
-              <img
+              <img loading="lazy" decoding="async"
                 src={getWhaleSpriteUrl(inspectedWhale.id)}
                 alt={inspectedWhale.name}
                 className="h-32 w-auto max-w-full object-contain select-none"
@@ -1295,6 +1553,69 @@ export const Guide: React.FC<GuideProps> = ({
               <button
                 onClick={() => setInspectedWhale(null)}
                 className="px-4 py-1.5 border border-[#3b4356] bg-[#1a202c] hover:bg-[#252d3e] text-[#f1f3f5] font-bold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+        </>
+      )}
+
+      {/* ARTIFACT INSPECTION MODAL */}
+      {inspectedArtifact && (
+        <div
+          onClick={() => setInspectedArtifact(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md border border-[#3b404d] bg-[#14161d] text-[#e3e6eb] p-5 space-y-4 shadow-2xl relative"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setInspectedArtifact(null)}
+              className="absolute top-3 right-3 text-[#717885] hover:text-[#f1f3f5] text-lg font-bold cursor-pointer"
+            >
+              x
+            </button>
+
+            {/* Artifact Close-up */}
+            <div className="w-full h-44 bg-[#0d0f14] border border-[#242832] flex items-center justify-center p-4 overflow-hidden">
+              <img
+                src={getTreasureSpriteUrl(inspectedArtifact.id)}
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+                alt={inspectedArtifact.name}
+                className="max-h-38 max-w-full object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </div>
+
+            {/* Details */}
+            <div className="space-y-2 text-xs">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-[#f1f3f5]">{inspectedArtifact.name}</h3>
+                  <span className="text-[11px] text-[#8c94a2]">{inspectedArtifact.historicalPeriod}</span>
+                </div>
+              </div>
+
+              <div className="p-2.5 bg-[#0f1116] border border-[#22252e] text-[11px] text-amber-300 font-mono">
+                Estimated Valuation: ~${inspectedArtifact.baseEstimatedValue.toLocaleString()}
+              </div>
+
+              <p className="text-xs text-[#9aa2af] leading-relaxed pt-1">
+                {inspectedArtifact.description}
+              </p>
+            </div>
+
+            <div className="pt-1">
+              <button
+                onClick={() => setInspectedArtifact(null)}
+                className="w-full py-2 border border-[#373d49] hover:border-[#4d5566] bg-[#1a1d25] hover:bg-[#222631] text-[#f1f3f5] font-bold text-xs cursor-pointer transition-colors"
               >
                 Close
               </button>

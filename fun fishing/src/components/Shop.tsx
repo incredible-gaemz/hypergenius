@@ -121,33 +121,33 @@ export const Shop: React.FC<ShopProps> = ({
       {shopMode === 'personal' && (
         <div className="space-y-3">
           {/* Subtabs */}
-          <div className="flex border-b border-[#292d36] pb-2 gap-2 text-xs">
+          <div className="grid grid-cols-3 sm:flex border-b border-[#292d36] pb-2 gap-1.5 sm:gap-2 text-xs">
             <button
               onClick={() => setPersonalTab('rods')}
-              className={`px-3 py-1.5 border cursor-pointer ${
+              className={`px-3 py-2 min-h-[38px] flex items-center justify-center border cursor-pointer transition-colors touch-manipulation text-center ${
                 personalTab === 'rods'
                   ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5] font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
+                  : 'border-[#23262d] bg-[#14161c] text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
               Rods
             </button>
             <button
               onClick={() => setPersonalTab('reels')}
-              className={`px-3 py-1.5 border cursor-pointer ${
+              className={`px-3 py-2 min-h-[38px] flex items-center justify-center border cursor-pointer transition-colors touch-manipulation text-center ${
                 personalTab === 'reels'
                   ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5] font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
+                  : 'border-[#23262d] bg-[#14161c] text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
               Reels
             </button>
             <button
               onClick={() => setPersonalTab('lures')}
-              className={`px-3 py-1.5 border cursor-pointer ${
+              className={`px-3 py-2 min-h-[38px] flex items-center justify-center border cursor-pointer transition-colors touch-manipulation text-center ${
                 personalTab === 'lures'
                   ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5] font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
+                  : 'border-[#23262d] bg-[#14161c] text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
               Bait/Lure
@@ -465,23 +465,23 @@ export const Shop: React.FC<ShopProps> = ({
       {shopMode === 'commercial' && (
         <div className="space-y-3">
           {/* Subtabs */}
-          <div className="flex border-b border-[#292d36] pb-2 gap-2 text-xs">
+          <div className="grid grid-cols-2 sm:flex border-b border-[#292d36] pb-2 gap-1.5 sm:gap-2 text-xs">
             <button
               onClick={() => setCommercialTab('boats')}
-              className={`px-3 py-1.5 border cursor-pointer ${
+              className={`px-3 py-2 min-h-[38px] flex items-center justify-center border cursor-pointer transition-colors touch-manipulation text-center ${
                 commercialTab === 'boats'
                   ? 'border-emerald-600/80 bg-emerald-950/40 text-emerald-300 font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
+                  : 'border-[#23262d] bg-[#14161c] text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
               Vessels &amp; Boats
             </button>
             <button
               onClick={() => setCommercialTab('upgrades')}
-              className={`px-3 py-1.5 border cursor-pointer ${
+              className={`px-3 py-2 min-h-[38px] flex items-center justify-center border cursor-pointer transition-colors touch-manipulation text-center ${
                 commercialTab === 'upgrades'
                   ? 'border-emerald-600/80 bg-emerald-950/40 text-emerald-300 font-bold'
-                  : 'border-transparent text-[#717885] hover:text-[#c0c5ce]'
+                  : 'border-[#23262d] bg-[#14161c] text-[#717885] hover:text-[#c0c5ce]'
               }`}
             >
               Vessel Upgrades

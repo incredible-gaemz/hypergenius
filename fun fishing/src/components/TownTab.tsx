@@ -140,10 +140,10 @@ export const TownTab: React.FC<TownTabProps> = ({
       </div>
 
       {/* Town Sub-tabs */}
-      <div className="flex flex-wrap gap-1 border-b border-[#262932] pb-2 text-xs">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 border-b border-[#262932] pb-2 text-xs">
         <button
           onClick={() => setActiveSubTab('contracts')}
-          className={`py-1.5 px-3 border font-bold cursor-pointer transition-colors ${
+          className={`py-2 px-3 min-h-[38px] flex items-center justify-center border font-bold cursor-pointer transition-colors touch-manipulation text-center ${
             activeSubTab === 'contracts'
               ? 'border-amber-600 bg-amber-950/60 text-amber-200'
               : 'border-[#282b34] bg-[#14161c] text-[#7d8594] hover:text-[#c0c5ce]'
@@ -153,27 +153,27 @@ export const TownTab: React.FC<TownTabProps> = ({
         </button>
         <button
           onClick={() => setActiveSubTab('gazette')}
-          className={`py-1.5 px-3 border font-bold cursor-pointer transition-colors ${
+          className={`py-2 px-3 min-h-[38px] flex items-center justify-center border font-bold cursor-pointer transition-colors touch-manipulation text-center ${
             activeSubTab === 'gazette'
               ? 'border-amber-600 bg-amber-950/60 text-amber-200'
               : 'border-[#282b34] bg-[#14161c] text-[#7d8594] hover:text-[#c0c5ce]'
           }`}
         >
-          Gazette & Sighting {isRumorActiveNow && <span className="text-emerald-400 font-bold ml-1">• Active</span>}
+          Gazette {isRumorActiveNow && <span className="text-emerald-400 font-bold ml-1">• Active</span>}
         </button>
         <button
           onClick={() => setActiveSubTab('civic')}
-          className={`py-1.5 px-3 border font-bold cursor-pointer transition-colors ${
+          className={`py-2 px-3 min-h-[38px] flex items-center justify-center border font-bold cursor-pointer transition-colors touch-manipulation text-center ${
             activeSubTab === 'civic'
               ? 'border-amber-600 bg-amber-950/60 text-amber-200'
               : 'border-[#282b34] bg-[#14161c] text-[#7d8594] hover:text-[#c0c5ce]'
           }`}
         >
-          Civic Works · {civicInvestments.length}/{CIVIC_INVESTMENTS.length}
+          Civic ({civicInvestments.length}/{CIVIC_INVESTMENTS.length})
         </button>
         <button
           onClick={() => setActiveSubTab('clubs')}
-          className={`py-1.5 px-3 border font-bold cursor-pointer transition-colors ${
+          className={`py-2 px-3 min-h-[38px] flex items-center justify-center border font-bold cursor-pointer transition-colors touch-manipulation text-center ${
             activeSubTab === 'clubs'
               ? 'border-amber-600 bg-amber-950/60 text-amber-200'
               : 'border-[#282b34] bg-[#14161c] text-[#7d8594] hover:text-[#c0c5ce]'
