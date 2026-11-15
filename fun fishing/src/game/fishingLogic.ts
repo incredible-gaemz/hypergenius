@@ -494,6 +494,12 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 185, name: 'Shorthorn Sculpin', tier: 'common', minWeight: 0.5, maxWeight: 3.0, trophyWeight: 4.0, basePrice: 12, bestLureId: 'worm', areaId: 'glacial' },
   { id: 186, name: 'Arctic Flounder', tier: 'common', minWeight: 0.8, maxWeight: 4.5, trophyWeight: 6.0, basePrice: 15, bestLureId: 'clam_strip', areaId: 'glacial' },
   { id: 187, name: 'Salmon Shark', tier: 'epic', minWeight: 100.0, maxWeight: 450.0, trophyWeight: 580.0, basePrice: 980, bestLureId: 'squid', areaId: 'glacial' },
+  // --- GLACIAL FJORD ARCTIC EXPANSION (IDs 188-192) ---
+  { id: 188, name: 'Polar Cod', tier: 'common', minWeight: 0.2, maxWeight: 0.9, trophyWeight: 1.25, basePrice: 10, bestLureId: 'cricket', areaId: 'glacial' },
+  { id: 189, name: 'Capelin', tier: 'common', minWeight: 0.1, maxWeight: 0.5, trophyWeight: 0.7, basePrice: 8, bestLureId: 'bread_crust', areaId: 'glacial' },
+  { id: 190, name: 'Sablefish', tier: 'uncommon', minWeight: 4.0, maxWeight: 25.0, trophyWeight: 32.0, basePrice: 55, bestLureId: 'jig', areaId: 'glacial' },
+  { id: 191, name: 'Spotted Wolffish', tier: 'rare', minWeight: 10.0, maxWeight: 48.0, trophyWeight: 60.0, basePrice: 135, bestLureId: 'squid', areaId: 'glacial' },
+  { id: 192, name: 'Siberian Taimen', tier: 'legendary', minWeight: 45.0, maxWeight: 210.0, trophyWeight: 260.0, basePrice: 2800, bestLureId: 'dragon_scale', areaId: 'glacial' },
 ];
 
 /**
@@ -2423,6 +2429,22 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('salmon shark') || id === 187) {
     return './fish/salmon_shark.png';
+  }
+  // --- GLACIAL FJORD ARCTIC EXPANSION (IDs 188-192) ---
+  if (name.includes('polar cod') || id === 188) {
+    return './fish/polar_cod.png';
+  }
+  if (name.includes('capelin') || id === 189) {
+    return './fish/capelin.png';
+  }
+  if (name.includes('sablefish') || name.includes('black cod') || id === 190) {
+    return './fish/sablefish.png';
+  }
+  if (name.includes('spotted wolffish') || id === 191) {
+    return './fish/spotted_wolffish.png';
+  }
+  if (name.includes('taimen') || id === 192) {
+    return './fish/siberian_taimen.png';
   }
 
   // Mythical Relics & Cryptids

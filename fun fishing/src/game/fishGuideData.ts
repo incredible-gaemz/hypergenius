@@ -1320,5 +1320,40 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
       "habitatBehavior": "Endothermic subarctic hunter capable of maintaining body temperature well above freezing water; prowls glacial fjords and open northern seas.",
       "dietNotes": "Apex hunter targeting Pacific salmon, sablefish, squid, and herring.",
       "wikiUrl": "https://en.wikipedia.org/wiki/Salmon_shark"
+  },
+  "188": {
+      "scientificName": "Boreogadus saida",
+      "visualDescription": "Slender brownish-grey subarctic gadid with deeply forked tail, protruding lower jaw, and biological antifreeze proteins that allow it to live directly under polar sea ice.",
+      "habitatBehavior": "Cruises the freezing upper surface layers directly beneath Arctic drift ice and cryopelagic pack margins.",
+      "dietNotes": "Consumes ice amphipods, copepods, and hyperiid amphipods clinging to underside of sea ice.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Polar_cod"
+  },
+  "189": {
+      "scientificName": "Mallotus villosus",
+      "visualDescription": "Small, delicate pelagic smelt with an iridescent olive-green back, glittering silvery belly, and a faint characteristic cucumber scent.",
+      "habitatBehavior": "Schools by the millions in frigid subarctic fjords and bays, serving as the cornerstone forage base for northern marine ecosystems.",
+      "dietNotes": "Feeds on planktonic crustaceans, euphausiids, and copepods.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Capelin"
+  },
+  "190": {
+      "scientificName": "Anoplopoma fimbria",
+      "visualDescription": "Sleek, velvety charcoal-black deepwater fish known as Black Cod or Butterfish, celebrated for its exceptionally rich, oil-dense white meat.",
+      "habitatBehavior": "Inhabits deep muddy and rocky seafloors across the cold North Pacific down to 3,000 feet.",
+      "dietNotes": "Omnivorous deepwater predator eating squid, small fish, crabs, and worms.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Sablefish"
+  },
+  "191": {
+      "scientificName": "Anarhichas minor",
+      "visualDescription": "Large serpentine benthic predator covered in striking irregular black spots and blotches over a yellow-brown body, featuring massive crushing teeth.",
+      "habitatBehavior": "Solitary bottom dweller prowling cold Arctic boulder reefs and deep shelf banks past 1,000 feet.",
+      "dietNotes": "Crushes hard-shelled sea urchins, large northern crabs, and mollusks with ease.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Spotted_wolffish"
+  },
+  "192": {
+      "scientificName": "Hucho taimen",
+      "visualDescription": "The River Wolf: the largest salmonid on Earth, featuring a ferocious streamlined copper-bronze body, heavy scarred jaw, dark X-spots, and brilliant flame-red tail and anal fins.",
+      "habitatBehavior": "Legendary apex predator ruling pristine subarctic rivers and glacial channels; lives for over 50 years and ambushes waterfowl, rodents, and big fish.",
+      "dietNotes": "Apex carnivore that strikes frogs, ducks, muskrats, and entire adult salmon in violent surface attacks.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Taimen"
   }
 };
