@@ -336,7 +336,6 @@ export const WhalingTab: React.FC<WhalingTabProps> = ({
           {state === 'searching' && (
             <div className="w-full py-3.5 px-4 border border-[#3b4356] bg-[#11141c]/95 text-xs sm:text-sm text-sky-300 flex items-center justify-between shadow-xl">
               <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping shrink-0" />
                 <span className="font-semibold">Looking for whales on the horizon...</span>
               </div>
               <span className="font-mono font-bold text-sky-200 shrink-0 text-sm">

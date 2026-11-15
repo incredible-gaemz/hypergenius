@@ -3201,11 +3201,6 @@ export default function App() {
               }`}
             >
               Whaling
-              {!isWhalingAvailable && (
-                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 border border-amber-500/50 bg-amber-950/60 text-amber-300">
-                  Locked
-                </span>
-              )}
             </button>
           </div>
 
@@ -3213,7 +3208,7 @@ export default function App() {
             !isWhalingAvailable ? (
               <div className="border border-[#2a2d34] bg-[#14161b] p-5 text-[#e3e6eb] space-y-4 text-xs">
                 <div className="border-b border-[#252830] pb-3">
-                  <div className="text-sm font-bold text-[#f1f3f5]">Whaling (Locked)</div>
+                  <div className="text-sm font-bold text-[#f1f3f5]">Whaling</div>
                   <div className="text-[#8c94a2] text-xs mt-1">
                     Whaling requires heavy gear and a commercial whaling permit.
                   </div>
