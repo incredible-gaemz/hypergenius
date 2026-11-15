@@ -2409,7 +2409,10 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   if (name.includes('haddock') || id === 180) {
     return './fish/haddock.png';
   }
-  if (name.includes('wolffish') || id === 181) {
+  if (name.includes('spotted wolffish') || id === 191) {
+    return './fish/spotted_wolffish.png';
+  }
+  if (name.includes('atlantic wolffish') || name.includes('wolffish') || id === 181) {
     return './fish/atlantic_wolffish.png';
   }
   if (name.includes('arctic cisco') || id === 182) {
