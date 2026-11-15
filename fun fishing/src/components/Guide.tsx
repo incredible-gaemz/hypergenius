@@ -101,7 +101,6 @@ export const Guide: React.FC<GuideProps> = ({
 
   const totalFishCount = FISH_COLLECTION.length;
   const totalWhaleCount = WHALE_SPECIES.length;
-  const totalSpecies = totalFishCount + totalWhaleCount;
 
   // Unlocked count: Fish caught 1 or more times
   const unlockedFishCount = useMemo(() => {
@@ -113,7 +112,10 @@ export const Guide: React.FC<GuideProps> = ({
     return WHALE_SPECIES.filter((w) => (whaleCatalog?.[w.id]?.caughtCount || 0) >= 1).length;
   }, [whaleCatalog]);
 
-  const totalUnlockedCount = unlockedFishCount + unlockedWhaleCount;
+  const hasCaughtWhale = unlockedWhaleCount > 0;
+  const totalSpecies = hasCaughtWhale ? totalFishCount + totalWhaleCount : totalFishCount;
+  const totalUnlockedCount = hasCaughtWhale ? unlockedFishCount + unlockedWhaleCount : unlockedFishCount;
+  const effectiveArea = !hasCaughtWhale && selectedArea === 'whaling' ? 'all' : selectedArea;
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -129,12 +131,12 @@ export const Guide: React.FC<GuideProps> = ({
 
   // Filtered fish list
   const filteredFish = useMemo(() => {
-    if (selectedArea === 'whaling') {
+    if (effectiveArea === 'whaling') {
       return [];
     }
     return FISH_COLLECTION.filter((fish) => {
       // Area filter
-      if (selectedArea !== 'all' && fish.areaId !== selectedArea) {
+      if (effectiveArea !== 'all' && fish.areaId !== effectiveArea) {
         return false;
       }
       // Tier filter
@@ -162,9 +164,12 @@ export const Guide: React.FC<GuideProps> = ({
     });
   }, [searchQuery, selectedArea, selectedTier, statusFilter, catalogMap]);
 
-  // Filtered whale list
+  // Filtered whale list (hidden until player catches at least 1 whale)
   const filteredWhales = useMemo(() => {
-    if (selectedArea !== 'all' && selectedArea !== 'whaling') {
+    if (!hasCaughtWhale) {
+      return [];
+    }
+    if (effectiveArea !== 'all' && effectiveArea !== 'whaling') {
       return [];
     }
     return WHALE_SPECIES.filter((whale) => {
@@ -283,7 +288,7 @@ export const Guide: React.FC<GuideProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-1 border border-emerald-600 bg-emerald-950/60 text-emerald-300 font-bold">
-              {selectedArea === 'whaling'
+              {effectiveArea === 'whaling' && hasCaughtWhale
                 ? `${unlockedWhaleCount} / ${totalWhaleCount} Whales Discovered`
                 : `${totalUnlockedCount} / ${totalSpecies} Species Discovered`}
             </span>
@@ -296,7 +301,7 @@ export const Guide: React.FC<GuideProps> = ({
             className="bg-emerald-500 h-full transition-all duration-300"
             style={{
               width: `${Math.round(
-                selectedArea === 'whaling'
+                effectiveArea === 'whaling' && hasCaughtWhale
                   ? (unlockedWhaleCount / totalWhaleCount) * 100
                   : (totalUnlockedCount / totalSpecies) * 100
               )}%`,
@@ -309,32 +314,34 @@ export const Guide: React.FC<GuideProps> = ({
           <button
             onClick={() => setSelectedArea('all')}
             className={`px-2.5 py-1 font-bold border transition-colors cursor-pointer shrink-0 touch-manipulation ${
-              selectedArea === 'all'
+              effectiveArea === 'all'
                 ? 'border-emerald-500 bg-emerald-950/60 text-emerald-200'
                 : 'border-[#292d37] bg-[#161820] text-[#8c94a2] hover:text-[#c0c5ce]'
             }`}
           >
             All Waters ({totalSpecies})
           </button>
-          <button
-            onClick={() => setSelectedArea('whaling')}
-            className={`px-2.5 py-1 font-bold border transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 touch-manipulation ${
-              selectedArea === 'whaling'
-                ? 'border-blue-400 bg-blue-950/70 text-blue-200'
-                : 'border-blue-900/60 bg-blue-950/25 text-blue-300 hover:text-blue-200'
-            }`}
-          >
-            Whaling Grounds ({totalWhaleCount})
-            <span className="text-[10px] px-1 py-0.2 border border-blue-500/50 bg-blue-900/40 text-blue-300 font-bold">
-              {unlockedWhaleCount}/{totalWhaleCount}
-            </span>
-          </button>
+          {hasCaughtWhale && (
+            <button
+              onClick={() => setSelectedArea('whaling')}
+              className={`px-2.5 py-1 font-bold border transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 touch-manipulation ${
+                effectiveArea === 'whaling'
+                  ? 'border-blue-400 bg-blue-950/70 text-blue-200'
+                  : 'border-blue-900/60 bg-blue-950/25 text-blue-300 hover:text-blue-200'
+              }`}
+            >
+              Whaling Grounds ({totalWhaleCount})
+              <span className="text-[10px] px-1 py-0.2 border border-blue-500/50 bg-blue-900/40 text-blue-300 font-bold">
+                {unlockedWhaleCount}/{totalWhaleCount}
+              </span>
+            </button>
+          )}
           {FISHING_AREAS.map((a) => (
             <button
               key={a.id}
               onClick={() => setSelectedArea(a.id)}
               className={`px-2 py-1 font-semibold border transition-colors cursor-pointer shrink-0 touch-manipulation ${
-                selectedArea === a.id
+                effectiveArea === a.id
                   ? 'border-sky-500 bg-sky-950/60 text-sky-200'
                   : 'border-[#292d37] bg-[#161820] text-[#717887] hover:text-[#c0c5ce]'
               }`}
@@ -355,7 +362,7 @@ export const Guide: React.FC<GuideProps> = ({
           />
 
           <select
-            value={selectedArea}
+            value={effectiveArea}
             onChange={(e) => setSelectedArea(e.target.value)}
             className="border border-[#2d323c] bg-[#181a22] px-2.5 py-1.5 text-[#f1f3f5] focus:outline-none cursor-pointer"
           >
@@ -365,7 +372,9 @@ export const Guide: React.FC<GuideProps> = ({
                 {a.name} ({FISH_COLLECTION.filter((f) => f.areaId === a.id).length})
               </option>
             ))}
-            <option value="whaling">Whaling Grounds ({totalWhaleCount})</option>
+            {hasCaughtWhale && (
+              <option value="whaling">Whaling Grounds ({totalWhaleCount})</option>
+            )}
           </select>
 
           <select

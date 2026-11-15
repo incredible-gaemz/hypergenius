@@ -26,8 +26,22 @@ export function preloadSingleImage(url: string): Promise<void> {
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => {
-      GLOBAL_IMAGE_CACHE.set(url, img);
-      resolve();
+      // Decode into memory so the browser never does top-to-bottom scanline rendering
+      if ('decode' in img && typeof img.decode === 'function') {
+        img
+          .decode()
+          .then(() => {
+            GLOBAL_IMAGE_CACHE.set(url, img);
+            resolve();
+          })
+          .catch(() => {
+            GLOBAL_IMAGE_CACHE.set(url, img);
+            resolve();
+          });
+      } else {
+        GLOBAL_IMAGE_CACHE.set(url, img);
+        resolve();
+      }
     };
     img.onerror = () => {
       // Resolve anyway so loading screen is never stuck

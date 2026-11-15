@@ -177,7 +177,7 @@ class SoundManager {
       if (!this.preloadedAudios.has(src)) {
         try {
           const a = new Audio(src);
-          a.preload = src.includes('trench.mp3') ? 'metadata' : 'auto';
+          a.preload = 'auto';
           this.preloadedAudios.set(src, a);
         } catch {}
       }
