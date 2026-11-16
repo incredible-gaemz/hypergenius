@@ -21,7 +21,8 @@ export type CrewSpecialty =
   | 'volume'
   | 'reef'
   | 'broker'
-  | 'monger';
+  | 'monger'
+  | 'abyssal';
 
 export interface CrewMember {
   id: string;
@@ -100,7 +101,9 @@ export type CommercialBaitId =
   | 'bare_gear'
   | 'bulk_worm_crate'
   | 'bulk_minnow_crate'
-  | 'bulk_squid_crate';
+  | 'bulk_herring_cask'
+  | 'bulk_squid_crate'
+  | 'bulk_abyssal_slurry';
 
 export interface CommercialBait {
   id: CommercialBaitId;
@@ -495,12 +498,28 @@ export const COMMERCIAL_BAITS: CommercialBait[] = [
     targetTierBonus: ['uncommon', 'rare'],
   },
   {
+    id: 'bulk_herring_cask',
+    name: 'Cured Herring & Mackerel Cask',
+    price: 260,
+    description: 'Heavy oak casks packed with salted herring, sprats, and cut mackerel. Superb for cold fjords and coastal bays. +50% catch yield.',
+    catchBonusMultiplier: 1.5,
+    targetTierBonus: ['uncommon', 'rare'],
+  },
+  {
     id: 'bulk_squid_crate',
     name: 'Frozen Squid & Chum Block',
     price: 380,
     description: 'Heavy scented chum and whole squid for ocean gamefish and deep reef pelagics. +60% catch yield.',
     catchBonusMultiplier: 1.6,
     targetTierBonus: ['rare', 'epic'],
+  },
+  {
+    id: 'bulk_abyssal_slurry',
+    name: 'Bioluminescent Abyssal Slurry',
+    price: 850,
+    description: 'Pressurized canister of deep-sea krill oil, squid extract, and bioluminescent photophore enzymes. Irresistible to massive trench leviathans and apex pelagics. +85% catch yield.',
+    catchBonusMultiplier: 1.85,
+    targetTierBonus: ['rare', 'epic', 'legendary'],
   },
 ];
 
@@ -538,7 +557,9 @@ export function calculateVoyageDuration(
       bare_gear: 0.92,
       bulk_worm_crate: 1.05,
       bulk_minnow_crate: 1.15,
+      bulk_herring_cask: 1.20,
       bulk_squid_crate: 1.25,
+      bulk_abyssal_slurry: 1.35,
     };
     duration *= baitDurationMultipliers[baitId] || 1.0;
   }
@@ -556,9 +577,17 @@ export function calculateVoyageDuration(
     duration *= 1 + (1 - staffedRatio) * 0.25;
   }
 
-  // 5. Sammy Cruz / speed specialty crew (-25%)
+  // 5. Speed specialty crew: Junior Helmsman (-8%)
   if (crewMembers.some((c) => c.specialty === 'speed')) {
-    duration *= 0.75;
+    duration *= 0.92;
+  }
+
+  // Expensive Abyssal Deep-Rift Captain (-30% deep voyage duration)
+  if (
+    crewMembers.some((c) => c.specialty === 'abyssal') &&
+    (destinationAreaId === 'trench' || destinationAreaId === 'ocean')
+  ) {
+    duration *= 0.70;
   }
 
   // 6. Upgrades: Hydraulic winch (-20%)
@@ -586,17 +615,25 @@ export function calculateExpeditionWageCost(crewMembers: CrewMember[]): number {
 }
 
 export function getRecommendedCommercialBait(species: FishSpecies): CommercialBaitId {
+  if (species.areaId === 'trench' || species.tier === 'mythical') {
+    return 'bulk_abyssal_slurry';
+  }
   if (
     species.areaId === 'ocean' ||
     species.areaId === 'reef' ||
-    species.areaId === 'trench' ||
     species.tier === 'epic' ||
     species.tier === 'legendary'
   ) {
     return 'bulk_squid_crate';
   }
   if (
-    ['minnow', 'crankbait', 'jig', 'spinner', 'spoon', 'crawfish'].includes(species.bestLureId) ||
+    species.areaId === 'glacial' ||
+    ['spoon', 'spinner', 'jig'].includes(species.bestLureId)
+  ) {
+    return 'bulk_herring_cask';
+  }
+  if (
+    ['minnow', 'crankbait', 'crawfish'].includes(species.bestLureId) ||
     species.tier === 'rare' ||
     species.tier === 'uncommon'
   ) {
@@ -651,92 +688,102 @@ export function generateJobSeekers(alreadyHiredIds: string[] = []): CrewMember[]
     {
       specialty: 'apprentice',
       title: 'Deckhand Apprentice',
-      desc: '+15% total catch volume',
+      desc: '+4% total catch volume',
       icon: '',
-      minHire: 75,
-      maxHire: 120,
-      minWage: 4,
-      maxWage: 7,
+      minHire: 60,
+      maxHire: 100,
+      minWage: 3,
+      maxWage: 6,
     },
     {
       specialty: 'bottom',
       title: 'Channel Fisherman',
-      desc: '+35% yield in Bayou & Rivers',
+      desc: '+8% yield in Bayou & Rivers',
       icon: '',
-      minHire: 160,
-      maxHire: 240,
-      minWage: 8,
-      maxWage: 14,
+      minHire: 120,
+      maxHire: 180,
+      minWage: 6,
+      maxWage: 10,
     },
     {
       specialty: 'gamefish',
       title: 'Gamefish Scout',
-      desc: '+30% market value for trout, bass & pike',
+      desc: '+8% market value for freshwater catches',
       icon: '',
-      minHire: 240,
-      maxHire: 350,
+      minHire: 180,
+      maxHire: 280,
+      minWage: 9,
+      maxWage: 15,
+    },
+    {
+      specialty: 'speed',
+      title: 'Junior Helmsman',
+      desc: '-8% expedition voyage duration',
+      icon: '',
+      minHire: 250,
+      maxHire: 380,
       minWage: 12,
       maxWage: 20,
     },
     {
-      specialty: 'speed',
-      title: 'Helmsman',
-      desc: '-25% expedition voyage duration',
-      icon: '',
-      minHire: 320,
-      maxHire: 480,
-      minWage: 15,
-      maxWage: 24,
-    },
-    {
       specialty: 'pelagic',
       title: 'Offshore Navigator',
-      desc: '+45% saltwater yield in Ocean & Reef',
+      desc: '+15% saltwater yield in Ocean & Reef',
       icon: '',
-      minHire: 580,
-      maxHire: 850,
+      minHire: 600,
+      maxHire: 950,
       minWage: 25,
       maxWage: 38,
     },
     {
       specialty: 'volume',
       title: 'Net Tender',
-      desc: '+50% bulk catch volume on Volume Hauls',
+      desc: '+20% volume on Quantity/Volume hauls',
       icon: '',
-      minHire: 750,
-      maxHire: 1100,
-      minWage: 32,
-      maxWage: 48,
+      minHire: 900,
+      maxHire: 1400,
+      minWage: 38,
+      maxWage: 55,
     },
     {
       specialty: 'reef',
-      title: 'Reef Pilot',
-      desc: 'Drastically boosts rare & epic reef catches',
+      title: 'Master Reef Pilot',
+      desc: '+65% reef yield & 2.5x rare reef attraction',
       icon: '',
-      minHire: 1200,
-      maxHire: 1700,
-      minWage: 50,
-      maxWage: 75,
+      minHire: 3000,
+      maxHire: 4800,
+      minWage: 110,
+      maxWage: 170,
     },
     {
       specialty: 'broker',
-      title: 'Wholesale Broker',
-      desc: '+35% cash on fleet wholesale sales',
+      title: 'Wholesale Trade Director',
+      desc: '+50% cash payout on all fleet wholesale sales',
       icon: '',
-      minHire: 1800,
-      maxHire: 2600,
-      minWage: 70,
-      maxWage: 100,
+      minHire: 6500,
+      maxHire: 9500,
+      minWage: 220,
+      maxWage: 340,
     },
     {
       specialty: 'monger',
-      title: 'Fishmonger',
-      desc: 'Sashimi-grade +40% value and 2x trophy odds',
+      title: 'Master Sashimi Fishmonger',
+      desc: 'Sashimi-grade: +65% catch value, 3.5x trophy odds, runts eliminated',
       icon: '',
-      minHire: 2800,
-      maxHire: 3800,
-      minWage: 95,
-      maxWage: 140,
+      minHire: 12000,
+      maxHire: 18000,
+      minWage: 400,
+      maxWage: 600,
+    },
+    {
+      specialty: 'abyssal',
+      title: 'Abyssal Deep-Rift Captain',
+      desc: '+100% deep trench volume, 4x leviathan rate, -30% trench voyage time',
+      icon: '',
+      minHire: 25000,
+      maxHire: 38000,
+      minWage: 800,
+      maxWage: 1250,
     },
   ];
 
@@ -811,16 +858,31 @@ export function calculateExpeditionHaul(
 
   // Specialty boosts:
   if (crewMembers.some((c) => c.specialty === 'apprentice')) {
-    targetCatchCount = Math.round(targetCatchCount * 1.15);
-    bonusNotes.push('Junior Briggs +15% catch volume');
+    targetCatchCount = Math.round(targetCatchCount * 1.04);
+    bonusNotes.push('Deckhand Apprentice +4% catch volume');
   }
 
   if (expedition.searchFocus === 'volume' || expedition.searchFocus === 'quantity') {
     targetCatchCount = Math.round(targetCatchCount * 1.35);
     if (crewMembers.some((c) => c.specialty === 'volume')) {
-      targetCatchCount = Math.round(targetCatchCount * 1.5);
-      bonusNotes.push("Elena Nets +50% volume");
+      targetCatchCount = Math.round(targetCatchCount * 1.20);
+      bonusNotes.push('Net Tender +20% volume');
     }
+  }
+
+  // Expensive specialty: Master Reef Pilot (+65% reef volume)
+  if (crewMembers.some((c) => c.specialty === 'reef') && expedition.destinationAreaId === 'reef') {
+    targetCatchCount = Math.round(targetCatchCount * 1.65);
+    bonusNotes.push('Master Reef Pilot +65% reef volume');
+  }
+
+  // Expensive specialty: Abyssal Deep-Rift Captain (+100% deep trench volume)
+  if (
+    crewMembers.some((c) => c.specialty === 'abyssal') &&
+    (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')
+  ) {
+    targetCatchCount = Math.round(targetCatchCount * 2.0);
+    bonusNotes.push('Abyssal Deep-Rift Captain +100% deep-sea volume');
   }
 
   // Bait catch multiplier
@@ -913,6 +975,7 @@ export function calculateExpeditionHaul(
   const hasReefSpecialist = crewMembers.some((c) => c.specialty === 'reef');
   const hasBroker = crewMembers.some((c) => c.specialty === 'broker');
   const hasMonger = crewMembers.some((c) => c.specialty === 'monger');
+  const hasAbyssalSpecialist = crewMembers.some((c) => c.specialty === 'abyssal');
 
   const hasSonarFinder = installedUpgrades.some((u) => u.id === 'fish_finder');
   const hasChillerHold = installedUpgrades.some((u) => u.id === 'refrigerated_hold');
@@ -931,8 +994,9 @@ export function calculateExpeditionHaul(
   if (hasSpotterDrone) bonusNotes.push('Spotter Drone +45% pelagic attraction');
   if (hasAutoSorter) bonusNotes.push('Weight Sorter culls light forage fish');
   if (hasExportSyndicate) bonusNotes.push('Export Syndicate +50% global export payout');
-  if (hasBroker) bonusNotes.push('Marcus Sterling +35% wholesale price');
-  if (hasMonger) bonusNotes.push('Yuki Tanaka Sashimi grade +40% value and 2x trophy odds');
+  if (hasBroker) bonusNotes.push('Wholesale Trade Director +50% wholesale payout');
+  if (hasMonger) bonusNotes.push('Master Sashimi Fishmonger +65% value, 3.5x trophy odds, and runts eliminated');
+  if (hasAbyssalSpecialist) bonusNotes.push('Abyssal Deep-Rift Captain +100% deep trench volume & 4x leviathan odds');
 
   const catches: CaughtFish[] = [];
 
@@ -975,7 +1039,8 @@ export function calculateExpeditionHaul(
     if (expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality') rarityRoll += 30;
     if (hasSonarFinder) rarityRoll += 25;
     if (hasSpotterDrone) rarityRoll += 30;
-    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 25;
+    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 60;
+    if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) rarityRoll += 75;
 
     let targetTier: RarityTier = 'common';
     if (rarityRoll < 780) {
@@ -1004,14 +1069,15 @@ export function calculateExpeditionHaul(
 
       if (isFavoredBait) {
         if (isLegendaryTarget) {
-          // Fleets have an especially low chance to catch legendary titans: no free guarantee, ~1.5% roll
-          isTargetRoll = (seed % 1000) < 15;
+          // Fleets have an especially low chance to catch legendary titans: no free guarantee, ~1.5% roll (4x with Abyssal Captain)
+          const threshold = hasAbyssalSpecialist ? 60 : 15;
+          isTargetRoll = (seed % 1000) < threshold;
         } else if (isEpicTarget) {
           const minGuaranteed = Math.min(1, finalCatchCount);
           if (i < minGuaranteed) {
             isTargetRoll = true;
           } else {
-            isTargetRoll = (seed % 100) < 16;
+            isTargetRoll = (seed % 100) < (hasAbyssalSpecialist ? 32 : 16);
           }
         } else {
           // Common, uncommon, rare species: standard baseline guarantee
@@ -1053,15 +1119,18 @@ export function calculateExpeditionHaul(
       expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality'
         ? 0.085
         : 0.035;
-    if (hasMonger) monsterChance += 0.035;
+    if (hasMonger) monsterChance += 0.085;
+    if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) {
+      monsterChance += 0.09;
+    }
     if (hasCryoFreezer) monsterChance += 0.02;
     if (crewMembers.some((c) => (c.moraleLevel || 0) >= 4)) {
-      monsterChance = Math.min(0.18, monsterChance * 1.25);
+      monsterChance = Math.min(0.25, monsterChance * 1.25);
     }
 
     // Small juvenile / runt chance: ~15%
-    // Auto-sorter upgrade filters out lightweight forage/runts
-    const smallRuntChance = hasAutoSorter ? 0.0 : 0.15;
+    // Auto-sorter upgrade or Master Fishmonger eliminates lightweight forage/runts
+    const smallRuntChance = hasAutoSorter || hasMonger ? 0.0 : 0.15;
 
     const sizeRoll = ((seed * 13 + i * 37) % 1000) / 1000;
     let weight: number;
@@ -1094,9 +1163,9 @@ export function calculateExpeditionHaul(
     // Base commercial payout value
     let val = Math.round(species.basePrice * 1.30 * Math.pow(weightRatio, 0.52) * trophyBonus);
 
-    // Maya Lin gamefish bonus (+30%)
+    // Cheap Gamefish Scout bonus (+8% river/lake gamefish value)
     if (hasGamefishSpecialist && (species.name.includes('Trout') || species.name.includes('Bass') || species.name.includes('Walleye') || species.name.includes('Pike'))) {
-      val = Math.round(val * 1.3);
+      val = Math.round(val * 1.08);
     }
 
     // Chiller hold bonus (+20%)
@@ -1124,14 +1193,19 @@ export function calculateExpeditionHaul(
       val = Math.round(val * 1.5);
     }
 
-    // Marcus Sterling broker bonus (+35%)
+    // Expensive Wholesale Trade Director bonus (+50%)
     if (hasBroker) {
-      val = Math.round(val * 1.35);
+      val = Math.round(val * 1.50);
     }
 
-    // Yuki Tanaka master monger bonus (+40%)
+    // Expensive Master Sashimi Fishmonger bonus (+65%)
     if (hasMonger) {
-      val = Math.round(val * 1.4);
+      val = Math.round(val * 1.65);
+    }
+
+    // Expensive Abyssal Deep-Rift Captain bonus (+40% deep-sea value)
+    if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) {
+      val = Math.round(val * 1.40);
     }
 
     const caught: CaughtFish = {

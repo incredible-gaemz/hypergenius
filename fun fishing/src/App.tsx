@@ -1326,8 +1326,17 @@ export default function App() {
         }
 
         if (encounter.type === 'treasure') {
-          const mult = 0.5 + Math.random() * 1.0;
-          const reward = Math.max(500, Math.round(money * mult));
+          const highestAreaIndex = Math.max(
+            ...unlockedAreaIds.map((id) => FISHING_AREAS.findIndex((a) => a.id === id)),
+            0
+          );
+          // High-value windfall scaling with unlocked world progression:
+          // pond: $3,500, river: $5,000, lake: $8,000, bayou: $15,000, glacial: $25,000, ocean: $50,000, reef: $100,000, trench: $250,000
+          const tierMinimums = [3500, 5000, 8000, 15000, 25000, 50000, 100000, 250000];
+          const minByProgression = tierMinimums[highestAreaIndex] ?? 5000;
+          const randomBonus = Math.round(Math.random() * (minByProgression * 0.5));
+          const wealthScaled = Math.round(money * (0.75 + Math.random() * 0.75));
+          const reward = Math.max(minByProgression + randomBonus, wealthScaled);
           setPendingTreasureGold(reward);
           setCastState('treasure');
           return;
