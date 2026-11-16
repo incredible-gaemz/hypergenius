@@ -95,8 +95,8 @@ const PROJECT_NAMES = {
     'raycaster': 'Wolfenstein 3D Raycaster',
     'snake': 'Snake 3D',
     'fun fishing': 'Fun Fishing',
-    'coin-cleaning': 'Restoration Studio',
-    'coin-restoration': 'Restoration Studio'
+    'coin-cleaning': 'Coin Cleaning (Restoration Studio)',
+    'coin-restoration': 'Coin Cleaning (Restoration Studio)'
 };
 
 function getDisplayProjectName(rawName) {
