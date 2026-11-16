@@ -56,6 +56,14 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   const [startingBids, setStartingBids] = useState<Record<string, number>>({});
   const [nowTick, setNowTick] = useState<number>(Date.now());
 
+  const crewIdsOutFishingInFleet = useMemo(() => {
+    return new Set(
+      (ownedBoats || [])
+        .filter((b) => Boolean(b.expedition))
+        .flatMap((b) => b.assignedCrewIds)
+    );
+  }, [ownedBoats]);
+
   useEffect(() => {
     // Preload wreck banner images so they appear instantaneously upon unlock
     SUNKEN_WRECK_SITES.forEach((w) => {
@@ -119,13 +127,6 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   const activeExpeditionBoatIds = new Set(
     salvageState.activeExpeditions.map((e) => e.boatInstanceId)
   );
-  const crewIdsOutFishingInFleet = useMemo(() => {
-    return new Set(
-      (ownedBoats || [])
-        .filter((b) => Boolean(b.expedition))
-        .flatMap((b) => b.assignedCrewIds)
-    );
-  }, [ownedBoats]);
 
   return (
     <div className="space-y-4">
