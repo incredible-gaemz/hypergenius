@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { CrewMember } from '../game/commercialLogic';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CrewMember, OwnedBoat } from '../game/commercialLogic';
 import {
   SALVAGE_BOATS_CATALOG,
   SUNKEN_WRECK_SITES,
@@ -21,6 +21,7 @@ import {
 interface SalvageViewProps {
   money: number;
   hiredCrew: CrewMember[];
+  ownedBoats?: OwnedBoat[];
   salvageState: SalvageState;
   onUnlockSalvageCharter: () => void;
   onBuySalvageBoat: (boatDefId: string) => void;
@@ -37,6 +38,7 @@ interface SalvageViewProps {
 export const SalvageView: React.FC<SalvageViewProps> = ({
   money,
   hiredCrew,
+  ownedBoats = [],
   salvageState,
   onUnlockSalvageCharter,
   onBuySalvageBoat,
@@ -117,6 +119,13 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   const activeExpeditionBoatIds = new Set(
     salvageState.activeExpeditions.map((e) => e.boatInstanceId)
   );
+  const crewIdsOutFishingInFleet = useMemo(() => {
+    return new Set(
+      (ownedBoats || [])
+        .filter((b) => Boolean(b.expedition))
+        .flatMap((b) => b.assignedCrewIds)
+    );
+  }, [ownedBoats]);
 
   return (
     <div className="space-y-4">
@@ -275,7 +284,17 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                 : 0;
 
               const readyBoats = salvageState.ownedSalvageBoatInstances.filter(
-                (b) => !activeExpeditionBoatIds.has(b.instanceId) && b.assignedCrewIds.length > 0
+                (b) =>
+                  !activeExpeditionBoatIds.has(b.instanceId) &&
+                  b.assignedCrewIds.length > 0 &&
+                  !b.assignedCrewIds.some((cId) => crewIdsOutFishingInFleet.has(cId))
+              );
+
+              const hasBoatsBlockedByFleet = salvageState.ownedSalvageBoatInstances.some(
+                (b) =>
+                  !activeExpeditionBoatIds.has(b.instanceId) &&
+                  b.assignedCrewIds.length > 0 &&
+                  b.assignedCrewIds.some((cId) => crewIdsOutFishingInFleet.has(cId))
               );
 
               const selectedBoatId =
@@ -423,7 +442,9 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                         <div className="space-y-2">
                           {readyBoats.length === 0 ? (
                             <div className="text-[11px] text-[#8c94a2] italic py-1">
-                              Assign crew to an available salvage boat to launch.
+                              {hasBoatsBlockedByFleet
+                                ? 'Assigned crew is currently out fishing in the fleet. Wait for their return or assign docked crew.'
+                                : 'Assign crew to an available salvage boat to launch.'}
                             </div>
                           ) : (
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -544,12 +565,22 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                           ) : (
                             boat.assignedCrewIds.map((cId) => {
                               const crew = hiredCrew.find((c) => c.id === cId);
+                              const isAtSeaInFleet = crewIdsOutFishingInFleet.has(cId);
                               return (
                                 <span
                                   key={cId}
-                                  className="inline-flex items-center gap-1.5 px-2 py-1 border border-[#333742] bg-[#1c1f26] text-xs text-[#d6d9e0]"
+                                  className={`inline-flex items-center gap-1.5 px-2 py-1 border text-xs ${
+                                    isAtSeaInFleet
+                                      ? 'border-amber-700/70 bg-amber-950/40 text-amber-200'
+                                      : 'border-[#333742] bg-[#1c1f26] text-[#d6d9e0]'
+                                  }`}
                                 >
                                   {crew ? `${crew.name}${crew.specialtyTitle ? ` (${crew.specialtyTitle})` : ''}` : 'Sailor'}
+                                  {isAtSeaInFleet && (
+                                    <span className="text-[10px] text-amber-400 font-bold">
+                                      (At Sea in Fleet)
+                                    </span>
+                                  )}
                                   {!isBusy && (
                                     <button
                                       onClick={() => onUnassignCrewFromSalvageBoat(boat.instanceId, cId)}
@@ -568,7 +599,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                             <select
                               value=""
                               onChange={(e) => {
-                                if (e.target.value) {
+                                if (e.target.value && !crewIdsOutFishingInFleet.has(e.target.value)) {
                                   onAssignCrewToSalvageBoat(boat.instanceId, e.target.value);
                                 }
                               }}
@@ -577,11 +608,15 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                               <option value="">+ Assign Crew...</option>
                               {availableToAssign
                                 .filter((c) => !boat.assignedCrewIds.includes(c.id))
-                                .map((c) => (
-                                  <option key={c.id} value={c.id}>
-                                    {c.name}{c.specialtyTitle ? ` (${c.specialtyTitle})` : ''}
-                                  </option>
-                                ))}
+                                .map((c) => {
+                                  const isAtSea = crewIdsOutFishingInFleet.has(c.id);
+                                  return (
+                                    <option key={c.id} value={c.id} disabled={isAtSea}>
+                                      {c.name}{c.specialtyTitle ? ` (${c.specialtyTitle})` : ''}
+                                      {isAtSea ? ' - Out Fishing in Fleet (Unavailable)' : ''}
+                                    </option>
+                                  );
+                                })}
                             </select>
                           )}
                         </div>

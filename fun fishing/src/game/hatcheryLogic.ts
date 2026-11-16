@@ -91,30 +91,30 @@ export interface FeedOption {
 export const FEED_OPTIONS: FeedOption[] = [
   {
     id: 'pellets',
-    name: 'Aqua Pellets',
+    name: 'Extruded Fry Pellets',
     price: 15,
     speedMultiplier: 1.0,
     clutchBonus: 0,
     trophyChance: 0.005,
-    description: 'Standard grain feed. Steady growth.',
+    description: 'Standard grain-based aquaculture pellets. Steady natural growth.',
   },
   {
     id: 'plankton',
-    name: 'Plankton Blend',
+    name: 'Cultured Artemia & Plankton',
     price: 45,
     speedMultiplier: 1.4,
     clutchBonus: 2,
     trophyChance: 0.015,
-    description: '+40% growth speed and +2 clutch yield per pair.',
+    description: '+40% incubation speed and +2 clutch yield per breeding pair.',
   },
   {
     id: 'protein',
-    name: 'Protein Mash',
+    name: 'High-Protein Krill & Fishmeal',
     price: 110,
     speedMultiplier: 1.85,
     clutchBonus: 4,
     trophyChance: 0.035,
-    description: '+85% growth speed and higher trophy odds.',
+    description: '+85% incubation speed, +4 clutch yield, and elevated trophy odds.',
   },
 ];
 

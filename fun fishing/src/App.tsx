@@ -649,6 +649,11 @@ export default function App() {
     try {
       const saved = localStorage.getItem('cozy_reel_salvage_state_v1');
       if (saved) return JSON.parse(saved);
+      const savedMain = localStorage.getItem(STORAGE_KEY);
+      if (savedMain) {
+        const parsed = JSON.parse(savedMain);
+        if (parsed.salvageState) return parsed.salvageState;
+      }
     } catch {}
     return INITIAL_SALVAGE_STATE;
   });
@@ -675,7 +680,7 @@ export default function App() {
             return {
               ...auc,
               currentBid: isUnsold ? auc.startPrice : auc.finalHammerPrice,
-              status: (isUnsold ? 'unsold' : 'sold') as const,
+              status: isUnsold ? ('unsold' as const) : ('sold' as const),
             };
           }
 
@@ -1039,6 +1044,7 @@ export default function App() {
           townBounties,
           whalingUnlocked,
           whaleCatalog,
+          salvageState,
         })
       );
     } catch {}
@@ -1075,6 +1081,7 @@ export default function App() {
     townBounties,
     whalingUnlocked,
     whaleCatalog,
+    salvageState,
   ]);
 
   // Clean up timers
@@ -1374,6 +1381,16 @@ export default function App() {
     handleClaimTreasure,
   ]);
 
+  // Console helper for developer cheats
+  useEffect(() => {
+    (window as any).setMoney = (amount: number) => setMoney(amount);
+    (window as any).addMoney = (amount: number) => setMoney((prev) => prev + amount);
+    return () => {
+      delete (window as any).setMoney;
+      delete (window as any).addMoney;
+    };
+  }, []);
+
   const handleSellFish = (catchId: string) => {
     const item = inventory.find((f) => f.catchId === catchId);
     if (!item || item.isLocked) return;
@@ -1411,7 +1428,6 @@ export default function App() {
     soundManager.playRegisterSfx();
     setMoney((prev) => prev + totalVal);
     setInventory((prev) => prev.filter((f) => f.isLocked));
-    setSalvageState(INITIAL_SALVAGE_STATE);
   };
 
   const handleToggleLockFish = (catchId: string) => {
@@ -2418,6 +2434,12 @@ export default function App() {
     const boatDef = BOATS_CATALOG.find((b) => b.id === boat.boatDefId) || BOATS_CATALOG[0];
     if (boat.assignedCrewIds.length >= boatDef.crewCapacity) return;
 
+    // Crew member cannot be assigned if currently out on a salvage expedition
+    const isOutOnSalvage = salvageState.activeExpeditions.some((e) =>
+      e.assignedCrewIds.includes(crewId)
+    );
+    if (isOutOnSalvage) return;
+
     setOwnedBoats((prev) =>
       prev.map((b) => ({
         ...b,
@@ -2448,6 +2470,12 @@ export default function App() {
   ) => {
     const boat = ownedBoats.find((b) => b.instanceId === boatInstanceId);
     if (!boat || boat.expedition) return;
+
+    // Check if any assigned crew member is currently out on a salvage expedition
+    const hasCrewOnSalvage = boat.assignedCrewIds.some((cId) =>
+      salvageState.activeExpeditions.some((e) => e.assignedCrewIds.includes(cId))
+    );
+    if (hasCrewOnSalvage) return;
 
     const boatDef = BOATS_CATALOG.find((b) => b.id === boat.boatDefId) || BOATS_CATALOG[0];
     const assignedCrew = hiredCrew.filter((c) => boat.assignedCrewIds.includes(c.id));
@@ -2658,6 +2686,12 @@ export default function App() {
   };
 
   const handleAssignCrewToSalvageBoat = (boatInstanceId: string, crewId: string) => {
+    // If a person is out in a fleet fishing then they cannot be selected for a salvage expedition
+    const isOutInFleet = ownedBoats.some(
+      (b) => Boolean(b.expedition) && b.assignedCrewIds.includes(crewId)
+    );
+    if (isOutInFleet) return;
+
     setSalvageState((prev) => {
       const boat = prev.ownedSalvageBoatInstances.find((b) => b.instanceId === boatInstanceId);
       if (!boat) return prev;
@@ -2691,6 +2725,12 @@ export default function App() {
     const boat = salvageState.ownedSalvageBoatInstances.find((b) => b.instanceId === boatInstanceId);
     const wreck = SUNKEN_WRECK_SITES.find((w) => w.id === wreckSiteId);
     if (!boat || !wreck || boat.assignedCrewIds.length === 0) return;
+
+    // Cannot dispatch if any assigned crew member is currently out in a fleet fishing
+    const hasCrewOutInFleet = boat.assignedCrewIds.some((cId) =>
+      ownedBoats.some((b) => Boolean(b.expedition) && b.assignedCrewIds.includes(cId))
+    );
+    if (hasCrewOutInFleet) return;
 
     const isBoatBusy = salvageState.activeExpeditions.some((e) => e.boatInstanceId === boatInstanceId);
     const isWreckBusy = salvageState.activeExpeditions.some((e) => e.wreckSiteId === wreckSiteId);
@@ -2822,6 +2862,7 @@ export default function App() {
     setWhalingUnlocked(false);
     setLiveBaitCharges(0);
     setCommercialBusinessName(null);
+    setSalvageState(INITIAL_SALVAGE_STATE);
 
     setCommercialStats({
       totalFleetRevenue: 0,

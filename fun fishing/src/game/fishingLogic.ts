@@ -755,10 +755,10 @@ export const LURES: Lure[] = [
   },
   {
     id: 'deep_glow_rig',
-    name: 'Bioluminescent Abyssal Drop Rig',
+    name: 'Deep-Drop Heavy Wire Rig',
     price: 160000,
     rarityWeights: { common: 1, uncommon: 5, rare: 30, epic: 41, legendary: 21, mythical: 2 },
-    targetNote: 'Trench Abyssal Monsters',
+    targetNote: 'Deep Trench Pelagics',
     emptyHookChance: 0.01,
   },
   {

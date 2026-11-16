@@ -465,10 +465,10 @@ export const FLEET_UPGRADES: FleetUpgrade[] = [
   },
   {
     id: 'abyssal_crawler_suite',
-    name: 'Autonomous Hadal Benthic Dredge & Sonar Suite',
+    name: 'Deep-Trench Hydraulic Trawl Winch',
     price: 285000,
-    effect: '+100% deep-sea haul yield, doubles hold capacity, and targets rare abyssal fauna',
-    description: 'Titanium-armored autonomous benthic dredge deployed to trench depths with sub-millimeter target lock.',
+    effect: '+100% deep-sea haul yield, doubles hold capacity, and targets rare trench fauna',
+    description: 'High-torque industrial hydraulic cable drums, titanium spreader bars, and deep benthic sonars. Built to dredge the deepest ocean trenches.',
   },
 ];
 
@@ -515,9 +515,9 @@ export const COMMERCIAL_BAITS: CommercialBait[] = [
   },
   {
     id: 'bulk_abyssal_slurry',
-    name: 'Bioluminescent Abyssal Slurry',
+    name: 'Deep-Drop Menhaden & Krill Chum',
     price: 850,
-    description: 'Pressurized canister of deep-sea krill oil, squid extract, and bioluminescent photophore enzymes. Irresistible to massive trench leviathans and apex pelagics. +85% catch yield.',
+    description: 'Heavy frozen blocks of cold-pressed menhaden fish oil, ground squid, and Antarctic krill. Heavy scent trails penetrate dark ocean trenches and attract pelagic predators. +85% catch yield.',
     catchBonusMultiplier: 1.85,
     targetTierBonus: ['rare', 'epic', 'legendary'],
   },
@@ -582,7 +582,7 @@ export function calculateVoyageDuration(
     duration *= 0.92;
   }
 
-  // Expensive Abyssal Deep-Rift Captain (-30% deep voyage duration)
+  // Deep-Trench Operations Captain (-30% deep voyage duration)
   if (
     crewMembers.some((c) => c.specialty === 'abyssal') &&
     (destinationAreaId === 'trench' || destinationAreaId === 'ocean')
@@ -777,7 +777,7 @@ export function generateJobSeekers(alreadyHiredIds: string[] = []): CrewMember[]
     },
     {
       specialty: 'abyssal',
-      title: 'Abyssal Deep-Rift Captain',
+      title: 'Deep-Trench Operations Captain',
       desc: '+100% deep trench volume, 4x leviathan rate, -30% trench voyage time',
       icon: '',
       minHire: 25000,
@@ -876,13 +876,13 @@ export function calculateExpeditionHaul(
     bonusNotes.push('Master Reef Pilot +65% reef volume');
   }
 
-  // Expensive specialty: Abyssal Deep-Rift Captain (+100% deep trench volume)
+  // Deep-Trench Operations Captain (+100% deep trench volume)
   if (
     crewMembers.some((c) => c.specialty === 'abyssal') &&
     (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')
   ) {
     targetCatchCount = Math.round(targetCatchCount * 2.0);
-    bonusNotes.push('Abyssal Deep-Rift Captain +100% deep-sea volume');
+    bonusNotes.push('Deep-Trench Operations Captain +100% deep-sea volume');
   }
 
   // Bait catch multiplier
@@ -996,7 +996,7 @@ export function calculateExpeditionHaul(
   if (hasExportSyndicate) bonusNotes.push('Export Syndicate +50% global export payout');
   if (hasBroker) bonusNotes.push('Wholesale Trade Director +50% wholesale payout');
   if (hasMonger) bonusNotes.push('Master Sashimi Fishmonger +65% value, 3.5x trophy odds, and runts eliminated');
-  if (hasAbyssalSpecialist) bonusNotes.push('Abyssal Deep-Rift Captain +100% deep trench volume & 4x leviathan odds');
+  if (hasAbyssalSpecialist) bonusNotes.push('Deep-Trench Operations Captain +100% deep trench volume & 4x leviathan odds');
 
   const catches: CaughtFish[] = [];
 
@@ -1203,7 +1203,7 @@ export function calculateExpeditionHaul(
       val = Math.round(val * 1.65);
     }
 
-    // Expensive Abyssal Deep-Rift Captain bonus (+40% deep-sea value)
+    // Deep-Trench Operations Captain bonus (+40% deep-sea value)
     if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) {
       val = Math.round(val * 1.40);
     }

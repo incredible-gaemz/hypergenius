@@ -116,7 +116,22 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   onRelistAuctionTreasure,
   onCollectAuctionProceeds,
 }) => {
-  const [subTab, setSubTab] = useState<'fleet' | 'salvage' | 'crew' | 'stats'>('fleet');
+  const [subTab, setSubTab] = useState<'fleet' | 'salvage' | 'crew' | 'stats'>(() => {
+    try {
+      const saved = localStorage.getItem('cozy_reel_commercial_subtab');
+      if (saved === 'fleet' || saved === 'salvage' || saved === 'crew' || saved === 'stats') {
+        return saved;
+      }
+    } catch {}
+    return 'fleet';
+  });
+
+  const handleSetSubTab = (newTab: 'fleet' | 'salvage' | 'crew' | 'stats') => {
+    setSubTab(newTab);
+    try {
+      localStorage.setItem('cozy_reel_commercial_subtab', newTab);
+    } catch {}
+  };
   const [charterNameInput, setCharterNameInput] = useState('');
 
   const [docksCooldownSec, setDocksCooldownSec] = useState<number>(() => {
@@ -238,6 +253,9 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
 
   const availableAreas = FISHING_AREAS.filter((a) => unlockedAreaIds.includes(a.id));
   const assignedCrewIdsSet = new Set(ownedBoats.flatMap((b) => b.assignedCrewIds));
+  const busySalvageCrewIds = new Set(
+    (salvageState?.activeExpeditions || []).flatMap((e) => e.assignedCrewIds)
+  );
 
   const allCaughtSpecies = useMemo(() => {
     return FISH_COLLECTION.filter((f) => (catalogMap[f.id]?.caughtCount || 0) > 0);
@@ -319,7 +337,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
 
         <div className="grid grid-cols-4 sm:flex items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
           <button
-            onClick={() => setSubTab('fleet')}
+            onClick={() => handleSetSubTab('fleet')}
             className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'fleet'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
@@ -329,7 +347,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             Fleet
           </button>
           <button
-            onClick={() => setSubTab('salvage')}
+            onClick={() => handleSetSubTab('salvage')}
             className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'salvage'
                 ? 'border-amber-600/70 bg-[#2b241c] text-amber-200'
@@ -339,7 +357,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             Expeditions
           </button>
           <button
-            onClick={() => setSubTab('crew')}
+            onClick={() => handleSetSubTab('crew')}
             className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'crew'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
@@ -349,7 +367,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
             Crew
           </button>
           <button
-            onClick={() => setSubTab('stats')}
+            onClick={() => handleSetSubTab('stats')}
             className={`px-2 py-2 sm:px-3 sm:py-1.5 min-h-[38px] flex items-center justify-center border text-[11px] sm:text-xs font-bold cursor-pointer transition-colors touch-manipulation text-center ${
               subTab === 'stats'
                 ? 'border-[#4a505e] bg-[#22252c] text-[#f1f3f5]'
@@ -655,11 +673,14 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                               </option>
                               {hiredCrew
                                 .filter((c) => !assignedCrewIdsSet.has(c.id))
-                                .map((c) => (
-                                  <option key={c.id} value={c.id}>
-                                    {c.name} ({c.specialtyTitle})
-                                  </option>
-                                ))}
+                                .map((c) => {
+                                  const isOutOnSalvage = busySalvageCrewIds.has(c.id);
+                                  return (
+                                    <option key={c.id} value={c.id} disabled={isOutOnSalvage}>
+                                      {c.name} ({c.specialtyTitle}){isOutOnSalvage ? ' - On Salvage Expedition (Unavailable)' : ''}
+                                    </option>
+                                  );
+                                })}
                             </select>
                           )}
                         </div>
@@ -847,36 +868,43 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                         </div>
 
                         {/* Dispatch Bar */}
-                        <div className="flex flex-wrap items-center justify-between border-t border-[#23262f] pt-2 text-xs gap-2">
-                          <div className="text-[11px] text-[#8c94a2]">
-                            Duration: <strong className="text-[#f1f3f5]">{voyageSec >= 60 ? `${Math.floor(voyageSec / 60)}m ${voyageSec % 60}s` : `${voyageSec}s`}</strong> · Total Cost:{' '}
-                            <strong className="text-emerald-400">${totalVoyageCost}</strong>
-                          </div>
+                        {(() => {
+                          const hasCrewOnSalvage = assignedCrew.some((c) => busySalvageCrewIds.has(c.id));
+                          return (
+                            <div className="flex flex-wrap items-center justify-between border-t border-[#23262f] pt-2 text-xs gap-2">
+                              <div className="text-[11px] text-[#8c94a2]">
+                                Duration: <strong className="text-[#f1f3f5]">{voyageSec >= 60 ? `${Math.floor(voyageSec / 60)}m ${voyageSec % 60}s` : `${voyageSec}s`}</strong> · Total Cost:{' '}
+                                <strong className="text-emerald-400">${totalVoyageCost}</strong>
+                              </div>
 
-                          <button
-                            disabled={assignedCrew.length === 0 || !canAffordDispatch}
-                            onClick={() =>
-                              onStartExpedition(
-                                boat.instanceId,
-                                currentAreaId,
-                                currentFocus,
-                                currentBaitId,
-                                currentTargetFishId
-                              )
-                            }
-                            className={`w-full sm:w-auto px-4 py-2 min-h-[38px] font-bold border text-xs transition-colors touch-manipulation text-center ${
-                              assignedCrew.length > 0 && canAffordDispatch
-                                ? 'border-emerald-600/80 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 cursor-pointer'
-                                : 'border-[#282a32] bg-[#141518] text-[#555a64] cursor-not-allowed'
-                            }`}
-                          >
-                            {assignedCrew.length === 0
-                              ? 'Assign Crew to Launch'
-                              : !canAffordDispatch
-                              ? `Need $${totalVoyageCost}`
-                              : `Launch Expedition · $${totalVoyageCost}`}
-                          </button>
-                        </div>
+                              <button
+                                disabled={assignedCrew.length === 0 || !canAffordDispatch || hasCrewOnSalvage}
+                                onClick={() =>
+                                  onStartExpedition(
+                                    boat.instanceId,
+                                    currentAreaId,
+                                    currentFocus,
+                                    currentBaitId,
+                                    currentTargetFishId
+                                  )
+                                }
+                                className={`w-full sm:w-auto px-4 py-2 min-h-[38px] font-bold border text-xs transition-colors touch-manipulation text-center ${
+                                  assignedCrew.length > 0 && canAffordDispatch && !hasCrewOnSalvage
+                                    ? 'border-emerald-600/80 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 cursor-pointer'
+                                    : 'border-[#282a32] bg-[#141518] text-[#555a64] cursor-not-allowed'
+                                }`}
+                              >
+                                {assignedCrew.length === 0
+                                  ? 'Assign Crew to Launch'
+                                  : hasCrewOnSalvage
+                                  ? 'Crew on Salvage Expedition'
+                                  : !canAffordDispatch
+                                  ? `Need $${totalVoyageCost}`
+                                  : `Launch Expedition · $${totalVoyageCost}`}
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -892,6 +920,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
         <SalvageView
           money={money}
           hiredCrew={hiredCrew}
+          ownedBoats={ownedBoats}
           salvageState={salvageState}
           onUnlockSalvageCharter={onUnlockSalvageCharter || (() => {})}
           onBuySalvageBoat={onBuySalvageBoat || (() => {})}
