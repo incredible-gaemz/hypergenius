@@ -1603,11 +1603,18 @@ export function rollHookedEncounter(
     escapeRoll?: number;
     treasureRoll?: number;
     mediumFishRoll?: number;
+    hasUnlockedFifthRod?: boolean;
   }
 ): HookedEncounter {
-  // Extremely rare 0.001 (0.1%) chance to hook a Sunken Treasure Chest
+  // Requirement: Player must at least have unlocked the 5th rod (RODS index >= 4, e.g. Fly Rod or higher)
+  // to be eligible to catch a Sunken Treasure Chest, with exactly 1 in 1000 (0.1%) chance.
+  const rodIndex = RODS.findIndex((r) => r.id === rod.id);
+  const canCatchTreasure = options?.hasUnlockedFifthRod !== undefined
+    ? options.hasUnlockedFifthRod
+    : rodIndex >= 4;
+
   const treasureRoll = options?.treasureRoll ?? (options?.nothingRoll !== undefined ? 1.0 : Math.random());
-  if (treasureRoll < 0.001) {
+  if (canCatchTreasure && treasureRoll < 0.001) {
     return {
       type: 'treasure',
       reelDurationSec: 4.2,

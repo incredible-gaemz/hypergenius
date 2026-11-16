@@ -1217,16 +1217,48 @@ test('Ocean mega-fauna and 0.001 treasure chest mechanics', async () => {
   assert.ok(extremeRod, 'extreme_rod must exist');
   assert.ok(theOneRod, 'the_one_rod must exist');
 
-  // Verify treasure chest encounter roll (0.001 chance)
+  // Verify treasure chest encounter roll (0.001 chance) and 5th rod requirement
+  // 5th rod is RODS[4] (Fly Rod)
+  const fifthRod = RODS[4];
+  assert.equal(fifthRod.id, 'fly_rod', '5th rod must be fly_rod');
+
+  // 1. Lower rod (index < 4, e.g. stick) without 5th rod unlocked must NEVER yield treasure even with treasureRoll < 0.001
+  const starterRod = RODS[0];
+  const blockedEnc1 = rollHookedEncounter('ocean', starterRod, LURES[0], REELS[0], {
+    treasureRoll: 0.0005,
+    hasUnlockedFifthRod: false,
+  });
+  assert.notEqual(blockedEnc1.type, 'treasure', 'Starter rod without 5th rod unlocked must never trigger treasure');
+
+  const blockedEnc2 = rollHookedEncounter('ocean', starterRod, LURES[0], REELS[0], {
+    treasureRoll: 0.0005,
+    // hasUnlockedFifthRod undefined, rodIndex is 0 (< 4)
+  });
+  assert.notEqual(blockedEnc2.type, 'treasure', 'Rod index < 4 without explicit unlock must not trigger treasure');
+
+  // 2. Equipped 5th rod (index 4) with treasureRoll < 0.001 yields treasure
+  const fifthRodEnc = rollHookedEncounter('ocean', fifthRod, LURES[0], REELS[0], {
+    treasureRoll: 0.0005,
+  });
+  assert.equal(fifthRodEnc.type, 'treasure', 'Equipped 5th rod with treasure roll < 0.001 must yield treasure');
+  assert.ok(fifthRodEnc.reelDurationSec >= 4.0, 'Treasure chest must take substantial reeling duration');
+
+  // 3. Lower rod equipped, but player has unlocked 5th rod (hasUnlockedFifthRod: true) yields treasure
+  const lowerRodWithFifthUnlocked = rollHookedEncounter('ocean', starterRod, LURES[0], REELS[0], {
+    treasureRoll: 0.0005,
+    hasUnlockedFifthRod: true,
+  });
+  assert.equal(lowerRodWithFifthUnlocked.type, 'treasure', 'Unlocked 5th rod allows catching treasure even with lower rod equipped');
+
+  // 4. Higher rod (the_one_rod) with treasure roll < 0.001 yields treasure
   const treasureEnc = rollHookedEncounter('ocean', theOneRod, LURES[LURES.length - 1], REELS[0], {
     treasureRoll: 0.0005, // below 0.001
   });
-  assert.equal(treasureEnc.type, 'treasure', 'Treasure roll < 0.001 must yield a treasure encounter');
-  assert.ok(treasureEnc.reelDurationSec >= 4.0, 'Treasure chest must take substantial reeling duration');
+  assert.equal(treasureEnc.type, 'treasure', 'Treasure roll < 0.001 with high rod must yield a treasure encounter');
 
-  // Non-treasure roll
+  // 5. Non-treasure roll (>= 0.001) never triggers treasure even with 5th rod or higher
   const normalEnc = rollHookedEncounter('ocean', theOneRod, LURES[LURES.length - 1], REELS[0], {
-    treasureRoll: 0.005,
+    treasureRoll: 0.001,
     nothingRoll: 0.99,
   });
   assert.notEqual(normalEnc.type, 'treasure', 'Roll >= 0.001 must not trigger treasure');

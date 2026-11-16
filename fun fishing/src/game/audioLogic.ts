@@ -13,6 +13,7 @@ class SoundManager {
   private preloadedAudios: Map<string, HTMLAudioElement> = new Map();
   private reelAudio: HTMLAudioElement | null = null;
   private audioCtx: AudioContext | null = null;
+  private registerAudioPool: HTMLAudioElement[] = [];
   private reelLoopStart: number = 0;
   private reelLoopEnd: number = 0;
   private reelTimeListener: (() => void) | null = null;
@@ -178,6 +179,7 @@ class SoundManager {
       './audio/gulls.mp3',
       './audio/coral.mp3',
       './audio/trench.mp3',
+      './audio/register.mp3',
     ];
 
     for (const src of allSources) {
@@ -386,11 +388,36 @@ class SoundManager {
   }
 
   /**
-   * Crisp retro cash register 'ka-ching' SFX
-   * Synthesized via Web Audio API: mechanical drawer click followed by resonant brass bell strike
+   * Cash Register Sound Effect: Plays the user-provided register.mp3 (cash register drawer & bell)
+   * with fallback to procedural synthesis.
    */
   public playRegisterSfx(): void {
     if (this.muted || typeof window === 'undefined') return;
+
+    try {
+      // Find an idle audio element or allocate a new one (pool up to 8 concurrent voices)
+      let audio = this.registerAudioPool.find((a) => a.paused || a.ended);
+      if (!audio) {
+        audio = new Audio('./audio/register.mp3');
+        audio.preload = 'auto';
+        if (this.registerAudioPool.length < 8) {
+          this.registerAudioPool.push(audio);
+        }
+      }
+      audio.volume = Math.max(0, Math.min(1, this.sfxVolume * 1.15));
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          this.fallbackProceduralRegister();
+        });
+      }
+    } catch {
+      this.fallbackProceduralRegister();
+    }
+  }
+
+  private fallbackProceduralRegister(): void {
     try {
       const ctx = this.getAudioContext();
       if (!ctx) return;
@@ -400,7 +427,7 @@ class SoundManager {
       masterGain.gain.setValueAtTime(this.sfxVolume * 0.85, now);
       masterGain.connect(ctx.destination);
 
-      // Part 1: Mechanical drawer 'cha-chunk' (rapid metallic lever strike)
+      // Mechanical drawer click
       const clickTimes = [now, now + 0.045];
       clickTimes.forEach((t) => {
         const osc = ctx.createOscillator();
@@ -416,7 +443,7 @@ class SoundManager {
         osc.stop(t + 0.045);
       });
 
-      // Part 2: Classic brass register bell ring ('ching!')
+      // Bell ring
       const bellTime = now + 0.08;
       const bellFreqs = [1980, 2640, 3960];
       bellFreqs.forEach((freq, idx) => {
@@ -431,22 +458,6 @@ class SoundManager {
         g.connect(masterGain);
         osc.start(bellTime);
         osc.stop(bellTime + 0.6);
-      });
-
-      // Part 3: Secondary coin jingle ring
-      const coinTime = now + 0.14;
-      const coinFreqs = [3135, 4186];
-      coinFreqs.forEach((freq) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, coinTime);
-        g.gain.setValueAtTime(0.22, coinTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, coinTime + 0.35);
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start(coinTime);
-        osc.stop(coinTime + 0.4);
       });
     } catch {}
   }

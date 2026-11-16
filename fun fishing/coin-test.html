@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coin Restoration Workshop - Cleaning Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background-color: #0c0e12;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      overflow-x: hidden;
+    }
+    header {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #14171f;
+      border: 1px solid #232834;
+      margin-bottom: 14px;
+      border-radius: 6px;
+    }
+    .header-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: normal;
+    }
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 12px;
+    }
+    .progress-pill {
+      background: #062319;
+      border: 1px solid #059669;
+      color: #34d399;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+    }
+    .main-layout {
+      width: 100%;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 820px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .panel {
+      background: #13161e;
+      border: 1px solid #222634;
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .panel-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      font-weight: bold;
+      border-bottom: 1px solid #1e2330;
+      padding-bottom: 6px;
+    }
+    .coin-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .coin-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #181d28;
+      border: 1px solid #2b3345;
+      color: #cbd5e1;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+    .coin-btn:hover {
+      background: #202737;
+      border-color: #38bdf8;
+    }
+    .coin-btn.active {
+      background: #0c2738;
+      border-color: #0284c7;
+      color: #f0f9ff;
+    }
+    .coin-thumb-box {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #0b0e14;
+      border: 1px solid #334155;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .coin-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .coin-name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .coin-meta {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .tools-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tool-btn {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      background: #181d28;
+      border: 1px solid #2b3345;
+      color: #cbd5e1;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+    .tool-btn:hover {
+      background: #202737;
+      border-color: #14b8a6;
+    }
+    .tool-btn.active {
+      background: #082924;
+      border-color: #0d9488;
+      color: #f0fdfa;
+    }
+    .tool-icon-frame {
+      width: 80px;
+      height: 40px;
+      background: #0b0e14;
+      border: 1px solid #1e293b;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 3px;
+    }
+    .tool-icon-img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    }
+    .tool-info-title {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .tool-desc {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+    .workbench-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .canvas-viewport {
+      width: 520px;
+      height: 520px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: none;
+      touch-action: none;
+      background: radial-gradient(circle at center, #1b202c 0%, #0a0c10 80%);
+      border: 1px solid #262c3c;
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.85), 0 10px 30px rgba(0,0,0,0.7);
+    }
+    @media (max-width: 580px) {
+      .canvas-viewport {
+        width: 100%;
+        height: 380px;
+      }
+    }
+    #cleaningCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Fixed Tool Cursor Overlays */
+    .cursor-tool {
+      position: absolute;
+      pointer-events: none;
+      display: none;
+      z-index: 50;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+    }
+    #cursorToolBrush {
+      width: 175px;
+      height: auto;
+    }
+    #cursorToolPick {
+      width: 180px;
+      height: auto;
+    }
+    #cursorToolCloth {
+      width: 90px;
+      height: auto;
+    }
+    .workbench-toolbar {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-action {
+      background: #181d28;
+      border: 1px solid #2b3345;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-action:hover {
+      background: #242c3d;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+    .btn-action.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+    .btn-flip {
+      background: #1e1b4b;
+      border-color: #4338ca;
+      color: #c7d2fe;
+    }
+    .btn-flip:hover {
+      background: #312e81;
+      border-color: #6366f1;
+      color: #ffffff;
+    }
+    .btn-reset {
+      background: #271418;
+      border-color: #7f1d1d;
+      color: #fca5a5;
+    }
+    .btn-reset:hover {
+      background: #450a0a;
+      border-color: #ef4444;
+      color: #ffffff;
+    }
+    .side-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #1e293b;
+      color: #94a3b8;
+      font-weight: 600;
+      border: 1px solid #334155;
+    }
+    .side-badge.obverse {
+      background: #082f49;
+      color: #7dd3fc;
+      border-color: #0284c7;
+    }
+    .side-badge.reverse {
+      background: #311042;
+      color: #e879f9;
+      border-color: #a21caf;
+    }
+    .instruction-bar {
+      width: 100%;
+      max-width: 520px;
+      font-size: 11px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 4px;
+      line-height: 1.4;
+    }
+    .status-card {
+      background: #181d28;
+      border: 1px solid #242a3a;
+      border-radius: 5px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      color: #94a3b8;
+    }
+    .status-val {
+      font-weight: 600;
+      color: #f1f5f9;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="header-title">
+        <span>Coin Restoration Workshop</span>
+        <span class="header-subtitle">Specimen Cleaning Testbench</span>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div>
+        <span style="color: #64748b; margin-right: 4px;">Valuation:</span>
+        <span id="valuationText" style="color: #facc15; font-weight: 700;">$0.00</span>
+      </div>
+      <div class="progress-pill" id="cleanlinessPill">Clean: 0.0%</div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Left: Controls & Tools -->
+    <div class="panel">
+      <div class="panel-title">Test Specimens</div>
+      <div class="coin-selector">
+        <button id="btnCoin1" class="coin-btn active" onclick="switchCoin('coin1')">
+          <div class="coin-thumb-box">
+            <img src="/coins/coin1_clean.png" alt="Coin 1">
+          </div>
+          <div>
+            <div class="coin-name">1898 Indian Head Cent</div>
+            <div class="coin-meta">Bronze Alloy · $195.00 Restored</div>
+          </div>
+        </button>
+
+        <button id="btnCoin2" class="coin-btn" onclick="switchCoin('coin2')">
+          <div class="coin-thumb-box">
+            <img src="/coins/coin2_clean.png" alt="Coin 2">
+          </div>
+          <div>
+            <div class="coin-name">Roman Denarius (Trajan)</div>
+            <div class="coin-meta">90% Silver · $450.00 Restored</div>
+          </div>
+        </button>
+
+        <button id="btnCoin3" class="coin-btn" onclick="switchCoin('coin3')">
+          <div class="coin-thumb-box">
+            <img src="/coins/coin3_clean.png" alt="Coin 3">
+          </div>
+          <div>
+            <div class="coin-name">Ancient Greek Medallion</div>
+            <div class="coin-meta">Ancient Bronze · $280.00 Restored</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="panel-title" style="margin-top: 4px;">Restoration Tools</div>
+      <div class="tools-list">
+        <button id="btnToolBrush" class="tool-btn active" onclick="selectTool('brush')">
+          <div class="tool-icon-frame">
+            <img src="/coin_tools/tool_brush.png" class="tool-icon-img" alt="Bristle Brush">
+          </div>
+          <div>
+            <div class="tool-info-title">Bristle Brush</div>
+            <div class="tool-desc">Sweeps crust and loose soil (wide sweep)</div>
+          </div>
+        </button>
+
+        <button id="btnToolPick" class="tool-btn" onclick="selectTool('pick')">
+          <div class="tool-icon-frame">
+            <img src="/coin_tools/tool_pick.png" class="tool-icon-img" alt="Precision Pick">
+          </div>
+          <div>
+            <div class="tool-info-title">Precision Pick</div>
+            <div class="tool-desc">Picks hard grime out of lettering (pinpoint)</div>
+          </div>
+        </button>
+
+        <button id="btnToolCloth" class="tool-btn" onclick="selectTool('cloth')">
+          <div class="tool-icon-frame">
+            <img src="/coin_tools/tool_cloth.png" class="tool-icon-img" alt="Polishing Cloth">
+          </div>
+          <div>
+            <div class="tool-info-title">Polishing Cloth</div>
+            <div class="tool-desc">Buffs away tarnish film to high luster (soft)</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="panel-title" style="margin-top: 4px;">Cleanliness Breakdown</div>
+      <div class="status-card">
+        <div class="status-row">
+          <span>Active Side:</span>
+          <span class="status-val" id="activeSideLabel">Obverse (Front)</span>
+        </div>
+        <div class="status-row">
+          <span>Obverse Clean:</span>
+          <span class="status-val" id="obverseCleanText">0.0%</span>
+        </div>
+        <div class="status-row">
+          <span>Reverse Clean:</span>
+          <span class="status-val" id="reverseCleanText">0.0%</span>
+        </div>
+        <div class="status-row" style="border-top: 1px solid #273042; padding-top: 4px; margin-top: 2px;">
+          <span>Combined Total:</span>
+          <span class="status-val" style="color: #38bdf8;" id="totalCleanText">0.0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Interactive Workbench -->
+    <div class="workbench-area">
+      <div class="canvas-viewport" id="viewport">
+        <canvas id="cleaningCanvas" width="520" height="520"></canvas>
+
+        <!-- Unsquashed Tool Cursors with Exact Tip Placement -->
+        <img id="cursorToolBrush" class="cursor-tool" src="/coin_tools/tool_brush.png" alt="Brush Cursor">
+        <img id="cursorToolPick" class="cursor-tool" src="/coin_tools/tool_pick.png" alt="Pick Cursor">
+        <img id="cursorToolCloth" class="cursor-tool" src="/coin_tools/tool_cloth.png" alt="Cloth Cursor">
+      </div>
+
+      <div class="workbench-toolbar">
+        <div class="controls-group">
+          <button class="btn-action btn-flip" id="btnFlip" onclick="flipCoin()" title="Flip coin over [Space]">
+            <span>Flip Coin</span>
+            <span id="sideBadge" class="side-badge obverse">Obverse</span>
+          </button>
+        </div>
+
+        <div class="controls-group">
+          <span style="color: #64748b; font-size: 11px; margin-right: 2px;">Mag:</span>
+          <button class="btn-action active" id="btnZoom1" onclick="setZoom(1.0)">1.0x</button>
+          <button class="btn-action" id="btnZoom15" onclick="setZoom(1.5)">1.5x</button>
+          <button class="btn-action" id="btnZoom2" onclick="setZoom(2.2)">2.2x</button>
+          <button class="btn-action" id="btnZoom3" onclick="setZoom(3.2)">3.2x</button>
+          <button class="btn-action" onclick="resetPan()" title="Center specimen">Center</button>
+        </div>
+
+        <div class="controls-group">
+          <button class="btn-action btn-reset" onclick="resetCurrentCoin()">Reset</button>
+        </div>
+      </div>
+
+      <div class="instruction-bar">
+        <span>Click and scrub with active tool to clean. Right-click drag to pan when magnified.</span>
+        <span style="color: #38bdf8;">[Space / F] to Flip · Scroll to Zoom</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- PROCEDURAL AUDIO ENGINE ---
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    let lastAudioTime = 0;
+    function playRubSound(tool) {
+      const now = performance.now();
+      if (now - lastAudioTime < 45) return;
+      lastAudioTime = now;
+      if (!audioCtx) return;
+
+      if (tool === 'brush') {
+        // Multi-frequency bristle friction noise
+        const bufferSize = audioCtx.sampleRate * 0.04;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.4));
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1600 + Math.random() * 600;
+        filter.Q.value = 2.5;
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0.08;
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start();
+      } else if (tool === 'pick') {
+        // Sharp metallic scrape / tick
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        const freq = 2200 + Math.random() * 1200;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.025);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.025);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.03);
+      } else if (tool === 'cloth') {
+        // Soft low buff squeak
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(420 + Math.random() * 120, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.045);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      }
+    }
+
+    function playFlipSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.06);
+      osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.14);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.16);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.17);
+    }
+
+    // --- WORKBENCH CONFIG & COIN SPECS ---
+    const coinConfigs = {
+      coin1: {
+        name: '1898 Indian Head Cent',
+        baseVal: 6,
+        cleanVal: 195,
+        obverse: {
+          clean: '/coins/coin1_clean.png',
+          semi: '/coins/coin1_semi.png',
+          dirty: '/coins/coin1_dirty.png'
+        },
+        reverse: {
+          clean: '/coins/coin1_back_clean.png',
+          semi: '/coins/coin1_back_semi.png',
+          dirty: '/coins/coin1_back_dirty.png'
+        }
+      },
+      coin2: {
+        name: 'Roman Denarius (Trajan)',
+        baseVal: 18,
+        cleanVal: 450,
+        obverse: {
+          clean: '/coins/coin2_clean.png',
+          semi: '/coins/coin2_semi.png',
+          dirty: '/coins/coin2_dirty.png'
+        },
+        reverse: {
+          clean: '/coins/coin2_back_clean.png',
+          semi: '/coins/coin2_back_semi.png',
+          dirty: '/coins/coin2_back_dirty.png'
+        }
+      },
+      coin3: {
+        name: 'Ancient Greek Medallion',
+        baseVal: 10,
+        cleanVal: 280,
+        obverse: {
+          clean: '/coins/coin3_clean.png',
+          semi: '/coins/coin3_semi.png',
+          dirty: '/coins/coin3_dirty.png'
+        },
+        reverse: {
+          clean: '/coins/coin3_back_clean.png',
+          semi: '/coins/coin3_back_semi.png',
+          dirty: '/coins/coin3_back_dirty.png'
+        }
+      }
+    };
+
+    // --- APPLICATION STATE ---
+    let currentCoinId = 'coin1';
+    let currentSide = 'obverse'; // 'obverse' or 'reverse'
+    let currentTool = 'brush';   // 'brush', 'pick', 'cloth'
+
+    // Cleanliness cache per coin and side
+    const progressState = {
+      coin1: { obverse: 0, reverse: 0 },
+      coin2: { obverse: 0, reverse: 0 },
+      coin3: { obverse: 0, reverse: 0 }
+    };
+
+    // Off-screen canvas cache: [coinId][side] = { cleanImg, offSemi, ctxSemi, offDirty, ctxDirty, width, height, totalOpaquePixels }
+    const coinLayerCache = {};
+
+    // Camera / Viewport Transform
+    const camera = {
+      zoom: 1.0,
+      panX: 0,
+      panY: 0
+    };
+
+    let isScrubbing = false;
+    let isPanning = false;
+    let lastMousePos = { x: 0, y: 0 };
+    let currentMousePos = { x: -100, y: -100 };
+
+    // DOM Elements
+    const viewport = document.getElementById('viewport');
+    const displayCanvas = document.getElementById('cleaningCanvas');
+    const displayCtx = displayCanvas.getContext('2d');
+
+    const cursorBrush = document.getElementById('cursorToolBrush');
+    const cursorPick = document.getElementById('cursorToolPick');
+    const cursorCloth = document.getElementById('cursorToolCloth');
+
+    // Dust particle pool
+    const particles = [];
+    function spawnDust(x, y, color) {
+      if (particles.length > 50) particles.shift();
+      particles.push({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 1.8,
+        vy: (Math.random() - 0.5) * 1.8 - 0.8,
+        size: 1.5 + Math.random() * 2.5,
+        alpha: 0.8,
+        color
+      });
+    }
+
+    // --- IMAGE LOADING & LAYER CREATION ---
+    function loadCoinSide(coinId, side, callback) {
+      if (!coinLayerCache[coinId]) coinLayerCache[coinId] = {};
+      if (coinLayerCache[coinId][side]) {
+        callback(coinLayerCache[coinId][side]);
+        return;
+      }
+
+      const paths = coinConfigs[coinId][side];
+      let loaded = 0;
+      const cleanImg = new Image();
+      const semiImg = new Image();
+      const dirtyImg = new Image();
+
+      const onAssetLoad = () => {
+        loaded++;
+        if (loaded === 3) {
+          const w = cleanImg.naturalWidth || 580;
+          const h = cleanImg.naturalHeight || 580;
+
+          const offSemi = document.createElement('canvas');
+          offSemi.width = w;
+          offSemi.height = h;
+          const ctxSemi = offSemi.getContext('2d');
+          ctxSemi.drawImage(semiImg, 0, 0);
+
+          const offDirty = document.createElement('canvas');
+          offDirty.width = w;
+          offDirty.height = h;
+          const ctxDirty = offDirty.getContext('2d');
+          ctxDirty.drawImage(dirtyImg, 0, 0);
+
+          // Count initial opaque pixels
+          const imgData = ctxSemi.getImageData(0, 0, w, h);
+          let opaque = 0;
+          for (let i = 3; i < imgData.data.length; i += 16) {
+            if (imgData.data[i] > 30) opaque++;
+          }
+
+          const layerEntry = {
+            cleanImg,
+            offSemi,
+            ctxSemi,
+            offDirty,
+            ctxDirty,
+            width: w,
+            height: h,
+            totalOpaque: Math.max(opaque, 1)
+          };
+          coinLayerCache[coinId][side] = layerEntry;
+          callback(layerEntry);
+        }
+      };
+
+      cleanImg.onload = onAssetLoad;
+      semiImg.onload = onAssetLoad;
+      dirtyImg.onload = onAssetLoad;
+
+      cleanImg.src = paths.clean;
+      semiImg.src = paths.semi;
+      dirtyImg.src = paths.dirty;
+    }
+
+    // --- WORKBENCH RENDERING LOOP ---
+    function render() {
+      const cw = displayCanvas.width;
+      const ch = displayCanvas.height;
+      displayCtx.clearRect(0, 0, cw, ch);
+
+      const activeLayer = coinLayerCache[currentCoinId] && coinLayerCache[currentCoinId][currentSide];
+      if (activeLayer) {
+        displayCtx.save();
+        // Camera Transform: center -> pan -> scale
+        displayCtx.translate(cw / 2 + camera.panX, ch / 2 + camera.panY);
+        displayCtx.scale(camera.zoom, camera.zoom);
+        displayCtx.translate(-activeLayer.width / 2, -activeLayer.height / 2);
+
+        // Render Coin Stack
+        displayCtx.drawImage(activeLayer.cleanImg, 0, 0);
+        displayCtx.drawImage(activeLayer.offSemi, 0, 0);
+        displayCtx.drawImage(activeLayer.offDirty, 0, 0);
+
+        // Render Dust particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.028;
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+          displayCtx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+          displayCtx.beginPath();
+          displayCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          displayCtx.fill();
+        }
+
+        displayCtx.restore();
+
+        // Render Precision Reticle on Viewport under cursor
+        if (currentMousePos.x > 0 && currentMousePos.y > 0) {
+          let toolRadius = 24;
+          if (currentTool === 'brush') toolRadius = 30;
+          else if (currentTool === 'pick') toolRadius = 9;
+          else if (currentTool === 'cloth') toolRadius = 26;
+          
+          const screenRadius = toolRadius * camera.zoom;
+          displayCtx.save();
+          displayCtx.strokeStyle = currentTool === 'pick' ? 'rgba(56, 189, 248, 0.7)' : 'rgba(255, 255, 255, 0.4)';
+          displayCtx.lineWidth = 1.5;
+          displayCtx.setLineDash(currentTool === 'pick' ? [] : [3, 3]);
+          displayCtx.beginPath();
+          displayCtx.arc(currentMousePos.x, currentMousePos.y, screenRadius, 0, Math.PI * 2);
+          displayCtx.stroke();
+          displayCtx.restore();
+        }
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // --- COORDINATE TRANSFORMATIONS ---
+    function screenToCoinCoords(screenX, screenY) {
+      const activeLayer = coinLayerCache[currentCoinId] && coinLayerCache[currentCoinId][currentSide];
+      if (!activeLayer) return { x: -1, y: -1 };
+
+      const cw = displayCanvas.width;
+      const ch = displayCanvas.height;
+
+      // Reverse: screen -> un-center -> un-pan -> un-scale -> coin local
+      const centeredX = screenX - (cw / 2 + camera.panX);
+      const centeredY = screenY - (ch / 2 + camera.panY);
+
+      const localX = centeredX / camera.zoom + activeLayer.width / 2;
+      const localY = centeredY / camera.zoom + activeLayer.height / 2;
+
+      return { x: localX, y: localY };
+    }
+
+    // --- SCRUBBING ENGINE ---
+    function scrub(coinX, coinY) {
+      const activeLayer = coinLayerCache[currentCoinId] && coinLayerCache[currentCoinId][currentSide];
+      if (!activeLayer) return;
+
+      initAudio();
+      playRubSound(currentTool);
+
+      let radius, dirtyAlphaPower, semiAlphaPower, dustColor;
+
+      if (currentTool === 'brush') {
+        radius = 30;
+        dirtyAlphaPower = 0.38;
+        semiAlphaPower = 0.08;
+        dustColor = '130, 105, 80';
+      } else if (currentTool === 'pick') {
+        radius = 9;
+        dirtyAlphaPower = 0.85;
+        semiAlphaPower = 0.35;
+        dustColor = '180, 150, 110';
+      } else {
+        // cloth
+        radius = 26;
+        dirtyAlphaPower = 0.10;
+        semiAlphaPower = 0.45;
+        dustColor = '160, 150, 140';
+      }
+
+      // 1. Scrub Top Dirty Encrustation Layer
+      activeLayer.ctxDirty.save();
+      activeLayer.ctxDirty.globalCompositeOperation = 'destination-out';
+      const gradD = activeLayer.ctxDirty.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+      gradD.addColorStop(0, `rgba(0, 0, 0, ${dirtyAlphaPower})`);
+      gradD.addColorStop(0.7, `rgba(0, 0, 0, ${dirtyAlphaPower * 0.5})`);
+      gradD.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      activeLayer.ctxDirty.fillStyle = gradD;
+      activeLayer.ctxDirty.beginPath();
+      activeLayer.ctxDirty.arc(coinX, coinY, radius, 0, Math.PI * 2);
+      activeLayer.ctxDirty.fill();
+      activeLayer.ctxDirty.restore();
+
+      // 2. Scrub Semi-Dirty Patina/Tarnish Layer
+      activeLayer.ctxSemi.save();
+      activeLayer.ctxSemi.globalCompositeOperation = 'destination-out';
+      const gradS = activeLayer.ctxSemi.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+      gradS.addColorStop(0, `rgba(0, 0, 0, ${semiAlphaPower})`);
+      gradS.addColorStop(0.7, `rgba(0, 0, 0, ${semiAlphaPower * 0.4})`);
+      gradS.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      activeLayer.ctxSemi.fillStyle = gradS;
+      activeLayer.ctxSemi.beginPath();
+      activeLayer.ctxSemi.arc(coinX, coinY, radius, 0, Math.PI * 2);
+      activeLayer.ctxSemi.fill();
+      activeLayer.ctxSemi.restore();
+
+      // Spawn dust particle
+      spawnDust(coinX, coinY, dustColor);
+    }
+
+    // --- ACCURATE CLEANLINESS SAMPLING ---
+    let sampleTimer = null;
+    function scheduleCleanlinessCheck() {
+      if (sampleTimer) return;
+      sampleTimer = setTimeout(() => {
+        sampleTimer = null;
+        updateCleanlinessMetrics();
+      }, 120);
+    }
+
+    function updateCleanlinessMetrics() {
+      const activeLayer = coinLayerCache[currentCoinId] && coinLayerCache[currentCoinId][currentSide];
+      if (!activeLayer) return;
+
+      const w = activeLayer.width;
+      const h = activeLayer.height;
+      const semiData = activeLayer.ctxSemi.getImageData(0, 0, w, h).data;
+      const dirtyData = activeLayer.ctxDirty.getImageData(0, 0, w, h).data;
+
+      let remainingGrime = 0;
+      let totalCoinPixels = 0;
+
+      // Sample every 16th pixel for real-time responsiveness
+      for (let i = 3; i < semiData.length; i += 16) {
+        if (semiData[i] > 10 || dirtyData[i] > 10) {
+          totalCoinPixels++;
+          const dAlpha = dirtyData[i] / 255;
+          const sAlpha = semiData[i] / 255;
+          // Dirty crust weighs 60%, semi-dirty tarnish weighs 40%
+          const grimeWeight = dAlpha * 0.6 + sAlpha * 0.4;
+          remainingGrime += grimeWeight;
+        }
+      }
+
+      const totalBase = activeLayer.totalOpaque || totalCoinPixels || 1;
+      const grimeRatio = remainingGrime / totalBase;
+      const cleanRatio = Math.max(0, Math.min(1, 1 - grimeRatio));
+      const cleanPercent = cleanRatio * 100;
+
+      progressState[currentCoinId][currentSide] = cleanPercent;
+      updateUIStats();
+    }
+
+    function updateUIStats() {
+      const obv = progressState[currentCoinId].obverse;
+      const rev = progressState[currentCoinId].reverse;
+      const total = (obv + rev) / 2;
+
+      document.getElementById('obverseCleanText').textContent = `${obv.toFixed(1)}%`;
+      document.getElementById('reverseCleanText').textContent = `${rev.toFixed(1)}%`;
+      document.getElementById('totalCleanText').textContent = `${total.toFixed(1)}%`;
+      document.getElementById('cleanlinessPill').textContent = `Clean: ${total.toFixed(1)}%`;
+
+      const spec = coinConfigs[currentCoinId];
+      const curVal = spec.baseVal + (spec.cleanVal - spec.baseVal) * Math.pow(total / 100, 1.4);
+      document.getElementById('valuationText').textContent = `$${curVal.toFixed(2)}`;
+    }
+
+    // --- TOOL SELECTION & PRECISE CURSOR PLACEMENT ---
+    function selectTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+
+      cursorBrush.style.display = 'none';
+      cursorPick.style.display = 'none';
+      cursorCloth.style.display = 'none';
+
+      if (tool === 'brush') {
+        document.getElementById('btnToolBrush').classList.add('active');
+        cursorBrush.style.display = 'block';
+      } else if (tool === 'pick') {
+        document.getElementById('btnToolPick').classList.add('active');
+        cursorPick.style.display = 'block';
+      } else if (tool === 'cloth') {
+        document.getElementById('btnToolCloth').classList.add('active');
+        cursorCloth.style.display = 'block';
+      }
+    }
+
+    function updateToolCursorPosition(vx, vy) {
+      currentMousePos = { x: vx, y: vy };
+
+      // Tool tips contact placement:
+      // Brush: contact bristles are at x ≈ 15px, y ≈ 51px of the 175px width image
+      if (currentTool === 'brush') {
+        cursorBrush.style.left = `${vx - 15}px`;
+        cursorBrush.style.top = `${vy - 51}px`;
+      } 
+      // Pick: needle tip is at bottom-left: x ≈ 3px, y ≈ 35px of the 180px width image
+      else if (currentTool === 'pick') {
+        cursorPick.style.left = `${vx - 3}px`;
+        cursorPick.style.top = `${vy - 35}px`;
+      } 
+      // Cloth: center buffing fold
+      else if (currentTool === 'cloth') {
+        cursorCloth.style.left = `${vx - 45}px`;
+        cursorCloth.style.top = `${vy - 45}px`;
+      }
+    }
+
+    // --- COIN FLIPPING (OBVERSE / REVERSE) ---
+    function flipCoin() {
+      playFlipSound();
+      currentSide = currentSide === 'obverse' ? 'reverse' : 'obverse';
+
+      const sideBadge = document.getElementById('sideBadge');
+      const sideLabel = document.getElementById('activeSideLabel');
+
+      if (currentSide === 'obverse') {
+        sideBadge.textContent = 'Obverse';
+        sideBadge.className = 'side-badge obverse';
+        sideLabel.textContent = 'Obverse (Front)';
+      } else {
+        sideBadge.textContent = 'Reverse';
+        sideBadge.className = 'side-badge reverse';
+        sideLabel.textContent = 'Reverse (Back)';
+      }
+
+      loadCoinSide(currentCoinId, currentSide, () => {
+        updateUIStats();
+      });
+    }
+
+    // --- SPECIMEN SWITCHING ---
+    function switchCoin(coinId) {
+      currentCoinId = coinId;
+      document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'));
+
+      if (coinId === 'coin1') document.getElementById('btnCoin1').classList.add('active');
+      else if (coinId === 'coin2') document.getElementById('btnCoin2').classList.add('active');
+      else if (coinId === 'coin3') document.getElementById('btnCoin3').classList.add('active');
+
+      resetPan();
+      loadCoinSide(currentCoinId, currentSide, () => {
+        updateUIStats();
+      });
+    }
+
+    // --- MAGNIFICATION & CAMERA PAN ENGINE ---
+    function setZoom(factor) {
+      camera.zoom = factor;
+      document.querySelectorAll('.controls-group .btn-action').forEach(b => {
+        if (b.textContent.endsWith('x')) b.classList.remove('active');
+      });
+      if (factor === 1.0) document.getElementById('btnZoom1').classList.add('active');
+      else if (factor === 1.5) document.getElementById('btnZoom15').classList.add('active');
+      else if (factor === 2.2) document.getElementById('btnZoom2').classList.add('active');
+      else if (factor === 3.2) document.getElementById('btnZoom3').classList.add('active');
+    }
+
+    function resetPan() {
+      camera.panX = 0;
+      camera.panY = 0;
+    }
+
+    // --- POINTER / MOUSE / GESTURE LISTENERS ---
+    function getViewportCoords(e) {
+      const rect = viewport.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    viewport.addEventListener('pointerdown', (e) => {
+      const vpos = getViewportCoords(e);
+      lastMousePos = vpos;
+
+      // Right mouse button or Alt key initiates pan
+      if (e.button === 2 || e.altKey) {
+        isPanning = true;
+        return;
+      }
+
+      // Left click initiates scrubbing
+      if (e.button === 0) {
+        isScrubbing = true;
+        const coinPos = screenToCoinCoords(vpos.x, vpos.y);
+        scrub(coinPos.x, coinPos.y);
+        scheduleCleanlinessCheck();
+      }
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      const vpos = getViewportCoords(e);
+      const isInside = vpos.x >= 0 && vpos.x <= viewport.clientWidth && vpos.y >= 0 && vpos.y <= viewport.clientHeight;
+
+      if (isInside) {
+        updateToolCursorPosition(vpos.x, vpos.y);
+      } else {
+        cursorBrush.style.display = 'none';
+        cursorPick.style.display = 'none';
+        cursorCloth.style.display = 'none';
+        currentMousePos = { x: -100, y: -100 };
+      }
+
+      if (isPanning) {
+        camera.panX += vpos.x - lastMousePos.x;
+        camera.panY += vpos.y - lastMousePos.y;
+        lastMousePos = vpos;
+        return;
+      }
+
+      if (isScrubbing && isInside) {
+        const coinPos = screenToCoinCoords(vpos.x, vpos.y);
+        scrub(coinPos.x, coinPos.y);
+        scheduleCleanlinessCheck();
+      }
+
+      lastMousePos = vpos;
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      isScrubbing = false;
+      isPanning = false;
+      scheduleCleanlinessCheck();
+    });
+
+    viewport.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Mouse scroll wheel zooms in / out centered on viewport
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
+      const newZoom = Math.max(0.8, Math.min(4.0, camera.zoom + zoomDelta));
+      camera.zoom = parseFloat(newZoom.toFixed(2));
+      document.querySelectorAll('.controls-group .btn-action').forEach(b => {
+        if (b.textContent.endsWith('x')) b.classList.remove('active');
+      });
+    }, { passive: false });
+
+    // Keyboard Shortcuts: Space or F to Flip Coin, 1-3 for Tools
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        flipCoin();
+      } else if (e.key === '1') {
+        selectTool('brush');
+      } else if (e.key === '2') {
+        selectTool('pick');
+      } else if (e.key === '3') {
+        selectTool('cloth');
+      }
+    });
+
+    // --- RESET CURRENT COIN ---
+    function resetCurrentCoin() {
+      if (coinLayerCache[currentCoinId]) {
+        delete coinLayerCache[currentCoinId];
+      }
+      progressState[currentCoinId].obverse = 0;
+      progressState[currentCoinId].reverse = 0;
+      loadCoinSide(currentCoinId, currentSide, () => {
+        updateUIStats();
+      });
+    }
+
+    // --- INITIALIZATION ---
+    // Start with Brush active and load Coin 1 Obverse
+    selectTool('brush');
+    loadCoinSide('coin1', 'obverse', () => {
+      updateUIStats();
+      render();
+    });
+  </script>
+</body>
+</html>

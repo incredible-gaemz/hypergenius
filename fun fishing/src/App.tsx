@@ -1146,6 +1146,10 @@ export default function App() {
     const currentRumor = getCurrentWeatherRumor();
     const isRumorActive = isWeatherRumorActive(currentRumor, selectedAreaId, weatherId);
     const isExplorersActive = isClubPerkActive(clubState, 'explorers');
+    const hasUnlockedFifthRod = ownedRodIds.some((id) => {
+      const idx = RODS.findIndex((r) => r.id === id);
+      return idx >= 4;
+    });
 
     const encounter: HookedEncounter = rollHookedEncounter(
       selectedAreaId,
@@ -1157,6 +1161,7 @@ export default function App() {
         useLiveBait: isLiveBaitActive,
         weatherRumorActive: isRumorActive || (isExplorersActive && Math.random() < 0.15),
         rumorSpeciesId: currentRumor.speciesId,
+        hasUnlockedFifthRod,
       }
     );
 
