@@ -225,47 +225,6 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
         </div>
       </div>
 
-      {/* Hatchery Feed Formulations Reference */}
-      <div className="border border-[#2a2e39] bg-[#13151b] p-3 text-xs space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-[#f1f3f5] tracking-wide uppercase text-[11px]">
-            Aquaculture Feed Formulations
-          </span>
-          <span className="text-[10px] text-[#717885]">
-            3 commercial feeds available for nursery and breeding tanks
-          </span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          {FEED_OPTIONS.map((fd) => (
-            <div
-              key={fd.id}
-              className="border border-[#232731] bg-[#101216] p-2.5 flex flex-col justify-between space-y-1.5"
-            >
-              <div className="flex items-start justify-between gap-1">
-                <span className="font-bold text-[#e2e8f0] text-xs">{fd.name}</span>
-                <span className="text-[11px] font-bold text-emerald-400 font-mono">${fd.price}/pair</span>
-              </div>
-              <p className="text-[10px] text-[#8c94a2] leading-relaxed">{fd.description}</p>
-              <div className="flex items-center gap-1.5 text-[9px] pt-1 border-t border-[#1e222a]">
-                <span className="px-1.5 py-0.5 border border-amber-600/60 bg-amber-950/40 text-amber-300 font-bold">
-                  {fd.speedMultiplier}x Speed
-                </span>
-                {fd.clutchBonus > 0 && (
-                  <span className="px-1.5 py-0.5 border border-sky-600/60 bg-sky-950/40 text-sky-300 font-semibold">
-                    +{fd.clutchBonus} Clutch
-                  </span>
-                )}
-                {fd.trophyChance > 0.01 && (
-                  <span className="px-1.5 py-0.5 border border-purple-600/60 bg-purple-950/40 text-purple-300 font-semibold">
-                    Trophy Boost
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Tanks Grid */}
       <div className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -746,61 +705,36 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                         </div>
                       </div>
 
-                      {/* Prominent Feed Selector with all 3 formulations clearly displayed */}
-                      <div className="space-y-1.5 pt-1.5 border-t border-[#232731]">
+                      {/* Simple Feed Dropdown */}
+                      <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#8c94a2] font-semibold">Feed Formulation (3 Available):</span>
-                          <span className="text-[10px] text-[#717885]">Click to select feed</span>
+                          <span className="text-[#8c94a2]">Feed Formulation:</span>
+                          <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                            ${(currentFeed.price * selectedPairs).toLocaleString()} (${currentFeed.price}/pair)
+                          </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-1.5">
+                        <select
+                          value={currentFeedId}
+                          aria-label="Select Feed Formulation"
+                          onChange={(e) =>
+                            setSelectedFeedByTank((prev) => ({
+                              ...prev,
+                              [tank.id]: e.target.value as FeedType,
+                            }))
+                          }
+                          className="w-full border border-[#323640] bg-[#101215] px-2.5 py-1 text-xs text-[#f1f3f5] font-bold focus:outline-none cursor-pointer"
+                        >
                           {FEED_OPTIONS.map((fd) => {
-                            const isSelected = currentFeedId === fd.id;
-                            const feedCost = fd.price * selectedPairs;
+                            const cost = fd.price * selectedPairs;
+                            const bonusStr = fd.clutchBonus > 0 ? ` · +${fd.clutchBonus * selectedPairs} Fry` : '';
+                            const trophyStr = fd.trophyChance > 0.01 ? ' · Trophy Boost' : '';
                             return (
-                              <button
-                                key={fd.id}
-                                type="button"
-                                onClick={() =>
-                                  setSelectedFeedByTank((prev) => ({
-                                    ...prev,
-                                    [tank.id]: fd.id,
-                                  }))
-                                }
-                                className={`p-2 text-left border flex flex-col justify-between transition-all cursor-pointer ${
-                                  isSelected
-                                    ? 'border-amber-400 bg-amber-950/60 shadow-sm ring-1 ring-amber-400/40'
-                                    : 'border-[#2d323f] bg-[#101217] hover:border-[#434b5c] hover:bg-[#151821]'
-                                }`}
-                              >
-                                <div>
-                                  <div className="flex items-start justify-between gap-1">
-                                    <span
-                                      className={`text-[11px] font-bold leading-tight ${
-                                        isSelected ? 'text-amber-200' : 'text-[#f1f3f5]'
-                                      }`}
-                                    >
-                                      {fd.name}
-                                    </span>
-                                  </div>
-                                  <div className="text-[10px] text-emerald-400 font-semibold mt-0.5 font-mono">
-                                    ${feedCost.toLocaleString()}
-                                  </div>
-                                </div>
-                                <div className="mt-1.5 pt-1 border-t border-[#232731]/60 text-[9px] text-[#9ca3af] leading-tight space-y-0.5">
-                                  <div className="font-semibold text-amber-300">{fd.speedMultiplier}x Speed</div>
-                                  <div>
-                                    {fd.clutchBonus > 0
-                                      ? `+${fd.clutchBonus * selectedPairs} Fry Yield`
-                                      : 'Standard Yield'}
-                                  </div>
-                                  {fd.trophyChance > 0.01 && (
-                                    <div className="text-purple-300 font-medium">Trophy Boost</div>
-                                  )}
-                                </div>
-                              </button>
+                              <option key={fd.id} value={fd.id}>
+                                {fd.name} (${cost.toLocaleString()}) · {fd.speedMultiplier}x Speed{bonusStr}{trophyStr}
+                              </option>
                             );
                           })}
-                        </div>
+                        </select>
                       </div>
                     </div>
                   )}

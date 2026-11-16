@@ -94,7 +94,9 @@ const PROJECT_NAMES = {
     'genesis': 'Genesis Evolution',
     'raycaster': 'Wolfenstein 3D Raycaster',
     'snake': 'Snake 3D',
-    'fun fishing': 'Fun Fishing'
+    'fun fishing': 'Fun Fishing',
+    'coin-cleaning': 'Restoration Studio',
+    'coin-restoration': 'Restoration Studio'
 };
 
 function getDisplayProjectName(rawName) {

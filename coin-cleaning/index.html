@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Restoration Studio</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="alternate icon" type="image/png" href="./favicon.png">
+  <link rel="shortcut icon" href="./favicon.ico">
+
+  <style>
+    :root {
+      --bg-base: #0a0c10;
+      --bg-surface: #12151b;
+      --bg-elevated: #181d26;
+      --bg-hover: #222836;
+      --bg-active: #2b3345;
+      
+      --border-dim: #1f2532;
+      --border-mid: #2b3446;
+      --border-bright: #3f4c66;
+      --border-focus: #38bdf8;
+
+      --text-high: #f8fafc;
+      --text-mid: #94a3b8;
+      --text-dim: #64748b;
+      --text-muted: #475569;
+
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-violet: #a855f7;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
+
+      --shadow-sharp: 0 1px 1px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border-dim);
+      --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-base);
+      font-family: var(--font-sans);
+      color: var(--text-high);
+      font-size: 13px;
+    }
+
+    #appContainer {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Top Navigation Bar: Precision Machined Header */
+    .top-bar {
+      height: 48px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      gap: 12px;
+      z-index: 50;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      width: 10px;
+      height: 10px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      transform: rotate(45deg);
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-high);
+      white-space: nowrap;
+    }
+
+    .brand-ver {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-left: 2px;
+    }
+
+    /* Specimen Switcher */
+    .specimen-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 2px 0;
+      scrollbar-width: none;
+    }
+    .specimen-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .specimen-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: 3px;
+      color: var(--text-mid);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--inset-top);
+      position: relative;
+    }
+
+    .specimen-tab:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+      border-color: var(--border-mid);
+    }
+
+    .specimen-tab.active {
+      background: #182333;
+      border-color: var(--accent-cyan);
+      color: var(--text-high);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.25), 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .specimen-tab.active::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 6px;
+      right: 6px;
+      height: 2px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 6px var(--accent-cyan);
+    }
+
+    .tab-badge {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      padding: 1px 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .specimen-tab.active .tab-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Top Action Controls */
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: 3px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-high);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      box-shadow: var(--inset-top), var(--shadow-sharp);
+    }
+
+    .btn-action:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-mid);
+    }
+
+    .btn-action:active {
+      background: var(--bg-active);
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .btn-action.primary {
+      background: #0369a1;
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(2, 132, 199, 0.3);
+    }
+    .btn-action.primary:hover {
+      background: #0284c7;
+    }
+
+    .btn-action.danger {
+      color: #f87171;
+      border-color: #4c1d1d;
+      background: #181214;
+    }
+    .btn-action.danger:hover {
+      background: #251417;
+      border-color: #7f1d1d;
+    }
+
+    /* Main Viewport Stage */
+    .stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #08090c;
+      cursor: none;
+    }
+
+    #workbenchCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: none;
+    }
+
+    /* Floating Telemetry & Progress HUD */
+    .floating-hud {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(15, 18, 24, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      padding: 12px 14px;
+      min-width: 270px;
+      box-shadow: var(--shadow-panel);
+      pointer-events: none;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .floating-hud::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--accent-cyan);
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    .hud-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .hud-specimen-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: var(--text-high);
+    }
+
+    .hud-specimen-meta {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 6px;
+    }
+
+    .hud-progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hud-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-mid);
+    }
+
+    .hud-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #0c0e13;
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid #1a202c;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    .hud-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+      transition: width 0.1s ease-out;
+    }
+
+    .hud-grade-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 5px;
+      border-top: 1px solid var(--border-dim);
+      font-size: 11px;
+    }
+
+    .hud-grade-tag {
+      font-weight: 800;
+      color: var(--accent-amber);
+      font-family: var(--font-mono);
+      letter-spacing: 0.03em;
+    }
+
+    /* Floating Tool Dock: Perfectly Proportioned, Unsquished */
+    .tool-dock {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 17, 23, 0.96);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-mid);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      z-index: 40;
+    }
+
+    .dock-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 114px;
+      height: 74px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-dim);
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text-mid);
+      transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      padding: 5px 8px;
+      box-shadow: var(--inset-top), 0 1px 3px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+      gap: 3px;
+    }
+
+    .dock-btn-preview {
+      width: 80px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .dock-btn-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.65));
+      display: block;
+    }
+
+    .dock-btn-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    .dock-btn-hotkey {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .dock-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+      border-color: var(--border-mid);
+    }
+
+    .dock-btn.active {
+      background: #142234;
+      border-color: var(--accent-cyan);
+      color: var(--text-high);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3), 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .dock-btn.active .dock-btn-label {
+      color: var(--accent-cyan);
+    }
+
+    .dock-btn.active .dock-btn-hotkey {
+      color: var(--accent-cyan);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    /* Custom Tool Cursors: Natural Aspect Ratio & Registration */
+    .cursor-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .tool-cursor-img {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+      z-index: 100;
+    }
+
+    #cursorBrush {
+      width: 135px;
+      height: auto;
+    }
+
+    #cursorPick {
+      width: 140px;
+      height: auto;
+    }
+
+    #cursorCloth {
+      width: 76px;
+      height: 76px;
+    }
+
+    #cursorPolish {
+      width: 140px;
+      height: auto;
+    }
+
+    /* Precision Saved Toast */
+    .toast-saved {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 3px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .toast-saved.show {
+      opacity: 1;
+    }
+
+    /* Certificate Modal: Archival Slab Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 8, 12, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .certificate-card {
+      width: 440px;
+      background: #fdfdfd;
+      border: 6px solid #d5dbe4;
+      border-radius: 8px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0,0,0,0.5);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      color: #0f172a;
+      position: relative;
+    }
+
+    .cert-header {
+      width: 100%;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-top: 4px solid #0284c7;
+      border-radius: 4px;
+      padding: 10px 12px;
+    }
+
+    .cert-title-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .cert-specimen-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 3px;
+      letter-spacing: -0.01em;
+    }
+
+    .cert-grade-text {
+      font-size: 18px;
+      font-weight: 900;
+      color: #b45309;
+      margin-top: 3px;
+      font-family: var(--font-mono);
+    }
+
+    .cert-preview-box {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 4px solid #e2e8f0;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .cert-preview-box.is-sword {
+      border-radius: 6px;
+      width: 380px;
+      height: 140px;
+    }
+
+    #certPreviewCanvas {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
+    .cert-btn-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .cert-btn {
+      flex: 1;
+      padding: 9px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      color: #1e293b;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.12s ease;
+    }
+    .cert-btn:hover {
+      background: #e2e8f0;
+    }
+    .cert-btn.primary {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0369a1;
+    }
+    .cert-btn.primary:hover {
+      background: #0369a1;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="appContainer">
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+      <div class="brand-section">
+        <div class="brand-mark"></div>
+        <span class="brand-title">Restoration Studio</span>
+      </div>
+
+      <!-- Specimen Switcher -->
+      <nav class="specimen-nav" id="specimenNav">
+        <!-- Built dynamically from catalog -->
+      </nav>
+
+      <!-- Top Action Controls -->
+      <div class="top-actions">
+        <!-- Table Background Toggle -->
+        <button class="btn-action" id="btnToggleBg" onclick="toggleTableBackground()" title="Switch Table Surface">
+          <span id="labelTableBg">Desk Surface</span>
+        </button>
+
+        <!-- Flip Face (F / Space) -->
+        <button class="btn-action" id="btnFlipFace" onclick="flipFace()" title="Flip Obverse / Reverse (Space or F)">
+          <span id="labelFace">Obverse</span>
+          <span class="tab-badge">F</span>
+        </button>
+
+        <!-- Certificate / Grade -->
+        <button class="btn-action primary" onclick="openCertificateModal()" title="View Specimen Certificate & Grade">
+          <span>Certificate</span>
+        </button>
+
+        <!-- Reset Progress -->
+        <button class="btn-action danger" onclick="confirmResetCurrentSpecimen()" title="Reset current specimen progress">
+          <span>Reset</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Viewport Stage -->
+    <main class="stage" id="stage">
+      <canvas id="workbenchCanvas"></canvas>
+
+      <!-- Floating Telemetry HUD -->
+      <div class="floating-hud">
+        <div class="hud-title-row">
+          <div class="hud-specimen-name" id="hudName">Loading...</div>
+        </div>
+
+        <div class="hud-specimen-meta">
+          <span id="hudSpecs">--</span>
+          <span id="hudValue" style="color: var(--text-high); font-weight: 700;">$0.00</span>
+        </div>
+
+        <div class="hud-grade-row">
+          <span style="color: var(--text-dim); text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Condition</span>
+          <span class="hud-grade-tag" id="hudGrade">Cull</span>
+        </div>
+      </div>
+
+      <!-- Floating Tool Dock: No Squish, 3 Focused Tools -->
+      <div class="tool-dock">
+        <!-- Brush (1) -->
+        <button class="dock-btn active" id="toolBrush" onclick="selectTool('brush')" title="Horsehair Brush (Key 1) - Cleans loose surface grime">
+          <span class="dock-btn-hotkey">1</span>
+          <div class="dock-btn-preview">
+            <img src="./assets/tools/tool_brush.png" alt="Brush">
+          </div>
+          <span class="dock-btn-label">BRUSH</span>
+        </button>
+
+        <!-- Pick (2) -->
+        <button class="dock-btn" id="toolPick" onclick="selectTool('pick')" title="Carbide Pick (Key 2) - Chips away stubborn crust & crevices">
+          <span class="dock-btn-hotkey">2</span>
+          <div class="dock-btn-preview">
+            <img src="./assets/tools/tool_pick.png" alt="Pick">
+          </div>
+          <span class="dock-btn-label">PICK</span>
+        </button>
+
+        <!-- Cloth (3) -->
+        <button class="dock-btn" id="toolCloth" onclick="selectTool('cloth')" title="Microfiber Cloth (Key 3) - Buffs heavy grime and patina">
+          <span class="dock-btn-hotkey">3</span>
+          <div class="dock-btn-preview">
+            <img src="./assets/tools/tool_cloth.png" alt="Cloth">
+          </div>
+          <span class="dock-btn-label">CLOTH</span>
+        </button>
+
+        <!-- Polish (4) -->
+        <button class="dock-btn" id="toolPolish" onclick="selectTool('polish')" title="Jeweler's Rouge Polish (Key 4) - Required for 4-layer specimens to achieve max mirror luster">
+          <span class="dock-btn-hotkey">4</span>
+          <div class="dock-btn-preview">
+            <img src="./assets/tools/tool_polish.png" alt="Polish">
+          </div>
+          <span class="dock-btn-label">POLISH</span>
+        </button>
+      </div>
+
+      <!-- Tool Cursors: Natural Aspect Ratios -->
+      <div class="cursor-layer">
+        <img id="cursorBrush" class="tool-cursor-img" src="./assets/tools/tool_brush.png" alt="Brush">
+        <img id="cursorPick" class="tool-cursor-img" src="./assets/tools/tool_pick.png" alt="Pick">
+        <img id="cursorCloth" class="tool-cursor-img" src="./assets/tools/tool_cloth.png" alt="Cloth">
+        <img id="cursorPolish" class="tool-cursor-img" src="./assets/tools/tool_polish.png" alt="Polish">
+      </div>
+
+      <!-- Auto-Saved Toast -->
+      <div class="toast-saved" id="toastSaved">Autosaved</div>
+    </main>
+  </div>
+
+  <!-- Certificate Modal -->
+  <div class="modal-overlay" id="certModal" onclick="if(event.target === this) closeCertificateModal()">
+    <div class="certificate-card">
+      <div class="cert-header">
+        <div class="cert-title-row">
+          <span>ARCHIVAL RESTORATION CERTIFICATE</span>
+          <span id="certLotNumber">#LOT-8291</span>
+        </div>
+        <div class="cert-specimen-name" id="certSpecimenName">Specimen Name</div>
+        <div class="cert-grade-text" id="certGradeText">MS-65 Gem Restored</div>
+      </div>
+
+      <div class="cert-preview-box" id="certPreviewBox">
+        <canvas id="certPreviewCanvas"></canvas>
+      </div>
+
+      <div style="font-size: 11px; color: #475569; text-align: center; width: 100%; line-height: 1.4;" id="certDesc">
+        Conservation integrity verified.
+      </div>
+
+      <div class="cert-btn-row">
+        <button class="cert-btn primary" onclick="exportSpecimenPNG()">Download PNG</button>
+        <button class="cert-btn" onclick="closeCertificateModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- SPECIMEN CATALOG DEFINITIONS ---
+    const catalog = {
+      denarius: {
+        name: 'Roman Denarius',
+        era: '161 AD',
+        specs: 'Ancient Rome · 85% Silver · 18.5mm',
+        baseVal: 35.00,
+        cleanVal: 420.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/denarius_obverse_clean.png',
+          semi: './assets/coins/denarius_obverse_semi.png',
+          dirty: './assets/coins/denarius_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/denarius_reverse_clean.png',
+          semi: './assets/coins/denarius_reverse_semi.png',
+          dirty: './assets/coins/denarius_reverse_dirty.png'
+        }
+      },
+      morgandollar: {
+        name: '1921 Morgan Dollar',
+        era: '1921',
+        specs: '$1.00 · 90% Silver · 38.1mm',
+        baseVal: 28.00,
+        cleanVal: 340.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/morgandollar_obverse_clean.png',
+          semi: './assets/coins/morgandollar_obverse_semi.png',
+          dirty: './assets/coins/morgandollar_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/morgandollar_reverse_clean.png',
+          semi: './assets/coins/morgandollar_reverse_semi.png',
+          dirty: './assets/coins/morgandollar_reverse_dirty.png'
+        }
+      },
+      halfdollar: {
+        name: 'Half Dollar',
+        era: '2021',
+        specs: '50¢ · Cupro-Nickel · 30.6mm',
+        baseVal: 12.00,
+        cleanVal: 380.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/halfdollar_obverse_clean.png',
+          semi: './assets/coins/halfdollar_obverse_semi.png',
+          dirty: './assets/coins/halfdollar_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/halfdollar_reverse_clean.png',
+          semi: './assets/coins/halfdollar_reverse_semi.png',
+          dirty: './assets/coins/halfdollar_reverse_dirty.png'
+        }
+      },
+      quarter: {
+        name: 'Quarter',
+        era: '2023',
+        specs: '25¢ · Cupro-Nickel · 24.3mm',
+        baseVal: 6.00,
+        cleanVal: 240.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/quarter_obverse_clean.png',
+          semi: './assets/coins/quarter_obverse_semi.png',
+          dirty: './assets/coins/quarter_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/quarter_reverse_clean.png',
+          semi: './assets/coins/quarter_reverse_semi.png',
+          dirty: './assets/coins/quarter_reverse_dirty.png'
+        }
+      },
+      penny: {
+        name: 'Penny',
+        era: '1909',
+        specs: '1¢ · Bronze Alloy · 19.0mm',
+        baseVal: 1.50,
+        cleanVal: 185.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/penny_obverse_clean.png',
+          semi: './assets/coins/penny_obverse_semi.png',
+          dirty: './assets/coins/penny_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/penny_reverse_clean.png',
+          semi: './assets/coins/penny_reverse_semi.png',
+          dirty: './assets/coins/penny_reverse_dirty.png'
+        }
+      },
+      standingliberty: {
+        name: 'Standing Liberty',
+        era: '1916',
+        specs: '25¢ · 90% Silver · 24.3mm',
+        baseVal: 18.00,
+        cleanVal: 850.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/standingliberty_obverse_clean.png',
+          semi: './assets/coins/standingliberty_obverse_semi.png',
+          dirty: './assets/coins/standingliberty_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/standingliberty_reverse_clean.png',
+          semi: './assets/coins/standingliberty_reverse_semi.png',
+          dirty: './assets/coins/standingliberty_reverse_dirty.png'
+        }
+      },
+      sacagawea: {
+        name: 'Sacagawea Dollar',
+        era: '2000',
+        specs: '$1.00 · Manganese Brass · 26.5mm',
+        baseVal: 15.00,
+        cleanVal: 480.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/sacagawea_obverse_clean.png',
+          semi: './assets/coins/sacagawea_obverse_semi.png',
+          dirty: './assets/coins/sacagawea_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/sacagawea_reverse_clean.png',
+          semi: './assets/coins/sacagawea_reverse_semi.png',
+          dirty: './assets/coins/sacagawea_reverse_dirty.png'
+        }
+      },
+      doubloon: {
+        name: 'Gold Doubloon',
+        era: '1707',
+        specs: '8 Escudos · 22k Gold · 37.0mm · Spanish Fleet Treasure',
+        baseVal: 1400.00,
+        cleanVal: 16500.00,
+        isCoin: true,
+        numLayers: 3,
+        obverse: {
+          clean: './assets/coins/doubloon_obverse_clean.png',
+          semi: './assets/coins/doubloon_obverse_semi.png',
+          dirty: './assets/coins/doubloon_obverse_dirty.png'
+        },
+        reverse: {
+          clean: './assets/coins/doubloon_reverse_clean.png',
+          semi: './assets/coins/doubloon_reverse_semi.png',
+          dirty: './assets/coins/doubloon_reverse_dirty.png'
+        }
+      },
+      pirate_coin: {
+        name: 'Sunken Pirate Cob',
+        era: '1685',
+        specs: '8 Reales · 93% Silver · 38.0mm · Shipwreck Treasure',
+        baseVal: 320.00,
+        cleanVal: 5400.00,
+        isCoin: true,
+        numLayers: 4,
+        obverse: {
+          clean: './assets/coins/pirate_obverse_clean.png',
+          mild: './assets/coins/pirate_obverse_mild.png',
+          heavy: './assets/coins/pirate_obverse_heavy.png',
+          extreme: './assets/coins/pirate_obverse_extreme.png'
+        },
+        reverse: {
+          clean: './assets/coins/pirate_reverse_clean.png',
+          mild: './assets/coins/pirate_reverse_mild.png',
+          heavy: './assets/coins/pirate_reverse_heavy.png',
+          extreme: './assets/coins/pirate_reverse_extreme.png'
+        }
+      },
+      gold_medallion: {
+        name: '24k Gold Medallion',
+        era: 'Proof',
+        specs: '1 Troy Oz · .9999 Pure 24k Gold · 39.0mm · Collector Proof',
+        baseVal: 1800.00,
+        cleanVal: 28500.00,
+        isCoin: true,
+        numLayers: 4,
+        obverse: {
+          clean: './assets/coins/medallion_obverse_clean.png',
+          mild: './assets/coins/medallion_obverse_mild.png',
+          heavy: './assets/coins/medallion_obverse_heavy.png',
+          extreme: './assets/coins/medallion_obverse_extreme.png'
+        },
+        reverse: {
+          clean: './assets/coins/medallion_reverse_clean.png',
+          mild: './assets/coins/medallion_reverse_mild.png',
+          heavy: './assets/coins/medallion_reverse_heavy.png',
+          extreme: './assets/coins/medallion_reverse_extreme.png'
+        }
+      },
+      broadsword: {
+        name: 'Medieval Broadsword',
+        era: '14th C.',
+        specs: 'Battle Blade · Folded Carbon Steel · 88cm',
+        baseVal: 120.00,
+        cleanVal: 2400.00,
+        isCoin: false,
+        numLayers: 4,
+        obverse: {
+          clean: './assets/coins/sword_obverse_clean.png',
+          mild: './assets/coins/sword_obverse_mild.png',
+          heavy: './assets/coins/sword_obverse_heavy.png',
+          extreme: './assets/coins/sword_obverse_extreme.png'
+        },
+        reverse: {
+          clean: './assets/coins/sword_reverse_clean.png',
+          mild: './assets/coins/sword_reverse_mild.png',
+          heavy: './assets/coins/sword_reverse_heavy.png',
+          extreme: './assets/coins/sword_reverse_extreme.png'
+        }
+      }
+    };
+
+    // --- APPLICATION STATE (PAN AND ZOOM COMPLETELY REMOVED) ---
+    let currentSpecimen = localStorage.getItem('numis_current_specimen') || 'denarius';
+    if (!catalog[currentSpecimen]) currentSpecimen = 'denarius';
+
+    let currentSide = localStorage.getItem('numis_current_side') || 'obverse';
+    let currentTool = localStorage.getItem('numis_current_tool') || 'brush';
+    let activeTableBg = localStorage.getItem('numis_table_bg') || 'desk';
+
+    const layerCache = {};
+    const cleanlinessState = {};
+
+    let baseScale = 1.0;
+    let isScrubbing = false;
+
+    // --- TABLE TEXTURE ASSETS ---
+    const bgTextures = {
+      desk: new Image(),
+      velvet: new Image()
+    };
+    bgTextures.desk.src = './assets/textures/workshop_desk_bg.jpg';
+    bgTextures.velvet.src = './assets/textures/velvet_tray_bg.jpg';
+
+    // --- DOM REFERENCES ---
+    const canvas = document.getElementById('workbenchCanvas');
+    const ctx = canvas.getContext('2d');
+    const stage = document.getElementById('stage');
+    const specimenNav = document.getElementById('specimenNav');
+
+    const hudName = document.getElementById('hudName');
+    const hudSpecs = document.getElementById('hudSpecs');
+    const hudValue = document.getElementById('hudValue');
+    const hudPercent = document.getElementById('hudPercent');
+    const hudProgressFill = document.getElementById('hudProgressFill');
+    const hudGrade = document.getElementById('hudGrade');
+
+    const labelFace = document.getElementById('labelFace');
+    const labelTableBg = document.getElementById('labelTableBg');
+    const toastSaved = document.getElementById('toastSaved');
+
+    const cursorBrush = document.getElementById('cursorBrush');
+    const cursorPick = document.getElementById('cursorPick');
+    const cursorCloth = document.getElementById('cursorCloth');
+    const cursorPolish = document.getElementById('cursorPolish');
+
+    // --- INDEXED-DB PERSISTENCE ENGINE ---
+    const DB_NAME = 'RestorationStudioDB';
+    const DB_VERSION = 1;
+    let dbPromise = null;
+
+    function getDB() {
+      if (!dbPromise) {
+        dbPromise = new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('layers')) {
+              db.createObjectStore('layers');
+            }
+          };
+          req.onsuccess = (e) => resolve(e.target.result);
+          req.onerror = (e) => reject(req.error);
+        });
+      }
+      return dbPromise;
+    }
+
+    async function loadSavedLayerData(specimenId, side) {
+      try {
+        const db = await getDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction('layers', 'readonly');
+          const store = tx.objectStore('layers');
+          const req = store.get(`${specimenId}_${side}`);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (err) {
+        return null;
+      }
+    }
+
+    let saveDebounceTimer = null;
+    function scheduleAutoSave() {
+      if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(async () => {
+        saveDebounceTimer = null;
+        await saveCurrentLayerData();
+      }, 350);
+    }
+
+    async function saveCurrentLayerData() {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      try {
+        const payload = {
+          isFourLayer: !!activeLayer.isFourLayer,
+          timestamp: Date.now()
+        };
+
+        if (activeLayer.isFourLayer) {
+          payload.mildData = activeLayer.offMild.toDataURL('image/png');
+          payload.heavyData = activeLayer.offHeavy.toDataURL('image/png');
+          payload.extremeData = activeLayer.offExtreme.toDataURL('image/png');
+        } else {
+          payload.semiData = activeLayer.offSemi.toDataURL('image/png');
+          payload.dirtyData = activeLayer.offDirty.toDataURL('image/png');
+        }
+
+        const db = await getDB();
+        const tx = db.transaction('layers', 'readwrite');
+        const store = tx.objectStore('layers');
+        store.put(payload, `${currentSpecimen}_${currentSide}`);
+
+        toastSaved.classList.add('show');
+        setTimeout(() => toastSaved.classList.remove('show'), 900);
+      } catch (err) {
+        console.warn('Persistence save warning:', err);
+      }
+    }
+
+    async function clearSpecimenProgressFromDB(specimenId) {
+      try {
+        const db = await getDB();
+        const tx = db.transaction('layers', 'readwrite');
+        const store = tx.objectStore('layers');
+        store.delete(`${specimenId}_obverse`);
+        store.delete(`${specimenId}_reverse`);
+      } catch (err) {
+        console.warn('DB clear error:', err);
+      }
+    }
+
+    // --- CANVAS RESIZE & STATIONARY FIT ---
+    function getWorkbenchCenter(cw, ch) {
+      // The bottom tool dock occupies up to y = ch - 110.
+      // Top bar ends at y = 0. Available space is y = 16 to y = ch - 120.
+      const availTop = 16;
+      const availBottom = ch - 120;
+      const centerY = (availTop + availBottom) / 2;
+      return {
+        centerX: cw / 2,
+        centerY: Math.max(130, centerY)
+      };
+    }
+
+    function resizeCanvas() {
+      const rect = stage.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      recalculateFit();
+    }
+
+    function recalculateFit() {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      const rect = stage.getBoundingClientRect();
+      const cfg = catalog[currentSpecimen];
+
+      const cw = rect.width;
+      const ch = rect.height;
+
+      // Available workbench bounds
+      const availW = cw;
+      const availH = ch - 120; // leaves 120px clearance for bottom tool dock
+
+      if (cfg && !cfg.isCoin) {
+        // Sword: 1336 x 360 - fits nicely across workbench
+        const fitX = (availW * 0.78) / activeLayer.width;
+        const fitY = (availH * 0.60) / activeLayer.height;
+        baseScale = Math.min(fitX, fitY);
+      } else {
+        // Coins: strictly bounded so bottom of coin NEVER overlaps the tool dock under any resolution
+        const verticalClearanceRoom = Math.max(150, ch - 160);
+        const horizontalClearanceRoom = Math.max(150, (cw - 300) * 0.95);
+        const maxCoinDiameter = Math.min(
+          350, // optimal authentic collector size
+          verticalClearanceRoom * 0.80,
+          horizontalClearanceRoom * 0.85,
+          availW * 0.45
+        );
+        baseScale = maxCoinDiameter / Math.max(activeLayer.width, activeLayer.height);
+      }
+    }
+
+    // --- SPECIMEN LAYER LOADER ---
+    async function loadSpecimenLayer(specimenId, side, callback) {
+      if (layerCache[specimenId] && layerCache[specimenId][side]) {
+        callback(layerCache[specimenId][side]);
+        return;
+      }
+
+      const cfg = catalog[specimenId];
+      if (!cfg) return;
+      const paths = cfg[side];
+
+      const saved = await loadSavedLayerData(specimenId, side);
+
+      if (cfg.numLayers === 4) {
+        // 4-LAYER SPECIMEN (BROADSWORD: clean, mild, heavy, extreme)
+        const cleanImg = new Image();
+        const mildImg = new Image();
+        const heavyImg = new Image();
+        const extremeImg = new Image();
+
+        let loadedCount = 0;
+        const onDone = () => {
+          loadedCount++;
+          if (loadedCount === 4) {
+            const w = cleanImg.naturalWidth || 1336;
+            const h = cleanImg.naturalHeight || 360;
+
+            const offMild = document.createElement('canvas');
+            offMild.width = w; offMild.height = h;
+            const ctxMild = offMild.getContext('2d');
+            ctxMild.drawImage(mildImg, 0, 0);
+
+            const offHeavy = document.createElement('canvas');
+            offHeavy.width = w; offHeavy.height = h;
+            const ctxHeavy = offHeavy.getContext('2d');
+            ctxHeavy.drawImage(heavyImg, 0, 0);
+
+            const offExtreme = document.createElement('canvas');
+            offExtreme.width = w; offExtreme.height = h;
+            const ctxExtreme = offExtreme.getContext('2d');
+            ctxExtreme.drawImage(extremeImg, 0, 0);
+
+            const imgData = ctxMild.getImageData(0, 0, w, h);
+            let opaque = 0;
+            for (let i = 3; i < imgData.data.length; i += 16) {
+              if (imgData.data[i] > 30) opaque++;
+            }
+
+            if (!layerCache[specimenId]) layerCache[specimenId] = {};
+            const entry = {
+              isFourLayer: true,
+              cleanImg,
+              offMild, ctxMild,
+              offHeavy, ctxHeavy,
+              offExtreme, ctxExtreme,
+              width: w, height: h,
+              totalOpaque: Math.max(opaque, 1)
+            };
+            layerCache[specimenId][side] = entry;
+            callback(entry);
+          }
+        };
+
+        cleanImg.onload = onDone;
+        mildImg.onload = onDone;
+        heavyImg.onload = onDone;
+        extremeImg.onload = onDone;
+
+        cleanImg.src = paths.clean;
+        if (saved && saved.isFourLayer && saved.mildData && saved.heavyData && saved.extremeData) {
+          mildImg.src = saved.mildData;
+          heavyImg.src = saved.heavyData;
+          extremeImg.src = saved.extremeData;
+        } else {
+          mildImg.src = paths.mild;
+          heavyImg.src = paths.heavy;
+          extremeImg.src = paths.extreme;
+        }
+      } else {
+        // 3-LAYER SPECIMEN (COINS: clean, semi, dirty)
+        const cleanImg = new Image();
+        const semiImg = new Image();
+        const dirtyImg = new Image();
+
+        let loadedCount = 0;
+        const onDone = () => {
+          loadedCount++;
+          if (loadedCount === 3) {
+            const w = cleanImg.naturalWidth || 720;
+            const h = cleanImg.naturalHeight || 720;
+
+            const offSemi = document.createElement('canvas');
+            offSemi.width = w; offSemi.height = h;
+            const ctxSemi = offSemi.getContext('2d');
+            ctxSemi.drawImage(semiImg, 0, 0);
+
+            const offDirty = document.createElement('canvas');
+            offDirty.width = w; offDirty.height = h;
+            const ctxDirty = offDirty.getContext('2d');
+            ctxDirty.drawImage(dirtyImg, 0, 0);
+
+            const imgData = ctxSemi.getImageData(0, 0, w, h);
+            let opaque = 0;
+            for (let i = 3; i < imgData.data.length; i += 16) {
+              if (imgData.data[i] > 30) opaque++;
+            }
+
+            if (!layerCache[specimenId]) layerCache[specimenId] = {};
+            const entry = {
+              isFourLayer: false,
+              cleanImg,
+              offSemi, ctxSemi,
+              offDirty, ctxDirty,
+              width: w, height: h,
+              totalOpaque: Math.max(opaque, 1)
+            };
+            layerCache[specimenId][side] = entry;
+            callback(entry);
+          }
+        };
+
+        cleanImg.onload = onDone;
+        semiImg.onload = onDone;
+        dirtyImg.onload = onDone;
+
+        cleanImg.src = paths.clean;
+        if (saved && !saved.isFourLayer && saved.semiData && saved.dirtyData) {
+          semiImg.src = saved.semiData;
+          dirtyImg.src = saved.dirtyData;
+        } else {
+          semiImg.src = paths.semi;
+          dirtyImg.src = paths.dirty;
+        }
+      }
+    }
+
+    // --- WORKBENCH RENDERING ENGINE (STATIONARY CENTERED) ---
+    function render() {
+      const rect = stage.getBoundingClientRect();
+      const cw = rect.width;
+      const ch = rect.height;
+
+      ctx.clearRect(0, 0, cw, ch);
+
+      // Render Active Table Background Texture
+      const bgImg = bgTextures[activeTableBg];
+      if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+        const scale = Math.max(cw / bgImg.naturalWidth, ch / bgImg.naturalHeight);
+        const bw = bgImg.naturalWidth * scale;
+        const bh = bgImg.naturalHeight * scale;
+        const bx = (cw - bw) / 2;
+        const by = (ch - bh) / 2;
+        ctx.drawImage(bgImg, bx, by, bw, bh);
+
+        // Studio radial lighting
+        const grad = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.25, cw / 2, ch / 2, Math.max(cw, ch) * 0.72);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.04)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.62)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, cw, ch);
+      } else {
+        const grad = ctx.createRadialGradient(cw / 2, ch / 2, 40, cw / 2, ch / 2, Math.max(cw, ch) * 0.6);
+        grad.addColorStop(0, '#1a1e27');
+        grad.addColorStop(1, '#0b0d12');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, cw, ch);
+      }
+
+      const { centerX, centerY } = getWorkbenchCenter(cw, ch);
+
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (activeLayer) {
+        ctx.save();
+        // Stationary: Centered on workbench, comfortably clear of UI
+        ctx.translate(centerX, centerY);
+        ctx.scale(baseScale, baseScale);
+        ctx.translate(-activeLayer.width / 2, -activeLayer.height / 2);
+
+        // Soft natural drop shadow under specimen resting on workbench
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.60)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 8;
+        ctx.drawImage(activeLayer.cleanImg, 0, 0);
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        if (activeLayer.isFourLayer) {
+          // Sword: Mild Patina -> Heavy Rust -> Extreme Crust
+          ctx.drawImage(activeLayer.offMild, 0, 0);
+          ctx.drawImage(activeLayer.offHeavy, 0, 0);
+          ctx.drawImage(activeLayer.offExtreme, 0, 0);
+        } else {
+          // Coins: Patina Semi -> Dirt Crust
+          ctx.drawImage(activeLayer.offSemi, 0, 0);
+          ctx.drawImage(activeLayer.offDirty, 0, 0);
+        }
+
+        ctx.restore();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // --- COORDINATE CONVERSION (STATIONARY) ---
+    function screenToSpecimenCoords(screenX, screenY) {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return { x: -1, y: -1 };
+
+      const rect = stage.getBoundingClientRect();
+      const cw = rect.width;
+      const ch = rect.height;
+      const { centerX, centerY } = getWorkbenchCenter(cw, ch);
+
+      const centeredX = screenX - centerX;
+      const centeredY = screenY - centerY;
+
+      const coinX = centeredX / baseScale + activeLayer.width / 2;
+      const coinY = centeredY / baseScale + activeLayer.height / 2;
+
+      return { x: coinX, y: coinY };
+    }
+
+    // --- MECHANICAL RESTORATION SCRUBBING ---
+    function executeScrub(coinX, coinY, isFinal = true) {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      if (activeLayer.isFourLayer) {
+        // --- 4-LAYER RESTORATION ---
+        // Layer 1: offExtreme (Extreme Crust / heaviest dirt)
+        // Layer 2: offHeavy (Heavy dirt / tarnish - the 2nd dirty level)
+        // Layer 3: offMild (Mild patina / light tarnish - the 3rd dirty level)
+        // Layer 4: cleanImg (Clean base / ultra shiny polish)
+
+        if (currentTool === 'brush') {
+          // Brush sweeps loose crust from Layer 1 (reveals Layer 2 underneath)
+          const radius = activeLayer.width > 1000 ? 50 : 44;
+          const extPower = 0.35;
+
+          activeLayer.ctxExtreme.save();
+          activeLayer.ctxExtreme.globalCompositeOperation = 'destination-out';
+          const ge = activeLayer.ctxExtreme.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          ge.addColorStop(0, `rgba(0,0,0,${extPower})`);
+          ge.addColorStop(0.7, `rgba(0,0,0,${extPower * 0.45})`);
+          ge.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxExtreme.fillStyle = ge;
+          activeLayer.ctxExtreme.beginPath();
+          activeLayer.ctxExtreme.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxExtreme.fill();
+          activeLayer.ctxExtreme.restore();
+
+        } else if (currentTool === 'pick') {
+          // Pick chips away stubborn crust from Layer 1 (Extreme) and Layer 2 (Heavy),
+          // cleaning all the way up to the 2nd clean layer (Mild patina)
+          const radius = activeLayer.width > 1000 ? 20 : 16;
+          const extPower = 1.0;
+          const hvyPower = 0.75;
+
+          activeLayer.ctxExtreme.save();
+          activeLayer.ctxExtreme.globalCompositeOperation = 'destination-out';
+          const gde = activeLayer.ctxExtreme.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          gde.addColorStop(0, `rgba(0,0,0,${extPower})`);
+          gde.addColorStop(0.7, `rgba(0,0,0,${extPower * 0.7})`);
+          gde.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxExtreme.fillStyle = gde;
+          activeLayer.ctxExtreme.beginPath();
+          activeLayer.ctxExtreme.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxExtreme.fill();
+          activeLayer.ctxExtreme.restore();
+
+          activeLayer.ctxHeavy.save();
+          activeLayer.ctxHeavy.globalCompositeOperation = 'destination-out';
+          const gdh = activeLayer.ctxHeavy.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          gdh.addColorStop(0, `rgba(0,0,0,${hvyPower})`);
+          gdh.addColorStop(0.7, `rgba(0,0,0,${hvyPower * 0.6})`);
+          gdh.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxHeavy.fillStyle = gdh;
+          activeLayer.ctxHeavy.beginPath();
+          activeLayer.ctxHeavy.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxHeavy.fill();
+          activeLayer.ctxHeavy.restore();
+
+        } else if (currentTool === 'cloth') {
+          // Cloth buffs away Layer 2 (Heavy Dirt) to clearly reveal Layer 3 (Mild Patina / 3rd dirty level)
+          const radius = activeLayer.width > 1000 ? 54 : 46;
+          const hvyPower = 0.85;
+
+          activeLayer.ctxHeavy.save();
+          activeLayer.ctxHeavy.globalCompositeOperation = 'destination-out';
+          const g = activeLayer.ctxHeavy.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          g.addColorStop(0, `rgba(0,0,0,${hvyPower})`);
+          g.addColorStop(0.7, `rgba(0,0,0,${hvyPower * 0.5})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxHeavy.fillStyle = g;
+          activeLayer.ctxHeavy.beginPath();
+          activeLayer.ctxHeavy.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxHeavy.fill();
+          activeLayer.ctxHeavy.restore();
+
+        } else if (currentTool === 'polish') {
+          // Polish buffs away Layer 3 (Mild Patina / 3rd dirty level) to reveal Layer 4 (Max Clean / Ultra Shiny)
+          const radius = activeLayer.width > 1000 ? 52 : 46;
+          const mildPower = 0.85;
+
+          activeLayer.ctxMild.save();
+          activeLayer.ctxMild.globalCompositeOperation = 'destination-out';
+          const g = activeLayer.ctxMild.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          g.addColorStop(0, `rgba(0,0,0,${mildPower})`);
+          g.addColorStop(0.7, `rgba(0,0,0,${mildPower * 0.5})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxMild.fillStyle = g;
+          activeLayer.ctxMild.beginPath();
+          activeLayer.ctxMild.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxMild.fill();
+          activeLayer.ctxMild.restore();
+        }
+      } else {
+        // --- 3-LAYER RESTORATION (COINS) ---
+        if (currentTool === 'brush') {
+          const radius = 42;
+          const dirtyPower = 0.28;
+
+          activeLayer.ctxDirty.save();
+          activeLayer.ctxDirty.globalCompositeOperation = 'destination-out';
+          const g = activeLayer.ctxDirty.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          g.addColorStop(0, `rgba(0,0,0,${dirtyPower})`);
+          g.addColorStop(0.7, `rgba(0,0,0,${dirtyPower * 0.45})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxDirty.fillStyle = g;
+          activeLayer.ctxDirty.beginPath();
+          activeLayer.ctxDirty.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxDirty.fill();
+          activeLayer.ctxDirty.restore();
+        } else if (currentTool === 'pick') {
+          const radius = 14;
+          const dirtyPower = 1.0;
+          const semiPower = 0.50;
+
+          activeLayer.ctxDirty.save();
+          activeLayer.ctxDirty.globalCompositeOperation = 'destination-out';
+          const gd = activeLayer.ctxDirty.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          gd.addColorStop(0, `rgba(0,0,0,${dirtyPower})`);
+          gd.addColorStop(0.65, `rgba(0,0,0,${dirtyPower * 0.75})`);
+          gd.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxDirty.fillStyle = gd;
+          activeLayer.ctxDirty.beginPath();
+          activeLayer.ctxDirty.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxDirty.fill();
+          activeLayer.ctxDirty.restore();
+
+          activeLayer.ctxSemi.save();
+          activeLayer.ctxSemi.globalCompositeOperation = 'destination-out';
+          const gs = activeLayer.ctxSemi.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          gs.addColorStop(0, `rgba(0,0,0,${semiPower})`);
+          gs.addColorStop(0.6, `rgba(0,0,0,${semiPower * 0.5})`);
+          gs.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxSemi.fillStyle = gs;
+          activeLayer.ctxSemi.beginPath();
+          activeLayer.ctxSemi.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxSemi.fill();
+          activeLayer.ctxSemi.restore();
+        } else if (currentTool === 'cloth' || currentTool === 'polish') {
+          const radius = 48;
+          const semiPower = currentTool === 'polish' ? 0.95 : 0.85;
+
+          activeLayer.ctxSemi.save();
+          activeLayer.ctxSemi.globalCompositeOperation = 'destination-out';
+          const g = activeLayer.ctxSemi.createRadialGradient(coinX, coinY, 0, coinX, coinY, radius);
+          g.addColorStop(0, `rgba(0,0,0,${semiPower})`);
+          g.addColorStop(0.7, `rgba(0,0,0,${semiPower * 0.5})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          activeLayer.ctxSemi.fillStyle = g;
+          activeLayer.ctxSemi.beginPath();
+          activeLayer.ctxSemi.arc(coinX, coinY, radius, 0, Math.PI * 2);
+          activeLayer.ctxSemi.fill();
+          activeLayer.ctxSemi.restore();
+        }
+      }
+
+      if (isFinal) {
+        scheduleCleanlinessUpdate();
+        scheduleAutoSave();
+      }
+    }
+
+    // --- CLEANLINESS & GRADING EVALUATION ---
+    let cleanDebounce = null;
+    function scheduleCleanlinessUpdate() {
+      if (cleanDebounce) return;
+      cleanDebounce = setTimeout(() => {
+        cleanDebounce = null;
+        calculateCleanliness();
+      }, 80);
+    }
+
+    function calculateCleanliness() {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      const w = activeLayer.width;
+      const h = activeLayer.height;
+
+      let remainingGrime = 0;
+      let totalSpecimenPixels = 0;
+
+      if (activeLayer.isFourLayer) {
+        const mData = activeLayer.ctxMild.getImageData(0, 0, w, h).data;
+        const hData = activeLayer.ctxHeavy.getImageData(0, 0, w, h).data;
+        const eData = activeLayer.ctxExtreme.getImageData(0, 0, w, h).data;
+
+        for (let i = 3; i < mData.length; i += 16) {
+          if (mData[i] > 30 || hData[i] > 30 || eData[i] > 30) {
+            totalSpecimenPixels++;
+            const eA = eData[i] / 255;
+            const hA = hData[i] / 255;
+            const mA = mData[i] / 255;
+            remainingGrime += eA * 0.45 + hA * 0.35 + mA * 0.20;
+          }
+        }
+      } else {
+        const semiData = activeLayer.ctxSemi.getImageData(0, 0, w, h).data;
+        const dirtyData = activeLayer.ctxDirty.getImageData(0, 0, w, h).data;
+
+        for (let i = 3; i < semiData.length; i += 16) {
+          if (semiData[i] > 30 || dirtyData[i] > 30) {
+            totalSpecimenPixels++;
+            const dAlpha = dirtyData[i] / 255;
+            const sAlpha = semiData[i] / 255;
+            remainingGrime += dAlpha * 0.6 + sAlpha * 0.4;
+          }
+        }
+      }
+
+      if (!cleanlinessState[currentSpecimen]) {
+        cleanlinessState[currentSpecimen] = { obverse: 0, reverse: 0 };
+      }
+
+      const cleanRatio = totalSpecimenPixels > 0
+        ? Math.max(0, Math.min(100, (1 - (remainingGrime / totalSpecimenPixels)) * 100))
+        : 0;
+
+      cleanlinessState[currentSpecimen][currentSide] = cleanRatio;
+      updateHUD();
+    }
+
+    function updateHUD() {
+      const cfg = catalog[currentSpecimen];
+      if (!cfg) return;
+
+      hudName.textContent = cfg.name;
+      hudSpecs.textContent = cfg.specs;
+
+      const scores = cleanlinessState[currentSpecimen] || { obverse: 0, reverse: 0 };
+      const currentScore = scores[currentSide] || 0;
+      const totalScore = (scores.obverse + scores.reverse) / 2;
+
+      if (hudPercent) hudPercent.textContent = `${currentScore.toFixed(1)}%`;
+      if (hudProgressFill) hudProgressFill.style.width = `${currentScore}%`;
+
+      const val = cfg.baseVal + (cfg.cleanVal - cfg.baseVal) * Math.pow(totalScore / 100, 1.4);
+      hudValue.textContent = `$${val.toFixed(2)}`;
+
+      if (cfg.isCoin) {
+        if (totalScore < 15) {
+          hudGrade.textContent = 'Cull / Crust';
+          hudGrade.style.color = '#ef4444';
+        } else if (totalScore < 40) {
+          hudGrade.textContent = 'Good (G-4)';
+          hudGrade.style.color = '#f97316';
+        } else if (totalScore < 70) {
+          hudGrade.textContent = 'Fine (F-12)';
+          hudGrade.style.color = '#f59e0b';
+        } else if (totalScore < 90) {
+          hudGrade.textContent = 'Very Fine (VF-30)';
+          hudGrade.style.color = '#38bdf8';
+        } else if (totalScore < 97) {
+          hudGrade.textContent = 'About Uncirculated (AU-58)';
+          hudGrade.style.color = '#a855f7';
+        } else {
+          hudGrade.textContent = 'MS-65 Gem Restored';
+          hudGrade.style.color = '#10b981';
+        }
+      } else {
+        if (totalScore < 20) {
+          hudGrade.textContent = 'Relic / Excavated';
+          hudGrade.style.color = '#ef4444';
+        } else if (totalScore < 50) {
+          hudGrade.textContent = 'Corroded Iron';
+          hudGrade.style.color = '#f97316';
+        } else if (totalScore < 80) {
+          hudGrade.textContent = 'Restored Antiquity';
+          hudGrade.style.color = '#f59e0b';
+        } else if (totalScore < 96) {
+          hudGrade.textContent = 'Museum Quality';
+          hudGrade.style.color = '#38bdf8';
+        } else {
+          hudGrade.textContent = 'Masterwork Heirloom';
+          hudGrade.style.color = '#10b981';
+        }
+      }
+
+      labelFace.textContent = currentSide === 'obverse' ? 'Obverse' : 'Reverse';
+    }
+
+    // --- TOOL SELECTION & CURSORS ---
+    function selectTool(tool) {
+      currentTool = tool;
+      localStorage.setItem('numis_current_tool', tool);
+
+      document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+      cursorBrush.style.display = 'none';
+      cursorPick.style.display = 'none';
+      cursorCloth.style.display = 'none';
+      cursorPolish.style.display = 'none';
+
+      if (tool === 'brush') {
+        document.getElementById('toolBrush').classList.add('active');
+        cursorBrush.style.display = 'block';
+      } else if (tool === 'pick') {
+        document.getElementById('toolPick').classList.add('active');
+        cursorPick.style.display = 'block';
+      } else if (tool === 'cloth') {
+        document.getElementById('toolCloth').classList.add('active');
+        cursorCloth.style.display = 'block';
+      } else if (tool === 'polish') {
+        document.getElementById('toolPolish').classList.add('active');
+        cursorPolish.style.display = 'block';
+      }
+    }
+
+    function positionToolCursor(screenX, screenY, isScrubbing = false, vx = 0, vy = 0) {
+      if (currentTool === 'brush') {
+        cursorBrush.style.display = 'block';
+        // Contact point at bristle head (bottom-left of brush image)
+        cursorBrush.style.left = `${screenX - 14}px`;
+        cursorBrush.style.top = `${screenY - 38}px`;
+        if (isScrubbing) {
+          const tilt = Math.max(-12, Math.min(12, vx * 0.45));
+          cursorBrush.style.transform = `rotate(${tilt}deg)`;
+        } else {
+          cursorBrush.style.transform = 'none';
+        }
+      } else if (currentTool === 'pick') {
+        cursorPick.style.display = 'block';
+        // Contact point at carbide tip (bottom-left of pick image)
+        cursorPick.style.left = `${screenX - 2}px`;
+        cursorPick.style.top = `${screenY - 28}px`;
+        if (isScrubbing) {
+          const tap = Math.sin(Date.now() * 0.06) * 1.5;
+          cursorPick.style.transform = `translateY(${tap}px)`;
+        } else {
+          cursorPick.style.transform = 'none';
+        }
+      } else if (currentTool === 'cloth') {
+        cursorCloth.style.display = 'block';
+        // Contact point at cloth center
+        cursorCloth.style.left = `${screenX - 38}px`;
+        cursorCloth.style.top = `${screenY - 38}px`;
+        if (isScrubbing) {
+          const wobble = Math.sin(Date.now() * 0.04) * 3;
+          cursorCloth.style.transform = `rotate(${wobble}deg) scale(0.96)`;
+        } else {
+          cursorCloth.style.transform = 'none';
+        }
+      } else if (currentTool === 'polish') {
+        cursorPolish.style.display = 'block';
+        // Contact point at buffing rouge tip (bottom-left of polish tool image)
+        cursorPolish.style.left = `${screenX - 8}px`;
+        cursorPolish.style.top = `${screenY - 32}px`;
+        if (isScrubbing) {
+          const wobble = Math.sin(Date.now() * 0.05) * 4;
+          cursorPolish.style.transform = `rotate(${wobble}deg) scale(0.97)`;
+        } else {
+          cursorPolish.style.transform = 'none';
+        }
+      }
+    }
+
+    function hideToolCursor() {
+      cursorBrush.style.display = 'none';
+      cursorPick.style.display = 'none';
+      cursorCloth.style.display = 'none';
+      cursorPolish.style.display = 'none';
+      cursorBrush.style.transform = 'none';
+      cursorPick.style.transform = 'none';
+      cursorCloth.style.transform = 'none';
+      cursorPolish.style.transform = 'none';
+    }
+
+    // --- TABLE BACKGROUND TOGGLE ---
+    function toggleTableBackground() {
+      activeTableBg = (activeTableBg === 'desk') ? 'velvet' : 'desk';
+      localStorage.setItem('numis_table_bg', activeTableBg);
+      labelTableBg.textContent = (activeTableBg === 'desk') ? 'Desk Surface' : 'Velvet Tray';
+    }
+
+    // --- SPECIMEN MOUNTING ---
+    function mountSpecimen(id) {
+      if (!catalog[id]) return;
+      currentSpecimen = id;
+      localStorage.setItem('numis_current_specimen', id);
+
+      document.querySelectorAll('.specimen-tab').forEach(t => t.classList.remove('active'));
+      const activeTab = document.getElementById(`tab_${id}`);
+      if (activeTab) activeTab.classList.add('active');
+
+      loadSpecimenLayer(id, currentSide, (layer) => {
+        recalculateFit();
+        calculateCleanliness();
+      });
+    }
+
+    function flipFace() {
+      currentSide = (currentSide === 'obverse') ? 'reverse' : 'obverse';
+      localStorage.setItem('numis_current_side', currentSide);
+      labelFace.textContent = currentSide === 'obverse' ? 'Obverse' : 'Reverse';
+
+      loadSpecimenLayer(currentSpecimen, currentSide, (layer) => {
+        recalculateFit();
+        calculateCleanliness();
+      });
+    }
+
+    async function confirmResetCurrentSpecimen() {
+      const cfg = catalog[currentSpecimen];
+      const name = cfg ? cfg.name : 'this specimen';
+      if (!confirm(`Reset all cleaning progress on ${name} back to uncleaned state?`)) {
+        return;
+      }
+
+      await clearSpecimenProgressFromDB(currentSpecimen);
+
+      if (layerCache[currentSpecimen]) {
+        delete layerCache[currentSpecimen];
+      }
+      if (cleanlinessState[currentSpecimen]) {
+        delete cleanlinessState[currentSpecimen];
+      }
+
+      loadSpecimenLayer(currentSpecimen, currentSide, (layer) => {
+        recalculateFit();
+        calculateCleanliness();
+      });
+    }
+
+    // --- CERTIFICATE & EXPORT ---
+    function openCertificateModal() {
+      const cfg = catalog[currentSpecimen];
+      if (!cfg) return;
+
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      document.getElementById('certSpecimenName').textContent = `${cfg.name} (${cfg.era})`;
+      document.getElementById('certGradeText').textContent = hudGrade.textContent;
+      document.getElementById('certDesc').textContent = `${cfg.specs}. Current valuation: ${hudValue.textContent}.`;
+
+      const box = document.getElementById('certPreviewBox');
+      if (cfg.isCoin) {
+        box.classList.remove('is-sword');
+      } else {
+        box.classList.add('is-sword');
+      }
+
+      const pCanvas = document.getElementById('certPreviewCanvas');
+      pCanvas.width = activeLayer.width;
+      pCanvas.height = activeLayer.height;
+      const pCtx = pCanvas.getContext('2d');
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      pCtx.drawImage(activeLayer.cleanImg, 0, 0);
+
+      if (activeLayer.isFourLayer) {
+        pCtx.drawImage(activeLayer.offMild, 0, 0);
+        pCtx.drawImage(activeLayer.offHeavy, 0, 0);
+        pCtx.drawImage(activeLayer.offExtreme, 0, 0);
+      } else {
+        pCtx.drawImage(activeLayer.offSemi, 0, 0);
+        pCtx.drawImage(activeLayer.offDirty, 0, 0);
+      }
+
+      document.getElementById('certModal').style.display = 'flex';
+    }
+
+    function closeCertificateModal() {
+      document.getElementById('certModal').style.display = 'none';
+    }
+
+    function exportSpecimenPNG() {
+      const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
+      if (!activeLayer) return;
+
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = activeLayer.width;
+      exportCanvas.height = activeLayer.height;
+      const eCtx = exportCanvas.getContext('2d');
+
+      eCtx.drawImage(activeLayer.cleanImg, 0, 0);
+      if (activeLayer.isFourLayer) {
+        eCtx.drawImage(activeLayer.offMild, 0, 0);
+        eCtx.drawImage(activeLayer.offHeavy, 0, 0);
+        eCtx.drawImage(activeLayer.offExtreme, 0, 0);
+      } else {
+        eCtx.drawImage(activeLayer.offSemi, 0, 0);
+        eCtx.drawImage(activeLayer.offDirty, 0, 0);
+      }
+
+      const link = document.createElement('a');
+      link.download = `${currentSpecimen}_${currentSide}_restored.png`;
+      link.href = exportCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // --- BUILD TOP SPECIMEN SWITCHER ---
+    function buildSpecimenNav() {
+      specimenNav.innerHTML = '';
+      for (const [id, item] of Object.entries(catalog)) {
+        const tab = document.createElement('div');
+        tab.className = `specimen-tab ${id === currentSpecimen ? 'active' : ''}`;
+        tab.id = `tab_${id}`;
+        tab.innerHTML = `
+          <span>${item.name}</span>
+          <span class="tab-badge">${item.era}</span>
+        `;
+        tab.onclick = () => mountSpecimen(id);
+        specimenNav.appendChild(tab);
+      }
+    }
+
+    // --- WORKBENCH EVENT LISTENERS (STATIONARY - NO PAN / NO ZOOM) ---
+    function getStageCoords(e) {
+      const rect = stage.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    let lastScrubPos = null;
+
+    stage.addEventListener('mousedown', (e) => {
+      if (e.button === 0) {
+        isScrubbing = true;
+        const pos = getStageCoords(e);
+        const coinPos = screenToSpecimenCoords(pos.x, pos.y);
+        lastScrubPos = { x: coinPos.x, y: coinPos.y };
+        executeScrub(coinPos.x, coinPos.y, true);
+      }
+    });
+
+    stage.addEventListener('mousemove', (e) => {
+      const pos = getStageCoords(e);
+
+      if (isScrubbing) {
+        const coinPos = screenToSpecimenCoords(pos.x, pos.y);
+        let vx = 0;
+        let vy = 0;
+
+        if (lastScrubPos) {
+          const dx = coinPos.x - lastScrubPos.x;
+          const dy = coinPos.y - lastScrubPos.y;
+          vx = dx;
+          vy = dy;
+          const dist = Math.hypot(dx, dy);
+
+          // Dense step interpolation so rapid movement produces smooth continuous strokes instead of dots
+          let step = 5;
+          if (currentTool === 'pick') step = 3;
+          else if (currentTool === 'brush') step = 5;
+          else if (currentTool === 'cloth') step = 7;
+          else if (currentTool === 'polish') step = 6;
+
+          if (dist > step) {
+            const steps = Math.min(Math.ceil(dist / step), 60);
+            for (let i = 1; i <= steps; i++) {
+              const t = i / steps;
+              const ix = lastScrubPos.x + dx * t;
+              const iy = lastScrubPos.y + dy * t;
+              executeScrub(ix, iy, i === steps);
+            }
+          } else {
+            executeScrub(coinPos.x, coinPos.y, true);
+          }
+          lastScrubPos = { x: coinPos.x, y: coinPos.y };
+        } else {
+          lastScrubPos = { x: coinPos.x, y: coinPos.y };
+          executeScrub(coinPos.x, coinPos.y, true);
+        }
+
+        positionToolCursor(pos.x, pos.y, true, vx, vy);
+      } else {
+        positionToolCursor(pos.x, pos.y, false, 0, 0);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (e.button === 0 && isScrubbing) {
+        isScrubbing = false;
+        lastScrubPos = null;
+        const pos = getStageCoords(e);
+        positionToolCursor(pos.x, pos.y, false, 0, 0);
+        saveCurrentLayerData();
+      }
+    });
+
+    stage.addEventListener('mouseleave', () => {
+      isScrubbing = false;
+      lastScrubPos = null;
+      hideToolCursor();
+    });
+
+    stage.addEventListener('mouseenter', (e) => {
+      const pos = getStageCoords(e);
+      positionToolCursor(pos.x, pos.y);
+    });
+
+    // Context menu prevention on workbench
+    stage.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Auto-save on beforeunload & visibilitychange
+    window.addEventListener('beforeunload', () => {
+      saveCurrentLayerData();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        saveCurrentLayerData();
+      }
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      const key = e.key.toLowerCase();
+      if (key === '1') {
+        selectTool('brush');
+      } else if (key === '2') {
+        selectTool('pick');
+      } else if (key === '3') {
+        selectTool('cloth');
+      } else if (key === '4') {
+        selectTool('polish');
+      } else if (key === 'f' || key === ' ') {
+        e.preventDefault();
+        flipFace();
+      }
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // --- INITIALIZATION ---
+    buildSpecimenNav();
+    labelTableBg.textContent = (activeTableBg === 'desk') ? 'Desk Surface' : 'Velvet Tray';
+    selectTool(currentTool);
+    resizeCanvas();
+    mountSpecimen(currentSpecimen);
+    render();
+  </script>
+
+  <!-- Global Telemetry & Leaderboard -->
+  <script type="module" src="../js/firebase-config.js"></script>
+  <script type="module" src="../js/tracker.js"></script>
+</body>
+</html>
