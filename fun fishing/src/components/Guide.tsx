@@ -1034,6 +1034,14 @@ export const Guide: React.FC<GuideProps> = ({
                                 : 'border-[#2d313a] bg-[#1a1d23] text-[#c0c5ce]'
                             }`}
                           >
+                            {wDef?.icon && (
+                              <img
+                                src={wDef.icon}
+                                alt={wDef.name}
+                                className="w-4 h-4 object-contain flex-shrink-0"
+                                style={{ imageRendering: 'pixelated' }}
+                              />
+                            )}
                             <span>{wDef?.name}</span>
                             {isCurrent && (
                               <span className="text-[10px] text-amber-400 ml-1 font-bold">

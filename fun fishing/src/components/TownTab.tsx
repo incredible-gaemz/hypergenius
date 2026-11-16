@@ -452,7 +452,22 @@ export const TownTab: React.FC<TownTabProps> = ({
           <div className="border border-[#282b34] bg-[#14161c] p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#f1f3f5]">Harbor Weather:</span>
-              <span className="text-amber-300 font-semibold">{WEATHER_TYPES.find((w) => w.id === currentWeatherId)?.name}</span>
+              {(() => {
+                const curW = WEATHER_TYPES.find((w) => w.id === currentWeatherId);
+                return (
+                  <span className="text-amber-300 font-semibold flex items-center gap-1.5">
+                    {curW?.icon && (
+                      <img
+                        src={curW.icon}
+                        alt={curW.name}
+                        className="w-4 h-4 object-contain flex-shrink-0"
+                        style={{ imageRendering: 'pixelated' }}
+                      />
+                    )}
+                    <span>{curW?.name}</span>
+                  </span>
+                );
+              })()}
             </div>
             <div className="text-[#8c94a2] text-[11px]">
               Next Shift in: <span className="text-[#f1f3f5] font-mono font-bold">{Math.floor(weatherShiftRemainingSec / 60)}m {weatherShiftRemainingSec % 60}s</span>

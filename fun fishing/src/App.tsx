@@ -2932,10 +2932,18 @@ export default function App() {
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <span
-              className="text-amber-300 font-semibold text-[11px] border border-[#2d323c] bg-[#16181d] px-2 py-0.5"
+              className="text-amber-300 font-semibold text-[11px] border border-[#2d323c] bg-[#16181d] px-2 py-0.5 flex items-center gap-1.5"
               title={currentWeather.waterEffect}
             >
-              Weather: {currentWeather.name}
+              {currentWeather.icon && (
+                <img
+                  src={currentWeather.icon}
+                  alt={currentWeather.name}
+                  className="w-4 h-4 object-contain flex-shrink-0"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              )}
+              <span>Weather: {currentWeather.name}</span>
             </span>
             <span className="font-bold text-emerald-400 text-sm">
               ${money.toLocaleString()}
