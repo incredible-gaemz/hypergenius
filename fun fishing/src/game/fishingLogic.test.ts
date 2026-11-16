@@ -45,8 +45,9 @@ test('FISHING_AREAS contains realistic areas including Glacial Fjord and Abyssal
   assert.equal(FISHING_AREAS[2].id, 'lake');
   assert.equal(FISHING_AREAS[3].id, 'bayou');
   assert.equal(FISHING_AREAS[4].id, 'glacial');
-  assert.equal(FISHING_AREAS[4].unlockCost, 500);
+  assert.equal(FISHING_AREAS[4].unlockCost, 700);
   assert.equal(FISHING_AREAS[5].id, 'ocean');
+  assert.equal(FISHING_AREAS[5].unlockCost, 2000);
   assert.equal(FISHING_AREAS[6].id, 'reef');
   assert.equal(FISHING_AREAS[6].unlockCost, 10000);
   assert.equal(FISHING_AREAS[7].id, 'trench');
@@ -247,14 +248,16 @@ test('Market orders system generates valid delivery bounties', async () => {
   }
 });
 
-test('Area unlock costs match user requirements: Ocean $1000, Coral Reef $10000, Abyssal Trench $150000', () => {
+test('Area unlock costs match user requirements: Glacial $700, Ocean $2000, Coral Reef $10000, Abyssal Trench $150000', () => {
   const bayou = FISHING_AREAS.find((a) => a.id === 'bayou');
+  const glacial = FISHING_AREAS.find((a) => a.id === 'glacial');
   const ocean = FISHING_AREAS.find((a) => a.id === 'ocean');
   const reef = FISHING_AREAS.find((a) => a.id === 'reef');
   const trench = FISHING_AREAS.find((a) => a.id === 'trench');
 
   assert.equal(bayou?.unlockCost, 200, 'Bayou unlock cost must be exactly $200');
-  assert.equal(ocean?.unlockCost, 1000, 'Ocean unlock cost must be exactly $1000');
+  assert.equal(glacial?.unlockCost, 700, 'Glacial Fjord unlock cost must be exactly $700');
+  assert.equal(ocean?.unlockCost, 2000, 'Ocean unlock cost must be exactly $2000');
   assert.equal(reef?.unlockCost, 10000, 'Coral Reef unlock cost must be exactly $10000');
   assert.equal(trench?.unlockCost, 150000, 'Abyssal Trench unlock cost must be exactly $150000');
 });
@@ -864,6 +867,17 @@ test('Hatchery scalable pair deposits, mutations, and resident broodstock contin
     }
   }
   assert.ok(foundMutations, 'Mutation rolls with lab and guild should produce genetic mutations');
+
+  // 3. Trophies in hatchery are rare and hard to breed
+  const { calculateTrophyCount, FEED_OPTIONS } = await import('./hatcheryLogic');
+  assert.ok(FEED_OPTIONS[0].trophyChance <= 0.01, 'Pellet trophy chance must be rare (<= 1%)');
+  assert.ok(FEED_OPTIONS[2].trophyChance <= 0.05, 'Protein mash trophy chance must be challenging (<= 5%)');
+  
+  // Verify trophy count is capped to at most 1 per clutch
+  for (let i = 0; i < 20; i++) {
+    const trophies = calculateTrophyCount(10, 'protein', ['genetics_lab'], 2.0);
+    assert.ok(trophies <= 1, 'Hatchery must never produce more than 1 trophy per breeding cycle');
+  }
 });
 
 test('Dynamic Weather Sighting Rumors and Town Civic Investments', async () => {
@@ -1177,7 +1191,7 @@ test('Fish pixel art sprites and mutation filter styles resolve properly', async
   assert.ok(getMutationFilterStyle('bioluminescent').filter.includes('hue-rotate'));
 });
 
-test('Ocean mega-fauna and 0.01 treasure chest mechanics', async () => {
+test('Ocean mega-fauna and 0.001 treasure chest mechanics', async () => {
   const { FISH_COLLECTION, RODS, LURES, REELS, rollHookedEncounter } = await import('./fishingLogic');
 
   // Verify the 6 new mega-species
@@ -1203,19 +1217,19 @@ test('Ocean mega-fauna and 0.01 treasure chest mechanics', async () => {
   assert.ok(extremeRod, 'extreme_rod must exist');
   assert.ok(theOneRod, 'the_one_rod must exist');
 
-  // Verify treasure chest encounter roll (0.01 chance)
+  // Verify treasure chest encounter roll (0.001 chance)
   const treasureEnc = rollHookedEncounter('ocean', theOneRod, LURES[LURES.length - 1], REELS[0], {
-    treasureRoll: 0.005, // below 0.01
+    treasureRoll: 0.0005, // below 0.001
   });
-  assert.equal(treasureEnc.type, 'treasure', 'Treasure roll < 0.01 must yield a treasure encounter');
+  assert.equal(treasureEnc.type, 'treasure', 'Treasure roll < 0.001 must yield a treasure encounter');
   assert.ok(treasureEnc.reelDurationSec >= 4.0, 'Treasure chest must take substantial reeling duration');
 
   // Non-treasure roll
   const normalEnc = rollHookedEncounter('ocean', theOneRod, LURES[LURES.length - 1], REELS[0], {
-    treasureRoll: 0.05,
+    treasureRoll: 0.005,
     nothingRoll: 0.99,
   });
-  assert.notEqual(normalEnc.type, 'treasure', 'Roll >= 0.01 must not trigger treasure');
+  assert.notEqual(normalEnc.type, 'treasure', 'Roll >= 0.001 must not trigger treasure');
 });
 
 test('Area bait compatibility, hatchery duration progression, and high-end fleet gear', async () => {

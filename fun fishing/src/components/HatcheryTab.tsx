@@ -301,19 +301,19 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
 
               const mutationInfo = MUTATION_DETAILS[tank.mutationStrain] || MUTATION_DETAILS.normal;
 
-              // Keep breeder setting: default to true if population > 2
+              // Keep breeder setting: default to true if population >= 2
               const shouldKeepBreeders = keepBreedersByTank[tank.id] !== undefined
                 ? keepBreedersByTank[tank.id]
-                : tank.clutchCount > 2;
+                : tank.clutchCount >= 2;
 
               const showCustom = showCustomTakeByTank[tank.id] || false;
               const customTake = Math.min(
                 tank.clutchCount,
-                Math.max(1, customTakeCountByTank[tank.id] || (tank.clutchCount > 2 && shouldKeepBreeders ? tank.clutchCount - 2 : tank.clutchCount))
+                Math.max(1, customTakeCountByTank[tank.id] || (tank.clutchCount >= 2 && shouldKeepBreeders ? tank.clutchCount - 2 : tank.clutchCount))
               );
 
               // Actual take count for standard one-click harvest
-              const defaultTakeCount = shouldKeepBreeders && tank.clutchCount > 2
+              const defaultTakeCount = shouldKeepBreeders && tank.clutchCount >= 2
                 ? tank.clutchCount - 2
                 : tank.clutchCount;
 
@@ -413,7 +413,7 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                   {isMature ? (
                     <div className="space-y-2.5 pt-1 border-t border-[#232731]">
                       {/* Resident Breeders Checkbox */}
-                      {tank.clutchCount > 2 && !showCustom && (
+                      {tank.clutchCount >= 2 && !showCustom && (
                         <label className="flex items-center gap-2 cursor-pointer text-xs text-[#c0c6d2] select-none">
                           <input
                             type="checkbox"
@@ -426,7 +426,11 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                             }
                             className="accent-emerald-500 cursor-pointer w-3.5 h-3.5"
                           />
-                          <span>Keep 2 breeders in tank</span>
+                          <span>
+                            {shouldKeepBreeders
+                              ? 'Keep 2 breeders in tank (continuous breeding)'
+                              : 'Keep 2 breeders in tank (unchecked: return original pair to Box)'}
+                          </span>
                         </label>
                       )}
 

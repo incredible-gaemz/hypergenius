@@ -81,7 +81,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     name: "The Smuggler's Sloop",
     vesselType: '18th-Century Blockade Runner',
     depthMeters: 25,
-    unlockCost: 0, // Unlocked immediately upon purchasing $20,000 salvage charter
+    unlockCost: 0, // Unlocked immediately upon purchasing $40,000 salvage charter
     totalTreasureCount: 13,
     description: 'Wrecked on coastal oyster shoals during an autumn storm, shallow and accessible.',
     bannerImage: './wrecks/smugglers_sloop.webp',
@@ -1177,7 +1177,7 @@ export interface ActiveSalvageExpedition {
 }
 
 export interface SalvageState {
-  unlocked: boolean; // Requires $20,000 charter
+  unlocked: boolean; // Requires $40,000 charter
   unlockedWreckIds: string[]; // Site IDs
   wreckTreasureFoundCounts: Record<string, number>; // siteId -> count of treasures already recovered
   ownedSalvageBoatInstances: Array<{

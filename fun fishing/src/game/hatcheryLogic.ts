@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FishSpecies, FISH_COLLECTION } from './fishingLogic';
+import { FishSpecies, FISH_COLLECTION, CaughtFish } from './fishingLogic';
 
 export type TankId = 'tank_1' | 'tank_2' | 'tank_3' | 'tank_4';
 export type TankStage = 'empty' | 'spawning' | 'fingerlings' | 'mature';
@@ -95,7 +95,7 @@ export const FEED_OPTIONS: FeedOption[] = [
     price: 15,
     speedMultiplier: 1.0,
     clutchBonus: 0,
-    trophyChance: 0.03,
+    trophyChance: 0.005,
     description: 'Standard grain feed. Steady growth.',
   },
   {
@@ -104,7 +104,7 @@ export const FEED_OPTIONS: FeedOption[] = [
     price: 45,
     speedMultiplier: 1.4,
     clutchBonus: 2,
-    trophyChance: 0.08,
+    trophyChance: 0.015,
     description: '+40% growth speed and +2 clutch yield per pair.',
   },
   {
@@ -113,7 +113,7 @@ export const FEED_OPTIONS: FeedOption[] = [
     price: 110,
     speedMultiplier: 1.85,
     clutchBonus: 4,
-    trophyChance: 0.18,
+    trophyChance: 0.035,
     description: '+85% growth speed and higher trophy odds.',
   },
 ];
@@ -187,6 +187,8 @@ export interface HatcheryTank {
   // Scalable Broodstock & Resident Colony
   broodstockCount: number;
   pairCount: number;
+  // Original breeding fish deposited by the player
+  depositedBreeders?: CaughtFish[];
   // Genetics & Stats
   growthRate: number; // 1.0x to 2.2x
   fecundity: number; // 1.0x to 2.0x
@@ -361,9 +363,9 @@ export function calculateTrophyCount(
   hardiness: number = 1.0
 ): number {
   const feed = FEED_OPTIONS.find((f) => f.id === feedType) || FEED_OPTIONS[0];
-  let chance = feed.trophyChance * Math.max(0.7, hardiness);
+  let chance = feed.trophyChance * Math.max(0.4, hardiness * 0.75);
   if (upgrades.includes('genetics_lab')) {
-    chance *= 2.0;
+    chance *= 1.4;
   }
 
   let trophies = 0;
@@ -372,7 +374,8 @@ export function calculateTrophyCount(
       trophies++;
     }
   }
-  return trophies;
+  // Cap at 1 trophy so a single clutch never yields an unrealistic flood of trophies
+  return Math.min(1, trophies);
 }
 
 export function rollClutchMutations(

@@ -67,7 +67,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Check if deep sea salvage charter is unlocked ($20,000)
+  // Check if deep sea salvage charter is unlocked ($40,000)
   if (!salvageState.unlocked) {
     return (
       <div className="border border-[#2d323e] bg-[#14161c] p-6 text-center space-y-4">
@@ -82,7 +82,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
         <div className="p-4 bg-[#0d0f14] border border-[#23262f] max-w-md mx-auto space-y-2 text-xs text-[#8c94a2]">
           <div className="flex justify-between items-center text-xs">
             <span>Maritime Salvage Charter:</span>
-            <span className="font-mono text-amber-400 font-bold">$20,000</span>
+            <span className="font-mono text-amber-400 font-bold">$40,000</span>
           </div>
           <div className="flex justify-between items-center text-xs">
             <span>Historical Shipwrecks:</span>
@@ -97,14 +97,14 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
         <div>
           <button
             onClick={onUnlockSalvageCharter}
-            disabled={money < 20000}
+            disabled={money < 40000}
             className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold border transition-colors cursor-pointer touch-manipulation min-h-[40px] ${
-              money >= 20000
+              money >= 40000
                 ? 'border-amber-600 bg-amber-950 hover:bg-amber-900 text-amber-200'
                 : 'border-[#2d323e] bg-[#1a1d24] text-[#636c7a] cursor-not-allowed'
             }`}
           >
-            {money >= 20000 ? 'Unlock Salvage Charter · $20,000' : 'Requires $20,000 to Unlock'}
+            {money >= 40000 ? 'Unlock Salvage Charter · $40,000' : 'Requires $40,000 to Unlock'}
           </button>
         </div>
       </div>

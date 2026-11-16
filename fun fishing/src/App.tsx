@@ -1408,6 +1408,7 @@ export default function App() {
 
   const handleClaimTreasure = () => {
     if (pendingTreasureGold != null && pendingTreasureGold > 0) {
+      soundManager.playRegisterSfx();
       setMoney((prev) => prev + pendingTreasureGold);
       setPendingTreasureGold(null);
     }
@@ -1499,6 +1500,7 @@ export default function App() {
     if (!item) return;
     const hasColdStorage = civicInvestments.includes('cold_storage');
     const finalVal = hasColdStorage ? Math.round(item.value * 1.15) : item.value;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + finalVal);
     setInventory((prev) => prev.filter((f) => f.catchId !== catchId));
   };
@@ -1512,6 +1514,7 @@ export default function App() {
       (sum, f) => sum + (hasColdStorage ? Math.round(f.value * 1.15) : f.value),
       0
     );
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + totalVal);
     setInventory((prev) => prev.filter((f) => !idSet.has(f.catchId)));
   };
@@ -1523,6 +1526,7 @@ export default function App() {
       (sum, f) => sum + (hasColdStorage ? Math.round(f.value * 1.15) : f.value),
       0
     );
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + totalVal);
     setInventory([]);
     setSalvageState(INITIAL_SALVAGE_STATE);
@@ -1537,6 +1541,7 @@ export default function App() {
     if (money < area.unlockCost) return;
 
     if (area.unlockCost > 0) {
+      soundManager.playRegisterSfx();
       setMoney((prev) => prev - area.unlockCost);
     }
     setUnlockedAreaIds((prev) => [...prev, area.id]);
@@ -1551,6 +1556,7 @@ export default function App() {
 
   const handleBuyRod = (rod: Rod) => {
     if (money < rod.price || ownedRodIds.includes(rod.id)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - rod.price);
     setOwnedRodIds((prev) => [...prev, rod.id]);
     setEquippedRodId(rod.id);
@@ -1558,6 +1564,7 @@ export default function App() {
 
   const handleBuyReel = (reel: Reel) => {
     if (money < reel.price || ownedReelIds.includes(reel.id)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - reel.price);
     setOwnedReelIds((prev) => [...prev, reel.id]);
     setEquippedReelId(reel.id);
@@ -1565,6 +1572,7 @@ export default function App() {
 
   const handleBuyLure = (lure: Lure) => {
     if (money < lure.price || ownedLureIds.includes(lure.id)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - lure.price);
     setOwnedLureIds((prev) => [...prev, lure.id]);
     setEquippedLureId(lure.id);
@@ -1737,6 +1745,7 @@ export default function App() {
       matchingFish.slice(0, order.requiredCount).map((f) => f.catchId)
     );
     setInventory((prev) => prev.filter((f) => !removeCatchIds.has(f.catchId)));
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + order.rewardCash);
 
     // Vanishes until wholesale market order arrives via timer (max 3)
@@ -1752,6 +1761,7 @@ export default function App() {
     const b = TRAP_BAITS.find((tb) => tb.id === baitId) || TRAP_BAITS[0];
     if (money < b.price) return;
     if (b.price > 0) {
+      soundManager.playRegisterSfx();
       setMoney((prev) => prev - b.price);
     }
     setTraps((prev) =>
@@ -1804,6 +1814,7 @@ export default function App() {
   const handleUpgradeTrapModel = (slotIndex: number, trapTypeId: string) => {
     const model = TRAP_TYPES.find((m) => m.id === trapTypeId);
     if (!model || money < model.price) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - model.price);
     setTraps((prev) =>
       prev.map((t, idx) => (idx === slotIndex ? { ...t, trapTypeId } : t))
@@ -1814,6 +1825,7 @@ export default function App() {
     if (unlockedTrapSlots >= TRAP_SLOT_PRICES.length) return;
     const cost = TRAP_SLOT_PRICES[unlockedTrapSlots];
     if (money < cost) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - cost);
     const newSlotIndex = unlockedTrapSlots;
     setTraps((prev) =>
@@ -1829,6 +1841,7 @@ export default function App() {
   // Hatchery Aquaculture Handlers
   const handleUnlockHatchery = () => {
     if (money < 500 || hatcheryUnlocked) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - 500);
     setHatcheryUnlocked(true);
     setHatcheryTanks((prev) =>
@@ -1839,6 +1852,7 @@ export default function App() {
   const handleUnlockTank = (tankId: TankId) => {
     const tank = hatcheryTanks.find((t) => t.id === tankId);
     if (!tank || tank.unlocked || money < tank.unlockCost) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - tank.unlockCost);
     if (tankId === 'tank_1') {
       setHatcheryUnlocked(true);
@@ -1851,6 +1865,7 @@ export default function App() {
   const handleBuyHatcheryUpgrade = (upgradeId: HatcheryUpgradeId) => {
     const upDef = HATCHERY_UPGRADES.find((u) => u.id === upgradeId);
     if (!upDef || hatcheryUpgrades.includes(upgradeId) || money < upDef.price) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - upDef.price);
     setHatcheryUpgrades((prev) => [...prev, upgradeId]);
   };
@@ -1877,7 +1892,8 @@ export default function App() {
     const requiredBroodstock = pairCount * 2;
     if (matchingBrood.length < requiredBroodstock) return;
 
-    const pairCatchIds = new Set(matchingBrood.slice(0, requiredBroodstock).map((f) => f.catchId));
+    const depositedFish = matchingBrood.slice(0, requiredBroodstock);
+    const pairCatchIds = new Set(depositedFish.map((f) => f.catchId));
     setInventory((prev) => prev.filter((f) => !pairCatchIds.has(f.catchId)));
     setMoney((prev) => prev - totalFeedCost);
 
@@ -1911,6 +1927,7 @@ export default function App() {
               avgWeight: Number(((species.minWeight + species.maxWeight) / 2).toFixed(2)),
               broodstockCount: requiredBroodstock,
               pairCount,
+              depositedBreeders: depositedFish,
               growthRate: 1.0,
               fecundity: 1.0,
               hardiness: 1.0,
@@ -1927,6 +1944,7 @@ export default function App() {
     if (!tank) return;
     const feed = FEED_OPTIONS.find((f) => f.id === tank.feedType) || FEED_OPTIONS[0];
     if (money < feed.price) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - feed.price);
     setHatcheryTanks((prev) =>
       prev.map((t) => (t.id === tankId ? { ...t, hasFood: true } : t))
@@ -1947,7 +1965,13 @@ export default function App() {
       tank.mutationStrain,
       tank.mutationCount
     );
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + batchVal);
+
+    // Return deposited breeders to box so original fish are never permanently lost
+    if (tank.depositedBreeders && tank.depositedBreeders.length > 0) {
+      setInventory((prev) => [...prev, ...tank.depositedBreeders!]);
+    }
 
     setHatcheryTanks((prev) =>
       prev.map((t) =>
@@ -1963,6 +1987,7 @@ export default function App() {
               trophyCount: 0,
               broodstockCount: 0,
               pairCount: 1,
+              depositedBreeders: [],
               growthRate: 1.0,
               fecundity: 1.0,
               hardiness: 1.0,
@@ -1984,6 +2009,11 @@ export default function App() {
     const baitUnits = calculateBaitYield(species, tank.clutchCount, tank.mutationStrain);
     setLiveBaitCharges((prev) => Math.min(maxBaitCap, prev + baitUnits));
 
+    // Return deposited breeders to box so original fish are never permanently lost
+    if (tank.depositedBreeders && tank.depositedBreeders.length > 0) {
+      setInventory((prev) => [...prev, ...tank.depositedBreeders!]);
+    }
+
     setHatcheryTanks((prev) =>
       prev.map((t) =>
         t.id === tankId
@@ -1998,6 +2028,7 @@ export default function App() {
               trophyCount: 0,
               broodstockCount: 0,
               pairCount: 1,
+              depositedBreeders: [],
               growthRate: 1.0,
               fecundity: 1.0,
               hardiness: 1.0,
@@ -2025,7 +2056,7 @@ export default function App() {
       let weight: number;
       if (isTrophyCandidate) {
         // True trophy weight >= species.trophyWeight
-        weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.15)).toFixed(2));
+        weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.10)).toFixed(2));
       } else {
         const minW = species.minWeight;
         const maxW = species.trophyWeight * 0.95;
@@ -2057,7 +2088,34 @@ export default function App() {
       });
     }
 
-    setInventory((prev) => [...prev, ...newFish]);
+    // Return the original breeding pair to the box when not keeping breeders in tank
+    const returnedBreeders: CaughtFish[] =
+      tank.depositedBreeders && tank.depositedBreeders.length > 0
+        ? tank.depositedBreeders
+        : [
+            {
+              catchId: `breeder_${now}_1_${Math.random().toString(36).substring(2, 6)}`,
+              fishId: species.id,
+              name: species.name,
+              tier: species.tier,
+              weight: Number(((species.minWeight + species.maxWeight) / 2).toFixed(2)),
+              value: Math.round(species.basePrice * 1.35),
+              caughtAt: now,
+              areaId: species.areaId,
+            },
+            {
+              catchId: `breeder_${now}_2_${Math.random().toString(36).substring(2, 6)}`,
+              fishId: species.id,
+              name: species.name,
+              tier: species.tier,
+              weight: Number(((species.minWeight + species.maxWeight) / 2).toFixed(2)),
+              value: Math.round(species.basePrice * 1.35),
+              caughtAt: now,
+              areaId: species.areaId,
+            },
+          ];
+
+    setInventory((prev) => [...prev, ...returnedBreeders, ...newFish]);
 
     if (tank.mutationStrain && tank.mutationStrain !== 'normal') {
       setCatalog((prev) => {
@@ -2095,6 +2153,7 @@ export default function App() {
               trophyCount: 0,
               broodstockCount: 0,
               pairCount: 1,
+              depositedBreeders: [],
               growthRate: 1.0,
               fecundity: 1.0,
               hardiness: 1.0,
@@ -2147,7 +2206,7 @@ export default function App() {
         let weight: number;
         if (isTrophyCandidate) {
           // True trophy weight >= species.trophyWeight
-          weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.15)).toFixed(2));
+          weight = Number((species.trophyWeight * (1.0 + Math.random() * 0.10)).toFixed(2));
         } else {
           const minW = species.minWeight;
           const maxW = species.trophyWeight * 0.95;
@@ -2234,6 +2293,7 @@ export default function App() {
                 trophyCount,
                 broodstockCount: nextBroodstock,
                 pairCount: nextPairs,
+                depositedBreeders: tank.depositedBreeders && tank.depositedBreeders.length >= 2 ? tank.depositedBreeders.slice(0, 2) : undefined,
                 growthRate: nextGrowthRate,
                 fecundity: nextFecundity,
                 hardiness: nextHardiness,
@@ -2245,6 +2305,11 @@ export default function App() {
       );
     } else {
       // Emptied below 2: reset
+      // Return original breeders to box so they are never lost
+      if (tank.depositedBreeders && tank.depositedBreeders.length > 0) {
+        setInventory((prev) => [...prev, ...tank.depositedBreeders!]);
+      }
+
       setHatcheryTanks((prev) =>
         prev.map((t) =>
           t.id === tankId
@@ -2259,6 +2324,7 @@ export default function App() {
                 trophyCount: 0,
                 broodstockCount: 0,
                 pairCount: 1,
+                depositedBreeders: [],
                 growthRate: 1.0,
                 fecundity: 1.0,
                 hardiness: 1.0,
@@ -2274,6 +2340,7 @@ export default function App() {
   const handleBuyCivicInvestment = (id: CivicInvestmentId) => {
     const inv = CIVIC_INVESTMENTS.find((c) => c.id === id);
     if (!inv || money < inv.cost || civicInvestments.includes(id)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - inv.cost);
     setCivicInvestments((prev) => [...prev, id]);
   };
@@ -2281,6 +2348,7 @@ export default function App() {
   const handleJoinClub = (clubId: ClubId) => {
     const club = ANGLER_CLUBS.find((c) => c.id === clubId);
     if (!club || money < club.membershipDues) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - club.membershipDues);
     setClubState((prev) => ({
       ...prev,
@@ -2295,6 +2363,7 @@ export default function App() {
     if (!clubState.currentClubId) return;
     const club = ANGLER_CLUBS.find((c) => c.id === clubState.currentClubId);
     if (!club || money < club.membershipDues) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - club.membershipDues);
     setClubState((prev) => ({
       ...prev,
@@ -2325,6 +2394,7 @@ export default function App() {
 
     const usedIds = new Set(matching.slice(0, bounty.requiredCount).map((f) => f.catchId));
     setInventory((prev) => prev.filter((f) => !usedIds.has(f.catchId)));
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + bounty.rewardCash);
 
     setClubState((prev) => ({
@@ -2344,6 +2414,11 @@ export default function App() {
   };
 
   const handleClearHatcheryTank = (tankId: TankId) => {
+    const tank = hatcheryTanks.find((t) => t.id === tankId);
+    if (tank?.depositedBreeders && tank.depositedBreeders.length > 0) {
+      setInventory((prev) => [...prev, ...tank.depositedBreeders!]);
+    }
+
     setHatcheryTanks((prev) =>
       prev.map((t) =>
         t.id === tankId
@@ -2356,6 +2431,14 @@ export default function App() {
               hasFood: false,
               clutchCount: 0,
               trophyCount: 0,
+              broodstockCount: 0,
+              pairCount: 1,
+              depositedBreeders: [],
+              growthRate: 1.0,
+              fecundity: 1.0,
+              hardiness: 1.0,
+              mutationStrain: 'normal',
+              mutationCount: 0,
             }
           : t
       )
@@ -2366,12 +2449,14 @@ export default function App() {
   const handleStartCommercialBusiness = (name: string) => {
     const trimmed = name.trim();
     if (money < 1000 || !trimmed || commercialBusinessName) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - 1000);
     setCommercialBusinessName(trimmed);
   };
 
   const handleBuyBoat = (boatDef: BoatDefinition) => {
     if (money < boatDef.price) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - boatDef.price);
 
     const existingCount = ownedBoats.filter((b) => b.boatDefId === boatDef.id).length;
@@ -2389,6 +2474,7 @@ export default function App() {
 
   const handleBuyUpgrade = (upgrade: FleetUpgrade) => {
     if (money < upgrade.price || ownedUpgradeIds.includes(upgrade.id)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - upgrade.price);
     setOwnedUpgradeIds((prev) => [...prev, upgrade.id]);
     setOwnedBoats((prev) =>
@@ -2401,6 +2487,7 @@ export default function App() {
 
   const handleHireCrew = (crew: CrewMember) => {
     if (money < crew.hireCost) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - crew.hireCost);
     setHiredCrew((prev) => [...prev, crew]);
     setAvailableJobSeekers((prev) => prev.filter((c) => c.id !== crew.id));
@@ -2408,6 +2495,7 @@ export default function App() {
 
   const handleGiveCrewBonus = (crewId: string, amount: number) => {
     if (money < amount) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - amount);
     setHiredCrew((prev) =>
       prev.map((c) => {
@@ -2487,6 +2575,7 @@ export default function App() {
     const totalCost = wageCost + baitDef.price;
 
     if (money < totalCost) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - totalCost);
 
     setOwnedBoats((prev) =>
@@ -2555,6 +2644,7 @@ export default function App() {
     const baseVal = haul.reduce((sum, f) => sum + f.value, 0);
     const wholesaleVal = Math.round(baseVal * 1.15);
 
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + wholesaleVal);
 
     setCatalog((prev) => {
@@ -2639,14 +2729,16 @@ export default function App() {
 
   // Salvage Charter & Expedition Handlers
   const handleUnlockSalvageCharter = () => {
-    if (money < 20000) return;
-    setMoney((prev) => prev - 20000);
+    if (money < 40000) return;
+    soundManager.playRegisterSfx();
+    setMoney((prev) => prev - 40000);
     setSalvageState((prev) => ({ ...prev, unlocked: true }));
   };
 
   const handleBuySalvageBoat = (boatDefId: string) => {
     const def = SALVAGE_BOATS_CATALOG.find((b) => b.id === boatDefId);
     if (!def || money < def.cost) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - def.cost);
     setSalvageState((prev) => ({
       ...prev,
@@ -2665,6 +2757,7 @@ export default function App() {
   const handleUnlockWreckSite = (siteId: string) => {
     const wreck = SUNKEN_WRECK_SITES.find((w) => w.id === siteId);
     if (!wreck || money < wreck.unlockCost || salvageState.unlockedWreckIds.includes(siteId)) return;
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev - wreck.unlockCost);
     setSalvageState((prev) => ({
       ...prev,
@@ -2789,6 +2882,7 @@ export default function App() {
     const auction = salvageState.activeAuctions.find((a) => a.auctionId === auctionId);
     if (!auction) return;
 
+    soundManager.playRegisterSfx();
     setMoney((prev) => prev + auction.finalHammerPrice);
     setSalvageState((prev) => ({
       ...prev,
@@ -3189,6 +3283,7 @@ export default function App() {
                     <button
                       onClick={() => {
                         if (hasWhaleRod && hasWhaleReel && money >= WHALING_UNLOCK_COST) {
+                          soundManager.playRegisterSfx();
                           setMoney((prev) => prev - WHALING_UNLOCK_COST);
                           setWhalingUnlocked(true);
                         }

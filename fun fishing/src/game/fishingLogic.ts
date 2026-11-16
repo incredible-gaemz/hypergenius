@@ -217,7 +217,7 @@ export const FISHING_AREAS: FishingAreaDef[] = [
     id: 'glacial',
     name: 'Glacial Fjord',
     description: 'Sub-zero subarctic fjord fed by mountain glaciers, icy waters, and arctic gamefish.',
-    unlockCost: 500,
+    unlockCost: 700,
     requiredSpecies: 24,
     theme: {
       name: 'Glacial Fjord',
@@ -233,7 +233,7 @@ export const FISHING_AREAS: FishingAreaDef[] = [
     id: 'ocean',
     name: 'Coastal Ocean',
     description: 'Atlantic coastal pier and tidal surf where salt gamefish, flounder, and bass hunt.',
-    unlockCost: 1000,
+    unlockCost: 2000,
     requiredSpecies: 28,
     theme: {
       name: 'Coastal Surf',
@@ -1597,9 +1597,9 @@ export function rollHookedEncounter(
     mediumFishRoll?: number;
   }
 ): HookedEncounter {
-  // Extremely rare 0.01 (1%) chance to hook a Sunken Treasure Chest
+  // Extremely rare 0.001 (0.1%) chance to hook a Sunken Treasure Chest
   const treasureRoll = options?.treasureRoll ?? (options?.nothingRoll !== undefined ? 1.0 : Math.random());
-  if (treasureRoll < 0.01) {
+  if (treasureRoll < 0.001) {
     return {
       type: 'treasure',
       reelDurationSec: 4.2,

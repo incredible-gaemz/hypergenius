@@ -295,22 +295,12 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
 
         {castState === 'treasure' && (
           <div className="w-full max-w-sm border-2 border-amber-500/90 bg-[#1e1b12] p-5 text-left space-y-4 shadow-xl shadow-amber-950/40">
-            <div className="flex items-start justify-between gap-2 border-b border-amber-800/60 pb-2.5">
-              <div>
-                <div className="text-base font-extrabold text-amber-300 tracking-wide">
-                  Sunken Treasure Chest!
-                </div>
-                <div className="text-[10px] text-amber-400/80 uppercase font-semibold tracking-widest mt-0.5">
-                  Ultra-Rare Salvage · 1% Strike
-                </div>
+            <div className="flex items-center justify-between border-b border-amber-800/60 pb-2.5">
+              <div className="text-base font-extrabold text-amber-300 tracking-wide">
+                Sunken Treasure Chest
               </div>
-              <div className="text-right">
-                <div className="text-base font-black text-amber-300">
-                  +${(pendingTreasureGold ?? 0).toLocaleString()}
-                </div>
-                <div className="text-[10px] text-amber-500/80 uppercase font-bold">
-                  Bounty Paid
-                </div>
+              <div className="text-base font-black text-amber-300">
+                +${(pendingTreasureGold ?? 0).toLocaleString()}
               </div>
             </div>
 
@@ -323,15 +313,11 @@ export const FishingArea: React.FC<FishingAreaProps> = ({
               />
             </div>
 
-            <div className="text-xs text-amber-100/90 leading-relaxed bg-amber-950/50 p-2.5 border border-amber-800/40">
-              You hauled an ancient iron-strapped pirate chest up from the deep! The lid snaps open to reveal a glittering hoard of doubloons, jewelry, and bullion.
-            </div>
-
             <button
               onClick={onClaimTreasure ?? onResetToIdle}
               className="w-full py-2.5 border border-amber-500 bg-amber-600 hover:bg-amber-500 text-xs font-black text-amber-950 uppercase tracking-wider cursor-pointer shadow-md transition-colors"
             >
-              Claim Treasure (+${(pendingTreasureGold ?? 0).toLocaleString()})
+              Claim Treasure
             </button>
           </div>
         )}
