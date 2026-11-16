@@ -1355,5 +1355,47 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
       "habitatBehavior": "Legendary apex predator ruling pristine subarctic rivers and glacial channels; lives for over 50 years and ambushes waterfowl, rodents, and big fish.",
       "dietNotes": "Apex carnivore that strikes frogs, ducks, muskrats, and entire adult salmon in violent surface attacks.",
       "wikiUrl": "https://en.wikipedia.org/wiki/Taimen"
+  },
+  "193": {
+      "scientificName": "Albula vulpes",
+      "visualDescription": "Known as the 'Gray Ghost of the Flats', featuring a sleek torpedo-shaped silvery body with subtle dusky pinstripes, conical underslung snout, and a deeply forked caudal fin.",
+      "habitatBehavior": "Cruises shallow tropical sand flats and turtle grass beds with the incoming tide, often exposing its tail fin while rooting in sediment.",
+      "dietNotes": "Crushes burrowing crabs, mantis shrimp, and bivalves with specialized granular pharyngeal teeth.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Bonefish"
+  },
+  "194": {
+      "scientificName": "Trachinotus falcatus",
+      "visualDescription": "Deep-bodied, laterally compressed diamond-shaped saltwater gamefish boasting brilliant silver-gray flanks, a warm golden-orange wash on the belly, and iconic sickle-shaped dark fins.",
+      "habitatBehavior": "Frequents shallow ocean flats, reef edges, and coral passes; renowned among saltwater anglers for its acute eyesight and cautious feeding habits.",
+      "dietNotes": "Excavates swimming crabs, mole crabs, sea urchins, and mollusks with crushing jaw plates.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Florida_pompano"
+  },
+  "195": {
+      "scientificName": "Seriola dumerili",
+      "visualDescription": "Muscular pelagic predator with a brownish-olive back, warm amber lateral stripe, and a distinctive dark nuchal band angling upward across the eyes.",
+      "habitatBehavior": "Schools around offshore reefs, deep ledges, and artificial wrecks; famous for brutal downward diving runs that test tackle to the breaking point.",
+      "dietNotes": "Voracious predator feeding on squid, cuttlefish, jacks, and smaller schooling reef fish.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Greater_amberjack"
+  },
+  "196": {
+      "scientificName": "Carcharhinus leucas",
+      "visualDescription": "Stout, heavy-bodied apex predator with a broad blunt snout, muscular slate-gray flank, pale white underbelly, and triangular serrated teeth.",
+      "habitatBehavior": "Capable of osmoregulation, allowing it to roam brackish bayous, murky estuaries, and coastal channels far up freshwater rivers.",
+      "dietNotes": "Apex carnivore feeding opportunistically on stingrays, catfish, mullet, turtles, and other marine creatures.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Bull_shark"
+  },
+  "197": {
+      "scientificName": "Lates calcarifer",
+      "visualDescription": "Renowned Australian gamefish with a distinctive concave forehead profile, bright luminous copper-silver scales, large pinkish reflective eyes, and a powerful paddle-like tail.",
+      "habitatBehavior": "Thrives in tropical tidal rivers, estuary mangroves, and freshwater billabongs; famous for explosive surface strikes and aerobatic leaps.",
+      "dietNotes": "Ambush hunter that engulfs mullet, cherabin prawns, baitfish, and small crabs with immense suction.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Barramundi"
+  },
+  "198": {
+      "scientificName": "Nematistius pectoralis",
+      "visualDescription": "Unmistakable Pacific prize gamefish with iridescent blue-grey flanks, two broad curved dark zebra-like bands, and an iconic crest of seven long whip-like spiny dorsal rays resembling a rooster comb.",
+      "habitatBehavior": "Hunts the turbulent surf zones, rocky shoreline drops, and white-water beach breaks of the Eastern Pacific, raising its comb when aggressive.",
+      "dietNotes": "High-speed pursuit predator chasing sardines, mullet, and flying fish right up to the shoreline.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Roosterfish"
   }
 };

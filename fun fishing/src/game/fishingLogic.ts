@@ -500,6 +500,13 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 190, name: 'Sablefish', tier: 'uncommon', minWeight: 4.0, maxWeight: 25.0, trophyWeight: 32.0, basePrice: 55, bestLureId: 'jig', areaId: 'glacial' },
   { id: 191, name: 'Spotted Wolffish', tier: 'rare', minWeight: 10.0, maxWeight: 48.0, trophyWeight: 60.0, basePrice: 135, bestLureId: 'squid', areaId: 'glacial' },
   { id: 192, name: 'Siberian Taimen', tier: 'legendary', minWeight: 45.0, maxWeight: 210.0, trophyWeight: 260.0, basePrice: 2800, bestLureId: 'dragon_scale', areaId: 'glacial' },
+  // --- FAMOUS EXPANSION SPECIES (IDs 193-198) ---
+  { id: 193, name: 'Bonefish', tier: 'rare', minWeight: 2.0, maxWeight: 14.0, trophyWeight: 16.5, basePrice: 85, bestLureId: 'clam_strip', areaId: 'ocean' },
+  { id: 194, name: 'Atlantic Permit', tier: 'rare', minWeight: 5.0, maxWeight: 35.0, trophyWeight: 44.0, basePrice: 110, bestLureId: 'cut_bait', areaId: 'reef' },
+  { id: 195, name: 'Greater Amberjack', tier: 'rare', minWeight: 15.0, maxWeight: 120.0, trophyWeight: 155.0, basePrice: 130, bestLureId: 'squid', areaId: 'ocean' },
+  { id: 196, name: 'Bull Shark', tier: 'epic', minWeight: 180.0, maxWeight: 520.0, trophyWeight: 680.0, basePrice: 480, bestLureId: 'squid', areaId: 'bayou' },
+  { id: 197, name: 'Barramundi', tier: 'rare', minWeight: 8.0, maxWeight: 58.0, trophyWeight: 72.0, basePrice: 90, bestLureId: 'minnow', areaId: 'river' },
+  { id: 198, name: 'Roosterfish', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 95.0, basePrice: 105, bestLureId: 'spoon', areaId: 'ocean' },
 ];
 
 /**
@@ -2448,6 +2455,26 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('taimen') || id === 192) {
     return './fish/siberian_taimen.png';
+  }
+
+  // --- FAMOUS EXPANSION SPECIES (IDs 193-198) ---
+  if (name.includes('bonefish') || id === 193) {
+    return './fish/bonefish.png';
+  }
+  if (name.includes('permit') || id === 194) {
+    return './fish/atlantic_permit.png';
+  }
+  if (name.includes('amberjack') || id === 195) {
+    return './fish/greater_amberjack.png';
+  }
+  if (name.includes('bull shark') || id === 196) {
+    return './fish/bull_shark.png';
+  }
+  if (name.includes('barramundi') || id === 197) {
+    return './fish/barramundi.png';
+  }
+  if (name.includes('roosterfish') || id === 198) {
+    return './fish/roosterfish.png';
   }
 
   // Mythical Relics & Cryptids
