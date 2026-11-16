@@ -161,7 +161,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 450,
     crewCapacity: 1,
     cargoCapacity: 8,
-    baseVoyageSec: 360, // 6 minutes
+    baseVoyageSec: 210, // 3.5 minutes
     description: 'A humble flat-bottomed wooden skiff for quiet river eddies and farm ponds.',
     tier: 1,
   },
@@ -171,7 +171,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 1400,
     crewCapacity: 2,
     cargoCapacity: 18,
-    baseVoyageSec: 600, // 10 minutes
+    baseVoyageSec: 360, // 6 minutes
     description: 'Double-ended seaworthy dory with twin oarlocks, outriggers, and a livewell.',
     tier: 2,
   },
@@ -181,7 +181,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 3800,
     crewCapacity: 3,
     cargoCapacity: 35,
-    baseVoyageSec: 960, // 16 minutes
+    baseVoyageSec: 540, // 9 minutes
     description: 'Diesel-powered harbor workhorse with hydraulic net drum and insulated fish hold.',
     tier: 3,
   },
@@ -191,7 +191,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 11000,
     crewCapacity: 5,
     cargoCapacity: 70,
-    baseVoyageSec: 1440, // 24 minutes
+    baseVoyageSec: 840, // 14 minutes
     description: 'Heavy steel hull with refrigerated storage capable of braving deep ocean banks.',
     tier: 4,
   },
@@ -201,7 +201,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 32000,
     crewCapacity: 10,
     cargoCapacity: 140,
-    baseVoyageSec: 2100, // 35 minutes
+    baseVoyageSec: 1200, // 20 minutes
     description: 'Ice-strengthened hull engineered for rough northern seas with high-capacity hydraulic pot haulers.',
     tier: 5,
   },
@@ -211,7 +211,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 75000,
     crewCapacity: 15,
     cargoCapacity: 240,
-    baseVoyageSec: 2700, // 45 minutes
+    baseVoyageSec: 1560, // 26 minutes
     description: 'Industrial flagship with on-board blast freezers, dual booms, and crew mess.',
     tier: 6,
   },
@@ -221,7 +221,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 180000,
     crewCapacity: 25,
     cargoCapacity: 420,
-    baseVoyageSec: 3600, // 60 minutes
+    baseVoyageSec: 2100, // 35 minutes
     description: 'Commercial purse seiner equipped with sonar helicopter pad, drone tracking, and massive brine tanks.',
     tier: 7,
   },
@@ -231,7 +231,7 @@ export const BOATS_CATALOG: BoatDefinition[] = [
     price: 450000,
     crewCapacity: 35,
     cargoCapacity: 750,
-    baseVoyageSec: 5400, // 90 minutes
+    baseVoyageSec: 2700, // 45 minutes
     description: 'Ice-class commercial mega-trawler with twin stern ramps, industrial blast freezers, and limitless ocean range.',
     tier: 8,
   },
@@ -541,12 +541,12 @@ export function calculateVoyageDuration(
   if (destinationAreaId) {
     const areaDistanceMultipliers: Record<AreaId, number> = {
       pond: 0.85,
-      river: 0.95,
-      lake: 1.05,
-      bayou: 1.20,
-      ocean: 1.35,
-      reef: 1.50,
-      trench: 1.75,
+      river: 0.90,
+      lake: 1.00,
+      bayou: 1.10,
+      ocean: 1.20,
+      reef: 1.30,
+      trench: 1.45,
     };
     duration *= areaDistanceMultipliers[destinationAreaId] || 1.0;
   }
@@ -554,19 +554,19 @@ export function calculateVoyageDuration(
   // 2. Bait and gear deployment weight modifier
   if (baitId) {
     const baitDurationMultipliers: Record<CommercialBaitId, number> = {
-      bare_gear: 0.92,
-      bulk_worm_crate: 1.05,
-      bulk_minnow_crate: 1.15,
-      bulk_herring_cask: 1.20,
-      bulk_squid_crate: 1.25,
-      bulk_abyssal_slurry: 1.35,
+      bare_gear: 0.90,
+      bulk_worm_crate: 1.00,
+      bulk_minnow_crate: 1.06,
+      bulk_herring_cask: 1.10,
+      bulk_squid_crate: 1.14,
+      bulk_abyssal_slurry: 1.20,
     };
     duration *= baitDurationMultipliers[baitId] || 1.0;
   }
 
   // 3. Target species tracking & scouting modifier
   if (targetFishId) {
-    duration *= 1.20;
+    duration *= 1.15;
   }
 
   // 4. Crew staffing ratio modifier
@@ -607,7 +607,7 @@ export function calculateVoyageDuration(
     duration *= 1 - durationReduction;
   }
 
-  return Math.max(20, Math.round(duration));
+  return Math.max(15, Math.round(duration));
 }
 
 export function calculateExpeditionWageCost(crewMembers: CrewMember[]): number {

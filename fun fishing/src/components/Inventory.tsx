@@ -17,6 +17,7 @@ interface InventoryProps {
   onSellFish: (catchId: string) => void;
   onSellBatch?: (catchIds: string[]) => void;
   onSellAll: () => void;
+  onToggleLockFish?: (catchId: string) => void;
   onFulfillOrder?: (orderId: string) => void;
   onDeclineOrder?: (orderId: string) => void;
 }
@@ -31,6 +32,7 @@ interface FishGroup {
   items: CaughtFish[];
   count: number;
   trophyCount: number;
+  lockedCount: number;
   totalValue: number;
   minWeight: number;
   maxWeight: number;
@@ -43,9 +45,14 @@ export const Inventory: React.FC<InventoryProps> = ({
   onSellFish,
   onSellBatch,
   onSellAll,
+  onToggleLockFish,
 }) => {
   const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
   const totalValue = fishList.reduce((acc, f) => acc + f.value, 0);
+
+  const unlockedFish = useMemo(() => fishList.filter((f) => !f.isLocked), [fishList]);
+  const unlockedValue = useMemo(() => unlockedFish.reduce((acc, f) => acc + f.value, 0), [unlockedFish]);
+  const totalLockedCount = fishList.length - unlockedFish.length;
 
   const toggleGroup = (key: string) => {
     setExpandedGroupKey((prev) => (prev === key ? null : key));
@@ -69,6 +76,7 @@ export const Inventory: React.FC<InventoryProps> = ({
           items: [],
           count: 0,
           trophyCount: 0,
+          lockedCount: 0,
           totalValue: 0,
           minWeight: item.weight,
           maxWeight: item.weight,
@@ -79,6 +87,7 @@ export const Inventory: React.FC<InventoryProps> = ({
       }
       g.items.push(item);
       g.count++;
+      if (item.isLocked) g.lockedCount++;
       const isActualTrophy = item.isTrophy && getFishSizeClassification(item.weight, item.fishId) === 'Trophy';
       if (isActualTrophy) g.trophyCount++;
       g.totalValue += item.value;
@@ -119,17 +128,28 @@ export const Inventory: React.FC<InventoryProps> = ({
             {fishList.length > 0 && (
               <span className="text-[#8c94a2] ml-2">
                 · Base Total: <span className="text-emerald-400 font-bold">${totalValue.toLocaleString()}</span>
+                {totalLockedCount > 0 && (
+                  <span className="text-amber-400 font-bold ml-1.5">
+                    ({totalLockedCount} Locked)
+                  </span>
+                )}
               </span>
             )}
           </div>
 
           {fishList.length > 0 && (
-            <button
-              onClick={onSellAll}
-              className="px-3 py-1.5 border border-emerald-600/80 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold cursor-pointer transition-colors"
-            >
-              Sell All · ${totalValue.toLocaleString()}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onSellAll}
+                disabled={unlockedFish.length === 0}
+                className="px-3 py-1.5 border border-emerald-600/80 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title={totalLockedCount > 0 ? "Sells only unlocked fish; locked fish remain safe in your Box" : "Sell all fish in Box"}
+              >
+                {unlockedFish.length > 0
+                  ? `Sell Unlocked (${unlockedFish.length}) · $${unlockedValue.toLocaleString()}`
+                  : `All ${fishList.length} Fish Locked`}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -202,6 +222,11 @@ export const Inventory: React.FC<InventoryProps> = ({
                               {group.trophyCount === 1 ? '1 Trophy' : `${group.trophyCount} Trophies`}
                             </span>
                           )}
+                          {group.lockedCount > 0 && (
+                            <span className="text-[10px] text-amber-300 border border-amber-500/60 bg-amber-950/40 px-1 font-bold">
+                              {group.lockedCount === group.count ? 'All Locked' : `${group.lockedCount} Locked`}
+                            </span>
+                          )}
                           {group.mutation && group.mutation !== 'normal' && (
                             <span className="text-[10px] text-cyan-300 border border-cyan-500/60 px-1 font-bold uppercase">
                               {group.mutationName || group.mutation}
@@ -237,34 +262,103 @@ export const Inventory: React.FC<InventoryProps> = ({
                       </div>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-1.5 self-end sm:self-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSellFish(group.items[0].catchId);
-                        }}
-                        className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors"
-                        title={group.count > 1 ? "Sell 1 fish" : "Sell fish"}
-                      >
-                        {group.count > 1
-                          ? `Sell 1 · $${group.items[0].value.toLocaleString()}`
-                          : `Sell · $${group.items[0].value.toLocaleString()}`}
-                      </button>
-                      {group.count > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onSellBatch) {
-                              onSellBatch(group.items.map((f) => f.catchId));
-                            } else {
-                              group.items.forEach((f) => onSellFish(f.catchId));
-                            }
-                          }}
-                          className="px-2.5 py-1 text-xs border border-emerald-700/70 bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-300 font-bold cursor-pointer transition-colors"
-                          title={`Sell all ${group.count} fish of this kind`}
-                        >
-                          Sell All ({group.count}) · ${group.totalValue.toLocaleString()}
-                        </button>
+                    <div className="shrink-0 flex items-center gap-1.5 self-end sm:self-center flex-wrap justify-end">
+                      {group.count === 1 ? (
+                        <>
+                          {onToggleLockFish && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleLockFish(group.items[0].catchId);
+                              }}
+                              className={`px-2 py-1 text-xs border font-bold cursor-pointer transition-colors ${
+                                group.items[0].isLocked
+                                  ? 'border-amber-600 bg-amber-950/70 text-amber-300 hover:bg-amber-900/70'
+                                  : 'border-[#3b404c] bg-[#16181e] text-[#8c94a2] hover:text-[#f1f3f5]'
+                              }`}
+                              title={group.items[0].isLocked ? "Unlock fish" : "Lock fish to protect it from being sold"}
+                            >
+                              {group.items[0].isLocked ? 'Locked' : 'Lock'}
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSellFish(group.items[0].catchId);
+                            }}
+                            disabled={group.items[0].isLocked}
+                            className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title={group.items[0].isLocked ? "Fish is locked" : "Sell fish"}
+                          >
+                            Sell · ${group.items[0].value.toLocaleString()}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {onToggleLockFish && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const shouldLock = group.lockedCount < group.count;
+                                group.items.forEach((f) => {
+                                  if (shouldLock && !f.isLocked) onToggleLockFish(f.catchId);
+                                  else if (!shouldLock && f.isLocked) onToggleLockFish(f.catchId);
+                                });
+                              }}
+                              className={`px-2 py-1 text-xs border font-bold cursor-pointer transition-colors ${
+                                group.lockedCount === group.count
+                                  ? 'border-amber-600 bg-amber-950/70 text-amber-300 hover:bg-amber-900/70'
+                                  : group.lockedCount > 0
+                                  ? 'border-amber-600/50 bg-amber-950/40 text-amber-300 hover:bg-amber-900/50'
+                                  : 'border-[#3b404c] bg-[#16181e] text-[#8c94a2] hover:text-[#f1f3f5]'
+                              }`}
+                              title="Lock / Unlock all specimens in this group"
+                            >
+                              {group.lockedCount === group.count ? 'All Locked' : group.lockedCount > 0 ? `${group.lockedCount} Locked` : 'Lock All'}
+                            </button>
+                          )}
+                          {(() => {
+                            const unlockedItems = group.items.filter((f) => !f.isLocked);
+                            const unlockedVal = unlockedItems.reduce((acc, f) => acc + f.value, 0);
+                            return (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (unlockedItems.length > 0) onSellFish(unlockedItems[0].catchId);
+                                  }}
+                                  disabled={unlockedItems.length === 0}
+                                  className="px-2.5 py-1 text-xs border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-400 font-semibold cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title={unlockedItems.length === 0 ? "All fish locked" : "Sell 1 unlocked fish"}
+                                >
+                                  {unlockedItems.length > 0
+                                    ? `Sell 1 · $${unlockedItems[0].value.toLocaleString()}`
+                                    : 'Sell 1'}
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (unlockedItems.length === 0) return;
+                                    if (onSellBatch) {
+                                      onSellBatch(unlockedItems.map((f) => f.catchId));
+                                    } else {
+                                      unlockedItems.forEach((f) => onSellFish(f.catchId));
+                                    }
+                                  }}
+                                  disabled={unlockedItems.length === 0}
+                                  className="px-2.5 py-1 text-xs border border-emerald-700/70 bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-300 font-bold cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title={unlockedItems.length === 0 ? "All fish locked" : `Sell all ${unlockedItems.length} unlocked fish of this kind`}
+                                >
+                                  {unlockedItems.length === group.count
+                                    ? `Sell All (${group.count}) · $${group.totalValue.toLocaleString()}`
+                                    : unlockedItems.length > 0
+                                    ? `Sell Unlocked (${unlockedItems.length}) · $${unlockedVal.toLocaleString()}`
+                                    : 'All Locked'}
+                                </button>
+                              </>
+                            );
+                          })()}
+                        </>
                       )}
                     </div>
                   </div>
@@ -306,16 +400,35 @@ export const Inventory: React.FC<InventoryProps> = ({
                                       {fish.mutationName || fish.mutation}
                                     </span>
                                   )}
+                                  {fish.isLocked && (
+                                    <span className="text-[9px] px-1.5 py-0.2 border border-amber-500/60 bg-amber-950/60 text-amber-300 font-bold">
+                                      LOCKED
+                                    </span>
+                                  )}
                                 </div>
 
                                 <div className="flex items-center gap-2 shrink-0">
                                   <span className="text-emerald-400 font-bold text-xs">
                                     ${fish.value.toLocaleString()}
                                   </span>
+                                  {onToggleLockFish && (
+                                    <button
+                                      onClick={() => onToggleLockFish(fish.catchId)}
+                                      className={`px-2 py-0.5 text-[11px] border font-bold cursor-pointer transition-colors ${
+                                        fish.isLocked
+                                          ? 'border-amber-600 bg-amber-950/70 text-amber-300 hover:bg-amber-900/70'
+                                          : 'border-[#3b404c] bg-[#16181d] text-[#8c94a2] hover:text-[#f1f3f5]'
+                                      }`}
+                                      title={fish.isLocked ? "Unlock fish" : "Lock fish to protect it from being sold"}
+                                    >
+                                      {fish.isLocked ? 'Locked' : 'Lock'}
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => onSellFish(fish.catchId)}
-                                    className="px-2 py-0.5 text-[11px] border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-300 font-semibold cursor-pointer transition-colors"
-                                    title="Sell this individual fish"
+                                    disabled={fish.isLocked}
+                                    className="px-2 py-0.5 text-[11px] border border-[#3b404c] bg-[#1e2128] hover:bg-[#282c35] text-emerald-300 font-semibold cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    title={fish.isLocked ? "Unlock fish before selling" : "Sell this individual fish"}
                                   >
                                     Sell
                                   </button>

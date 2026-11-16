@@ -66,6 +66,7 @@ export interface CaughtFish {
   growthRate?: number;
   fecundity?: number;
   hardiness?: number;
+  isLocked?: boolean;
 }
 
 export interface CatalogEntry {

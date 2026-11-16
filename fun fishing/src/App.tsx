@@ -804,141 +804,6 @@ export default function App() {
     ownedBoats.length
   );
 
-  // Dev Code: Typing 3157458141 normally anywhere on keyboard unlocks everything
-  const [devCodeBanner, setDevCodeBanner] = useState<string | null>(null);
-
-  useEffect(() => {
-    let keyBuffer = '';
-    const targetCode = '3157458141';
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-        return;
-      }
-
-      if (e.key >= '0' && e.key <= '9') {
-        keyBuffer = (keyBuffer + e.key).slice(-15);
-        if (keyBuffer.endsWith(targetCode)) {
-          // 1. Wealth: Add $1,000,000
-          setMoney((prev) => Math.max(prev + 1000000, 1000000));
-
-          // 2. All Fishing Areas
-          setUnlockedAreaIds(FISHING_AREAS.map((a) => a.id));
-
-          // 3. All Tackle: Rods, Reels, Lures
-          setOwnedRodIds(RODS.map((r) => r.id));
-          setOwnedReelIds(REELS.map((r) => r.id));
-          setOwnedLureIds(LURES.map((l) => l.id));
-
-          // 4. Maximum Trap Slots
-          setUnlockedTrapSlots(TRAP_SLOT_PRICES.length);
-
-          // 5. Commercial Fleet, Business Name, Upgrades, & Crew
-          setCommercialBusinessName((prev) => prev || 'Harbor Commercial Fleet');
-          setOwnedUpgradeIds(FLEET_UPGRADES.map((u) => u.id));
-          setOwnedBoats((prev) => {
-            const ownedDefIds = new Set(prev.map((b) => b.boatDefId));
-            const newBoats: OwnedBoat[] = [...prev];
-            BOATS_CATALOG.forEach((def, idx) => {
-              if (!ownedDefIds.has(def.id)) {
-                newBoats.push({
-                  instanceId: `boat_dev_${def.id}_${Date.now()}_${idx}`,
-                  boatDefId: def.id,
-                  customName: def.name,
-                  assignedCrewIds: [],
-                  installedUpgradeIds: FLEET_UPGRADES.map((u) => u.id),
-                  expedition: null,
-                });
-              }
-            });
-            return newBoats;
-          });
-          setHiredCrew((prev) => {
-            const existingIds = new Set(prev.map((c) => c.id));
-            const combined = [...prev];
-            for (const c of HIREABLE_CREW) {
-              if (!existingIds.has(c.id)) {
-                combined.push(c);
-                existingIds.add(c.id);
-              }
-            }
-            return combined;
-          });
-
-          // 6. Hatchery: Unlocked, All 4 Tanks Open, All Upgrades, 200 Live Bait Charges
-          setHatcheryUnlocked(true);
-          setHatcheryUpgrades(HATCHERY_UPGRADES.map((u) => u.id));
-          setLiveBaitCharges((prev) => Math.max(prev, 200));
-          setHatcheryTanks((prev) =>
-            prev.map((tank) => ({
-              ...tank,
-              unlocked: true,
-            }))
-          );
-
-          // 7. Town Civic Investments (All Funded)
-          setCivicInvestments(CIVIC_INVESTMENTS.map((c) => c.id));
-
-
-
-          // 9. Angler Guild (Active Subscription & High Reputation Across All Guilds)
-          setClubState((prev) => ({
-            ...prev,
-            currentClubId: prev.currentClubId || 'casters',
-            isSubscriptionActive: true,
-            subscriptionDueAt: Date.now() + GUILD_SUBSCRIPTION_CYCLE_MS * 12,
-            reputationPoints: {
-              casters: Math.max(prev.reputationPoints?.casters || 0, 5000),
-              commercial: Math.max(prev.reputationPoints?.commercial || 0, 5000),
-              breeders: Math.max(prev.reputationPoints?.breeders || 0, 5000),
-              explorers: Math.max(prev.reputationPoints?.explorers || 0, 5000),
-            },
-          }));
-
-          // 10. Fish Catalog: 100% Discovered with Trophy Catches for Complete Field Guide
-          setCatalog((prev) => {
-            const next = { ...prev };
-            FISH_COLLECTION.forEach((fish) => {
-              const existing = next[fish.id];
-              next[fish.id] = {
-                caughtCount: Math.max(1, existing?.caughtCount || 1),
-                maxWeight: Math.max(fish.trophyWeight, existing?.maxWeight || fish.maxWeight),
-                hasTrophy: true,
-                firstCaughtAt: existing?.firstCaughtAt || Date.now(),
-                unlockedMutations: existing?.unlockedMutations || [],
-              };
-            });
-            return next;
-          });
-
-          // 11. Whaling Permit Unlocked & 100% Whales in Guide
-          setWhalingUnlocked(true);
-          setWhaleCatalog(() => {
-            const next: Record<string, WhaleCatalogEntry> = {};
-            WHALE_SPECIES.forEach((w) => {
-              next[w.id] = {
-                caughtCount: 1,
-                maxWeight: w.maxWeightLbs,
-                firstCaughtAt: Date.now(),
-              };
-            });
-            return next;
-          });
-
-          setDevCodeBanner(
-            'DEV CODE ACTIVATED: Everything Unlocked! All Areas, Rods, Reels, Baits, Traps, Boats, Whaling, Hatchery, Guild, & 100% Fish Guide +$1,000,000!'
-          );
-          setTimeout(() => setDevCodeBanner(null), 6000);
-          keyBuffer = '';
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   // Ambient soundscape for active area
   useEffect(() => {
     if (activeTab === 'fish' && fishingSubTab === 'whaling' && isWhalingAvailable) {
@@ -1506,7 +1371,7 @@ export default function App() {
 
   const handleSellFish = (catchId: string) => {
     const item = inventory.find((f) => f.catchId === catchId);
-    if (!item) return;
+    if (!item || item.isLocked) return;
     const hasColdStorage = civicInvestments.includes('cold_storage');
     const finalVal = hasColdStorage ? Math.round(item.value * 1.15) : item.value;
     soundManager.playRegisterSfx();
@@ -1517,7 +1382,8 @@ export default function App() {
   const handleSellFishBatch = (catchIds: string[]) => {
     if (catchIds.length === 0) return;
     const idSet = new Set(catchIds);
-    const itemsToSell = inventory.filter((f) => idSet.has(f.catchId));
+    const itemsToSell = inventory.filter((f) => idSet.has(f.catchId) && !f.isLocked);
+    if (itemsToSell.length === 0) return;
     const hasColdStorage = civicInvestments.includes('cold_storage');
     const totalVal = itemsToSell.reduce(
       (sum, f) => sum + (hasColdStorage ? Math.round(f.value * 1.15) : f.value),
@@ -1525,20 +1391,28 @@ export default function App() {
     );
     soundManager.playRegisterSfx();
     setMoney((prev) => prev + totalVal);
-    setInventory((prev) => prev.filter((f) => !idSet.has(f.catchId)));
+    const soldIds = new Set(itemsToSell.map((f) => f.catchId));
+    setInventory((prev) => prev.filter((f) => !soldIds.has(f.catchId)));
   };
 
   const handleSellAll = () => {
-    if (inventory.length === 0) return;
+    const itemsToSell = inventory.filter((f) => !f.isLocked);
+    if (itemsToSell.length === 0) return;
     const hasColdStorage = civicInvestments.includes('cold_storage');
-    const totalVal = inventory.reduce(
+    const totalVal = itemsToSell.reduce(
       (sum, f) => sum + (hasColdStorage ? Math.round(f.value * 1.15) : f.value),
       0
     );
     soundManager.playRegisterSfx();
     setMoney((prev) => prev + totalVal);
-    setInventory([]);
+    setInventory((prev) => prev.filter((f) => f.isLocked));
     setSalvageState(INITIAL_SALVAGE_STATE);
+  };
+
+  const handleToggleLockFish = (catchId: string) => {
+    setInventory((prev) =>
+      prev.map((f) => (f.catchId === catchId ? { ...f, isLocked: !f.isLocked } : f))
+    );
   };
 
   const handleUnlockArea = (area: FishingAreaDef) => {
@@ -1560,6 +1434,10 @@ export default function App() {
   const handleSelectArea = (areaId: string) => {
     if (unlockedAreaIds.includes(areaId)) {
       setSelectedAreaId(areaId as AreaId);
+      if (fishingSubTab === 'whaling') {
+        setFishingSubTab('regular');
+      }
+      soundManager.playAreaAmbience(areaId as AreaId);
     }
   };
 
@@ -3028,9 +2906,25 @@ export default function App() {
         <header
           className={`border ${activeArea.theme.borderClass} ${activeArea.theme.panelClass} p-3 sm:p-3.5 flex items-center justify-between text-xs transition-colors`}
         >
-          <div className="font-bold text-sm text-[#f1f3f5] tracking-wide flex items-center gap-2">
+          <div className="font-bold text-sm text-[#f1f3f5] tracking-wide flex items-center gap-2 flex-wrap">
             <span>Fishing</span>
-            <span className="text-[11px] text-[#717885]">· {activeArea.name}</span>
+            <span className="text-[11px] text-[#717885]">·</span>
+            {unlockedAreaIds.length > 1 ? (
+              <select
+                value={selectedAreaId}
+                onChange={(e) => handleSelectArea(e.target.value)}
+                aria-label="Quick Switch Fishing Location"
+                className="border border-[#2d323c] bg-[#16181d] text-xs font-semibold text-[#f1f3f5] px-2 py-0.5 cursor-pointer focus:outline-none focus:border-sky-500 hover:border-[#454c5a] transition-colors"
+              >
+                {FISHING_AREAS.filter((a) => unlockedAreaIds.includes(a.id)).map((a) => (
+                  <option key={a.id} value={a.id} className="bg-[#14161c] text-[#f1f3f5]">
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-[11px] text-[#717885]">{activeArea.name}</span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -3067,13 +2961,6 @@ export default function App() {
             </button>
           </div>
         </header>
-
-        {/* Dev Code Activated Banner */}
-        {devCodeBanner && (
-          <div className="border border-emerald-500 bg-emerald-950/90 p-3 text-center text-xs font-bold text-emerald-200 animate-pulse">
-            {devCodeBanner}
-          </div>
-        )}
 
         {/* In-app Reset Confirmation Modal */}
         {showResetConfirm && (
@@ -3618,6 +3505,7 @@ export default function App() {
             onSellFish={handleSellFish}
             onSellBatch={handleSellFishBatch}
             onSellAll={handleSellAll}
+            onToggleLockFish={handleToggleLockFish}
           />
         </div>
 
