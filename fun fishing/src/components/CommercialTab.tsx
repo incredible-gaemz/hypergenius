@@ -64,6 +64,7 @@ interface CommercialTabProps {
   onFulfillOrder?: (orderId: string) => void;
   onDeclineOrder?: (orderId: string) => void;
   onGiveCrewBonus?: (crewId: string, amount: number) => void;
+  hasVoyageSpeedCivic?: boolean;
   commercialBusinessName?: string | null;
   onStartCommercialBusiness?: (name: string) => void;
   salvageState?: SalvageState;
@@ -102,6 +103,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   onFulfillOrder,
   onDeclineOrder,
   onGiveCrewBonus,
+  hasVoyageSpeedCivic = false,
   commercialBusinessName = null,
   onStartCommercialBusiness,
   salvageState = INITIAL_SALVAGE_STATE,
@@ -258,7 +260,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   );
 
   const allCaughtSpecies = useMemo(() => {
-    return FISH_COLLECTION.filter((f) => (catalogMap[f.id]?.caughtCount || 0) > 0);
+    return FISH_COLLECTION.filter((f) => (catalogMap[f.id]?.caughtCount || 0) > 0 && f.tier !== 'mythical');
   }, [catalogMap]);
 
   if (!commercialBusinessName) {
@@ -403,12 +405,13 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                 const currentTargetFishId = selectedTargetFishByBoat[boat.instanceId] ?? null;
 
                 const targetedFish = currentTargetFishId
-                  ? FISH_COLLECTION.find((f) => f.id === currentTargetFishId)
+                  ? FISH_COLLECTION.find((f) => f.id === currentTargetFishId && f.tier !== 'mythical')
                   : null;
 
                 const isDropdownOpen = fishDropdownOpenBoatId === boat.instanceId;
                 const searchLower = fishSearchQuery.toLowerCase().trim();
                 const candidateFishList = allCaughtSpecies.filter((f) => {
+                  if (f.tier === 'mythical') return false;
                   if (!searchLower) return f.areaId === currentAreaId;
                   const areaName = FISHING_AREAS.find((a) => a.id === f.areaId)?.name || '';
                   return (
@@ -424,7 +427,8 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                   installedUpgrades,
                   currentAreaId,
                   currentBaitId,
-                  currentTargetFishId
+                  currentTargetFishId,
+                  hasVoyageSpeedCivic
                 );
                 const wageCost = calculateExpeditionWageCost(assignedCrew);
                 const baitCost = currentBait.price;
@@ -666,7 +670,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                                 }
                               }}
                               defaultValue=""
-                              className="border border-[#323640] bg-[#101215] px-2 py-1 text-[11px] text-[#c0c5ce] cursor-pointer"
+                              className="border border-[#323640] bg-[#101215] px-2 py-1 text-[11px] text-[#c0c5ce] cursor-pointer max-w-full truncate"
                             >
                               <option value="" disabled>
                                 + Assign Crew...
@@ -677,7 +681,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                                   const isOutOnSalvage = busySalvageCrewIds.has(c.id);
                                   return (
                                     <option key={c.id} value={c.id} disabled={isOutOnSalvage}>
-                                      {c.name} ({c.specialtyTitle}){isOutOnSalvage ? ' - On Salvage Expedition (Unavailable)' : ''}
+                                      {c.name} ({c.specialtyTitle}){isOutOnSalvage ? ' (Unavailable)' : ''}
                                     </option>
                                   );
                                 })}
@@ -727,7 +731,17 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
 
                             {targetedFish && (
                               <div className="text-[10px] pt-0.5 leading-tight">
-                                {currentBaitId === getRecommendedCommercialBait(targetedFish) ? (
+                                {targetedFish.tier === 'legendary' ? (
+                                  currentBaitId === getRecommendedCommercialBait(targetedFish) ? (
+                                    <span className="text-amber-300 font-medium">
+                                      Legendary Titan: Rare chance (~10%) to land at most 1 {targetedFish.name}. No bulk hauls.
+                                    </span>
+                                  ) : (
+                                    <span className="text-rose-400 font-medium">
+                                      Wrong bait: Rare chance under 3%. Rig {COMMERCIAL_BAITS.find((b) => b.id === getRecommendedCommercialBait(targetedFish))?.name || 'favored bait'}.
+                                    </span>
+                                  )
+                                ) : currentBaitId === getRecommendedCommercialBait(targetedFish) ? (
                                   <span className="text-emerald-400 font-medium">
                                     Right bait loaded: guaranteed 2-4+ {targetedFish.name} in haul.
                                   </span>
@@ -800,7 +814,11 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                                           </span>
                                         </div>
                                         <div className="text-[10px] text-[#8c94a2] flex items-center justify-between mt-0.5">
-                                          <span>Favors {baitName}</span>
+                                          <span>
+                                            {f.tier === 'legendary'
+                                              ? 'Rare single catch chance'
+                                              : `Favors ${baitName}`}
+                                          </span>
                                           {!isCurrentArea && <span className="text-amber-400 font-medium">In {areaDef?.name}</span>}
                                         </div>
                                       </button>

@@ -1397,5 +1397,19 @@ export const FISH_GUIDE_DATA: Record<number, FishGuideDetails> = {
       "habitatBehavior": "Hunts the turbulent surf zones, rocky shoreline drops, and white-water beach breaks of the Eastern Pacific, raising its comb when aggressive.",
       "dietNotes": "High-speed pursuit predator chasing sardines, mullet, and flying fish right up to the shoreline.",
       "wikiUrl": "https://en.wikipedia.org/wiki/Roosterfish"
+  },
+  "199": {
+      "scientificName": "Oncorhynchus nerka kennerlyi",
+      "visualDescription": "Landlocked freshwater sockeye salmon with steel-blue and olive dorsal coloration, bright silvery flanks, and small scattered black speckles.",
+      "habitatBehavior": "Inhabits deep, cold oligotrophic lakes and reservoirs, schooling at thermoclines and feeding on pelagic zooplankton.",
+      "dietNotes": "Primarily filter feeds on daphnia, copepods, and freshwater mysis shrimp using fine gill rakers.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/Kokanee_salmon"
+  },
+  "200": {
+      "scientificName": "Morone americana",
+      "visualDescription": "Stout, laterally compressed temperate bass with dark olive-gray along the arched back, silvery sides with brass reflections, and sharp dorsal spines.",
+      "habitatBehavior": "Abundant schooling fish frequenting open lake basins, weed beds, and gravel bars; highly active in low-light and cloudy conditions.",
+      "dietNotes": "Opportunistic carnivore feeding on insect larvae, worms, small minnows, fish eggs, and small crustaceans.",
+      "wikiUrl": "https://en.wikipedia.org/wiki/White_perch"
   }
 };

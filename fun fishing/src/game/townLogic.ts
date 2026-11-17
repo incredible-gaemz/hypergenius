@@ -14,7 +14,8 @@ export type CivicInvestmentId =
   | 'aquaculture_lab'
   | 'tourism_board'
   | 'conservation_trust'
-  | 'merchant_bank';
+  | 'merchant_bank'
+  | 'deepwater_channel';
 
 export interface CivicInvestment {
   id: CivicInvestmentId;
@@ -65,6 +66,14 @@ export const CIVIC_INVESTMENTS: CivicInvestment[] = [
     sector: 'Commerce',
     effect: '10% discount on all tackle, vessels, and facility upgrades',
     description: 'Harbor trade credit lines lower shipyard and gear costs.',
+  },
+  {
+    id: 'deepwater_channel',
+    name: 'Deepwater Channel',
+    cost: 9800,
+    sector: 'Commerce',
+    effect: 'Cuts all fleet commercial voyage times in half (50% faster)',
+    description: 'Dredges the outer harbor channel for fast, direct commercial fleet passage.',
   },
 ];
 
@@ -144,6 +153,14 @@ export interface ClubMemberState {
   autoRenew?: boolean;
   isSubscriptionActive?: boolean;
 }
+
+export const INITIAL_CLUB_STATE: ClubMemberState = {
+  currentClubId: null,
+  reputationPoints: { casters: 0, commercial: 0, breeders: 0, explorers: 0 },
+  subscriptionDueAt: 0,
+  autoRenew: true,
+  isSubscriptionActive: false,
+};
 
 export function isClubPerkActive(clubState: ClubMemberState, clubId: ClubId): boolean {
   if (clubState.currentClubId !== clubId) return false;

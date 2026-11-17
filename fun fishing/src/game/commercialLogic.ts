@@ -533,7 +533,8 @@ export function calculateVoyageDuration(
   installedUpgrades: FleetUpgrade[],
   destinationAreaId?: AreaId,
   baitId?: CommercialBaitId,
-  targetFishId?: number | null
+  targetFishId?: number | null,
+  hasVoyageSpeedCivicUpgrade = false
 ): number {
   let duration = boatDef.baseVoyageSec;
 
@@ -605,6 +606,11 @@ export function calculateVoyageDuration(
   if (totalMorale > 0) {
     const durationReduction = Math.min(0.25, totalMorale * 0.04);
     duration *= 1 - durationReduction;
+  }
+
+  // 9. Town Civic Investment: Deepwater Channel cuts all fleet commercial voyage times in half (50% faster)
+  if (hasVoyageSpeedCivicUpgrade) {
+    duration *= 0.5;
   }
 
   return Math.max(15, Math.round(duration));
@@ -832,8 +838,8 @@ export function calculateExpeditionHaul(
   hasCommercialGuild: boolean = false
 ): ExpeditionHaulResult {
   const bonusNotes: string[] = [];
-  const areaSpecies = FISH_COLLECTION.filter((f) => f.areaId === expedition.destinationAreaId);
-  const pool = areaSpecies.length > 0 ? areaSpecies : FISH_COLLECTION;
+  const areaSpecies = FISH_COLLECTION.filter((f) => f.areaId === expedition.destinationAreaId && f.tier !== 'mythical');
+  const pool = areaSpecies.length > 0 ? areaSpecies : FISH_COLLECTION.filter((f) => f.tier !== 'mythical');
 
   const baitDef =
     COMMERCIAL_BAITS.find((b) => b.id === expedition.baitId) || COMMERCIAL_BAITS[0];
@@ -920,19 +926,33 @@ export function calculateExpeditionHaul(
   }
 
   // Target species tracking configuration
+  // Note: Commercial fleets can NEVER target or catch mythical creatures
   const targetFishSpecies = expedition.targetFishId
-    ? FISH_COLLECTION.find((f) => f.id === expedition.targetFishId)
+    ? FISH_COLLECTION.find((f) => f.id === expedition.targetFishId && f.tier !== 'mythical')
     : null;
 
   if (targetFishSpecies) {
     const favoredBaitId = getRecommendedCommercialBait(targetFishSpecies);
     const usingFavoredBait = expedition.baitId === favoredBaitId;
     const favoredBaitName = COMMERCIAL_BAITS.find((b) => b.id === favoredBaitId)?.name || 'Target Bait';
-    bonusNotes.push(
-      usingFavoredBait
-        ? `Target: ${targetFishSpecies.name} (Right bait loaded - high targeting yield)`
-        : `Target: ${targetFishSpecies.name} (Other bait used - reduced yield; favor ${favoredBaitName})`
-    );
+    if (targetFishSpecies.tier === 'legendary') {
+      bonusNotes.push(
+        usingFavoredBait
+          ? `Target: ${targetFishSpecies.name} (Legendary titan - rare single-catch expedition chance with right bait)`
+          : `Target: ${targetFishSpecies.name} (Legendary titan - exceedingly rare chance without favored ${favoredBaitName})`
+      );
+    } else {
+      bonusNotes.push(
+        usingFavoredBait
+          ? `Target: ${targetFishSpecies.name} (Right bait loaded - high targeting yield)`
+          : `Target: ${targetFishSpecies.name} (Other bait used - reduced yield; favor ${favoredBaitName})`
+      );
+    }
+  } else if (expedition.targetFishId) {
+    const attemptedTarget = FISH_COLLECTION.find((f) => f.id === expedition.targetFishId);
+    if (attemptedTarget?.tier === 'mythical') {
+      bonusNotes.push('Mythical creatures cannot be caught by commercial fleet vessels');
+    }
   }
 
   // Early recall handling (calling boats in early yields proportional catch)
@@ -998,13 +1018,30 @@ export function calculateExpeditionHaul(
   if (hasMonger) bonusNotes.push('Master Sashimi Fishmonger +65% value, 3.5x trophy odds, and runts eliminated');
   if (hasAbyssalSpecialist) bonusNotes.push('Deep-Trench Operations Captain +100% deep trench volume & 4x leviathan odds');
 
+  const isLegendaryTarget = targetFishSpecies && targetFishSpecies.tier === 'legendary';
+  const isEpicTarget = targetFishSpecies && targetFishSpecies.tier === 'epic';
+  const isFavoredBait = targetFishSpecies && expedition.baitId === getRecommendedCommercialBait(targetFishSpecies);
+
+  // Single voyage-level roll for targeted legendary:
+  // Even with favored bait, landing a legendary titan is a rare occurrence (~10% chance for 1 specimen).
+  // Without favored bait, it drops to ~2% chance.
+  // Fleets can NEVER catch more than 1 legendary across an entire voyage.
+  const voyageLegendarySeed = Math.abs(Math.floor(expedition.startedAt * 31 + finalCatchCount * 17));
+  let canCatchTargetLegendaryThisVoyage = false;
+  if (isLegendaryTarget) {
+    const baseTargetChance = isFavoredBait ? 100 : 20; // 10% favored, 2% wrong bait
+    const specialistBoost = hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean') ? 40 : 0;
+    canCatchTargetLegendaryThisVoyage = (voyageLegendarySeed % 1000) < (baseTargetChance + specialistBoost);
+  }
+
+  let totalLegendariesCaughtThisVoyage = 0;
   const catches: CaughtFish[] = [];
 
   for (let i = 0; i < finalCatchCount; i++) {
     const seed = Math.abs(Math.floor(expedition.startedAt + i * 79 + i * 23));
 
-    // Determine candidate species
-    let candidatePool = [...pool];
+    // Determine candidate species (commercial vessels can NEVER catch mythicals)
+    let candidatePool = pool.filter((f) => f.tier !== 'mythical');
 
     // Search focus filtering:
     if (expedition.searchFocus === 'orders' && activeMarketOrders.length > 0) {
@@ -1034,45 +1071,47 @@ export function calculateExpeditionHaul(
       }
     }
 
-    // Tier probability roll (Rebalanced: fleets catch predominantly common/uncommon commercial hauls, with significantly reduced rare/epic and exceedingly rare legendary odds):
+    // Tier probability roll:
+    // Fleets catch predominantly common and uncommon commercial hauls.
+    // Upgrades boost uncommon, rare, and epic hauls.
     let rarityRoll = seed % 1000;
     if (expedition.searchFocus === 'trophy' || expedition.searchFocus === 'quality') rarityRoll += 30;
-    if (hasSonarFinder) rarityRoll += 25;
-    if (hasSpotterDrone) rarityRoll += 30;
-    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 60;
-    if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) rarityRoll += 75;
+    if (hasSonarFinder) rarityRoll += 20;
+    if (hasSpotterDrone) rarityRoll += 25;
+    if (hasReefSpecialist && expedition.destinationAreaId === 'reef') rarityRoll += 40;
+    if (hasAbyssalSpecialist && (expedition.destinationAreaId === 'trench' || expedition.destinationAreaId === 'ocean')) rarityRoll += 45;
 
     let targetTier: RarityTier = 'common';
-    if (rarityRoll < 780) {
+    if (rarityRoll < 760) {
       targetTier = 'common';
-    } else if (rarityRoll < 945) {
+    } else if (rarityRoll < 930) {
       targetTier = 'uncommon';
-    } else if (rarityRoll < 990) {
+    } else if (rarityRoll < 980) {
       targetTier = 'rare';
-    } else if (rarityRoll < 999) {
-      targetTier = 'epic';
     } else {
-      // Exceedingly rare commercial encounter with a legendary titan (0.1% base)
-      targetTier = 'legendary';
+      targetTier = 'epic';
     }
 
-    // Target species roll:
-    // With favored (right) bait: guarantees a baseline of target fish (at least 2-4 specimens) + roll on rest.
-    // For legendary targets: fleets have an especially low catch rate (no bulk haul guarantee).
-    let species: FishSpecies;
-    const isFavoredBait = targetFishSpecies && expedition.baitId === getRecommendedCommercialBait(targetFishSpecies);
+    // Rare random legendary titan encounter: ~0.1% base per catch, hard-capped at max 1 across the whole trip
+    if (totalLegendariesCaughtThisVoyage === 0 && candidatePool.some((f) => f.tier === 'legendary')) {
+      const rawRoll = (seed * 19 + i * 47) % 10000;
+      const threshold = hasAbyssalSpecialist ? 25 : 10; // 0.25% with abyssal specialist, 0.1% base
+      if (rawRoll < threshold) {
+        targetTier = 'legendary';
+      }
+    }
 
     let isTargetRoll = false;
     if (targetFishSpecies) {
-      const isLegendaryTarget = targetFishSpecies.tier === 'legendary';
-      const isEpicTarget = targetFishSpecies.tier === 'epic';
-
-      if (isFavoredBait) {
-        if (isLegendaryTarget) {
-          // Fleets have an especially low chance to catch legendary titans: no free guarantee, ~1.5% roll (4x with Abyssal Captain)
-          const threshold = hasAbyssalSpecialist ? 60 : 15;
-          isTargetRoll = (seed % 1000) < threshold;
-        } else if (isEpicTarget) {
+      if (isLegendaryTarget) {
+        // Legendary targets: at most ONE specimen in the whole haul, only if voyage roll succeeded
+        if (canCatchTargetLegendaryThisVoyage && totalLegendariesCaughtThisVoyage === 0 && i === 0) {
+          isTargetRoll = true;
+        } else {
+          isTargetRoll = false;
+        }
+      } else if (isEpicTarget) {
+        if (isFavoredBait) {
           const minGuaranteed = Math.min(1, finalCatchCount);
           if (i < minGuaranteed) {
             isTargetRoll = true;
@@ -1080,20 +1119,17 @@ export function calculateExpeditionHaul(
             isTargetRoll = (seed % 100) < (hasAbyssalSpecialist ? 32 : 16);
           }
         } else {
-          // Common, uncommon, rare species: standard baseline guarantee
+          isTargetRoll = (seed % 100) < 6;
+        }
+      } else {
+        // Common, uncommon, rare species: standard baseline guarantee
+        if (isFavoredBait) {
           const minGuaranteed = Math.max(2, Math.min(finalCatchCount, Math.floor(finalCatchCount * 0.35)));
           if (i < minGuaranteed) {
             isTargetRoll = true;
           } else {
             isTargetRoll = (seed % 100) < 45;
           }
-        }
-      } else {
-        // Other bait: heavily reduced rate
-        if (isLegendaryTarget) {
-          isTargetRoll = (seed % 1000) < 2; // 0.2%
-        } else if (isEpicTarget) {
-          isTargetRoll = (seed % 100) < 6;
         } else {
           const minGuaranteed = finalCatchCount >= 4 ? 1 : 0;
           if (i < minGuaranteed) {
@@ -1105,12 +1141,19 @@ export function calculateExpeditionHaul(
       }
     }
 
+    let species: FishSpecies;
     if (isTargetRoll && targetFishSpecies) {
       species = targetFishSpecies;
     } else {
-      const tierMatches = candidatePool.filter((f) => f.tier === targetTier);
-      const chosenList = tierMatches.length > 0 ? tierMatches : candidatePool;
+      const availableTier = (targetTier === 'legendary' && totalLegendariesCaughtThisVoyage > 0) ? 'epic' : targetTier;
+      const tierMatches = candidatePool.filter((f) => f.tier === availableTier);
+      const nonLegendaryCandidates = candidatePool.filter((f) => f.tier !== 'legendary');
+      const chosenList = tierMatches.length > 0 ? tierMatches : (nonLegendaryCandidates.length > 0 ? nonLegendaryCandidates : candidatePool);
       species = chosenList[seed % chosenList.length];
+    }
+
+    if (species.tier === 'legendary') {
+      totalLegendariesCaughtThisVoyage++;
     }
 
     // Size and weight distribution: small runts, standard adults, and monster catches
@@ -1230,7 +1273,10 @@ export function calculateExpeditionHaul(
     finalCatches = sorted.slice(0, Math.max(3, Math.floor(catches.length * 0.8)));
   }
 
-  let totalValue = finalCatches.reduce((sum, f) => sum + f.value, 0);
+  // Guaranteed safeguard: fleets cannot catch mythicals under any circumstance
+  const sanitizedCatches = finalCatches.filter((f) => f.tier !== 'mythical');
+
+  let totalValue = sanitizedCatches.reduce((sum, f) => sum + f.value, 0);
 
   if (hasCommercialGuild && Math.random() < 0.12) {
     totalValue += 100;
@@ -1238,7 +1284,7 @@ export function calculateExpeditionHaul(
   }
 
   return {
-    fishes: finalCatches,
+    fishes: sanitizedCatches,
     totalValue,
     bonusNotes,
   };

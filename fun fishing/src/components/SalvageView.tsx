@@ -579,7 +579,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                                   {crew ? `${crew.name}${crew.specialtyTitle ? ` (${crew.specialtyTitle})` : ''}` : 'Sailor'}
                                   {isAtSeaInFleet && (
                                     <span className="text-[10px] text-amber-400 font-bold">
-                                      (At Sea in Fleet)
+                                      (Unavailable)
                                     </span>
                                   )}
                                   {!isBusy && (
@@ -604,7 +604,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                                   onAssignCrewToSalvageBoat(boat.instanceId, e.target.value);
                                 }
                               }}
-                              className="bg-[#101217] border border-[#2a2d34] text-xs text-[#e3e6eb] px-2 py-1.5 min-h-[34px] focus:outline-none"
+                              className="bg-[#101217] border border-[#2a2d34] text-xs text-[#e3e6eb] px-2 py-1.5 min-h-[34px] focus:outline-none max-w-full truncate"
                             >
                               <option value="">+ Assign Crew...</option>
                               {availableToAssign
@@ -614,7 +614,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                                   return (
                                     <option key={c.id} value={c.id} disabled={isAtSea}>
                                       {c.name}{c.specialtyTitle ? ` (${c.specialtyTitle})` : ''}
-                                      {isAtSea ? ' - Out Fishing in Fleet (Unavailable)' : ''}
+                                      {isAtSea ? ' (Unavailable)' : ''}
                                     </option>
                                   );
                                 })}

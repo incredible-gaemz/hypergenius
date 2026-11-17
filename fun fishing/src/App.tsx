@@ -93,6 +93,7 @@ import {
   generateTownBounties,
   isClubPerkActive,
   GUILD_SUBSCRIPTION_CYCLE_MS,
+  INITIAL_CLUB_STATE,
 } from './game/townLogic';
 import {
   getCurrentWeatherRumor,
@@ -635,13 +636,7 @@ export default function App() {
         };
       }
     } catch {}
-    return {
-      currentClubId: null,
-      reputationPoints: { casters: 0, commercial: 0, breeders: 0, explorers: 0 },
-      subscriptionDueAt: 0,
-      autoRenew: true,
-      isSubscriptionActive: false,
-    };
+    return INITIAL_CLUB_STATE;
   });
 
   // Deep Sea Shipwreck Salvage State
@@ -1748,9 +1743,9 @@ export default function App() {
 
   // Hatchery Aquaculture Handlers
   const handleUnlockHatchery = () => {
-    if (money < 500 || hatcheryUnlocked) return;
+    if (money < 1000 || hatcheryUnlocked) return;
     soundManager.playRegisterSfx();
-    setMoney((prev) => prev - 500);
+    setMoney((prev) => prev - 1000);
     setHatcheryUnlocked(true);
     setHatcheryTanks((prev) =>
       prev.map((t) => (t.id === 'tank_1' ? { ...t, unlocked: true } : t))
@@ -2482,13 +2477,15 @@ export default function App() {
     if (assignedCrew.length === 0) return;
 
     const installedUpgrades = FLEET_UPGRADES.filter((u) => boat.installedUpgradeIds.includes(u.id));
+    const hasVoyageSpeedCivic = civicInvestments.includes('deepwater_channel');
     const durationSec = calculateVoyageDuration(
       boatDef,
       assignedCrew,
       installedUpgrades,
       areaId,
       baitId,
-      targetFishId
+      targetFishId,
+      hasVoyageSpeedCivic
     );
     const wageCost = calculateExpeditionWageCost(assignedCrew);
     const baitDef = COMMERCIAL_BAITS.find((b) => b.id === baitId) || COMMERCIAL_BAITS[0];
@@ -2832,6 +2829,8 @@ export default function App() {
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem('cozy_reel_save_v7');
+      localStorage.removeItem('cozy_reel_save_v8');
+      localStorage.removeItem('cozy_reel_save_v9');
       localStorage.removeItem('cozy_reel_salvage_state_v1');
     } catch {}
 
@@ -2863,6 +2862,8 @@ export default function App() {
     setLiveBaitCharges(0);
     setCommercialBusinessName(null);
     setSalvageState(INITIAL_SALVAGE_STATE);
+    setCivicInvestments([]);
+    setClubState(INITIAL_CLUB_STATE);
 
     setCommercialStats({
       totalFleetRevenue: 0,
@@ -3508,6 +3509,7 @@ export default function App() {
             onCallInEarly={handleCallInEarly}
             onRetireBoat={handleRetireBoat}
             onGiveCrewBonus={handleGiveCrewBonus}
+            hasVoyageSpeedCivic={civicInvestments.includes('deepwater_channel')}
             salvageState={salvageState}
             onUnlockSalvageCharter={handleUnlockSalvageCharter}
             onBuySalvageBoat={handleBuySalvageBoat}

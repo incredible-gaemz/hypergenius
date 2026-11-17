@@ -85,7 +85,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 13,
     description: 'Wrecked on coastal oyster shoals during an autumn storm, shallow and accessible.',
     bannerImage: './wrecks/smugglers_sloop.webp',
-    baseVoyageDurationSec: 60,
+    baseVoyageDurationSec: 30,
     treasureIds: [
       'barnacle_rum_bottle',
       'clay_pipe',
@@ -111,7 +111,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 15,
     description: 'Driven onto jagged barrier reefs, its cannons and armory lie strewn across coral ridges.',
     bannerImage: './wrecks/resolute_frigate.webp',
-    baseVoyageDurationSec: 110,
+    baseVoyageDurationSec: 55,
     treasureIds: [
       'iron_cannonball',
       'wooden_rigging_pulley',
@@ -139,7 +139,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 16,
     description: 'Sunk along the continental shelf loaded with colonial silver ingots and bullion.',
     bannerImage: './wrecks/san_sebastian.webp',
-    baseVoyageDurationSec: 190,
+    baseVoyageDurationSec: 95,
     treasureIds: [
       'lead_sounding_weight',
       'terracotta_olive_jar',
@@ -168,7 +168,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 17,
     description: 'Crushed in pack ice along a fjord shelf, holding trade goods and gold-rush vaults.',
     bannerImage: './wrecks/arctic_star.webp',
-    baseVoyageDurationSec: 280,
+    baseVoyageDurationSec: 140,
     treasureIds: [
       'scrimshaw_whale_tooth',
       'leather_logbook_tin',
@@ -198,7 +198,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 16,
     description: 'Resting upright on deep oceanic silt with secure military safes and chronometers.',
     bannerImage: './wrecks/u_boat_9.webp',
-    baseVoyageDurationSec: 400,
+    baseVoyageDurationSec: 200,
     treasureIds: [
       'brass_porthole_frame',
       'antique_oil_lantern',
@@ -227,7 +227,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 19,
     description: 'Lies half-buried on an abyssal cliff with massive brass instruments and strongboxes.',
     bannerImage: './wrecks/leviathan_ironclad.webp',
-    baseVoyageDurationSec: 560,
+    baseVoyageDurationSec: 280,
     treasureIds: [
       'tarnished_silver_spoons',
       'brass_gimbal_compass',
@@ -259,7 +259,7 @@ export const SUNKEN_WRECK_SITES: SunkenWreckSite[] = [
     totalTreasureCount: 21,
     description: 'The ultimate deep salvage site split on the hadal seabed with immense historic wealth.',
     bannerImage: './wrecks/fitzgerald_deep.webp',
-    baseVoyageDurationSec: 780,
+    baseVoyageDurationSec: 390,
     treasureIds: [
       'brass_marine_telescope',
       'telegraph_engine_dial',
@@ -1300,17 +1300,17 @@ export function calculateExpeditionDurationSec(
   // Trawler (3 cargo): ~26 min base
   // Tug (6 cargo): ~50 min base (32m to 1h 25m)
   // Oceanic Explorer (12 cargo): ~110 min base (1h 11m to 3h 07m)
-  let baseBoatSec = 720;
+  let baseBoatSec = 360;
   if (boatDef.id === 'dredge_trawler') {
-    baseBoatSec = 1600;
+    baseBoatSec = 800;
   } else if (boatDef.id === 'salvage_tug') {
-    baseBoatSec = 3000;
+    baseBoatSec = 1500;
   } else if (boatDef.id === 'oceanic_explorer') {
-    baseBoatSec = 6600;
+    baseBoatSec = 3300;
   }
 
   const rawSec = Math.round(baseBoatSec * depthMultiplier);
-  return Math.max(60, rawSec);
+  return Math.max(30, rawSec);
 }
 
 export function createAuctionListing(

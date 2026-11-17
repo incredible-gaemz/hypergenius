@@ -508,6 +508,8 @@ export const FISH_COLLECTION: FishSpecies[] = [
   { id: 196, name: 'Bull Shark', tier: 'epic', minWeight: 180.0, maxWeight: 520.0, trophyWeight: 680.0, basePrice: 480, bestLureId: 'squid', areaId: 'bayou' },
   { id: 197, name: 'Barramundi', tier: 'rare', minWeight: 8.0, maxWeight: 58.0, trophyWeight: 72.0, basePrice: 90, bestLureId: 'minnow', areaId: 'river' },
   { id: 198, name: 'Roosterfish', tier: 'rare', minWeight: 10.0, maxWeight: 75.0, trophyWeight: 95.0, basePrice: 105, bestLureId: 'spoon', areaId: 'ocean' },
+  { id: 199, name: 'Kokanee Salmon', tier: 'rare', minWeight: 1.0, maxWeight: 4.5, trophyWeight: 5.5, basePrice: 65, bestLureId: 'spoon', areaId: 'lake' },
+  { id: 200, name: 'White Perch', tier: 'common', minWeight: 0.4, maxWeight: 2.2, trophyWeight: 2.8, basePrice: 15, bestLureId: 'worm', areaId: 'lake' },
 ];
 
 /**
@@ -1445,12 +1447,13 @@ export function calculateReelDuration(
     rawSeconds *= 1.8;
   }
 
-  // Deep-sea fauna take 2x as long to haul up from the abyss
+  // Deep-sea fauna take extended time to haul up from the abyss (2x reel duration for abyssal trench)
   if (areaId === 'trench') {
-    rawSeconds *= 2.0;
+    rawSeconds *= 4.0;
   }
 
-  return Math.max(2.2, Math.min(90.0, Number(rawSeconds.toFixed(1))));
+  const minFloor = areaId === 'trench' ? 4.4 : 2.2;
+  return Math.max(minFloor, Math.min(120.0, Number(rawSeconds.toFixed(1))));
 }
 
 export function rollFishEscape(
@@ -1639,7 +1642,7 @@ export function rollHookedEncounter(
     if (nothingRoll < emptyChance * nothingRatio) {
       return {
         type: 'nothing',
-        reelDurationSec: 2.2,
+        reelDurationSec: areaId === 'trench' ? 4.4 : 2.2,
         willEscape: false,
       };
     }
@@ -1649,7 +1652,7 @@ export function rollHookedEncounter(
       type: 'junk',
       item,
       junkItem: item,
-      reelDurationSec: 3.0,
+      reelDurationSec: areaId === 'trench' ? 6.0 : 3.0,
       willEscape: false,
     };
   }
@@ -2483,6 +2486,12 @@ export function getFishSpriteUrl(fish?: { id?: number; fishId?: number; name?: s
   }
   if (name.includes('roosterfish') || id === 198) {
     return './fish/roosterfish.png';
+  }
+  if (name.includes('kokanee') || id === 199) {
+    return './fish/kokanee_salmon.png';
+  }
+  if (name.includes('white perch') || id === 200) {
+    return './fish/white_perch.png';
   }
 
   // Mythical Relics & Cryptids

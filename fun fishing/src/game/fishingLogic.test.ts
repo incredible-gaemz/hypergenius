@@ -175,7 +175,7 @@ test('Starter trap costs $100 and higher reels provide line and bait protection'
 test('Field guide data has complete biological info and Wikipedia links for all species', async () => {
   const { FISH_GUIDE_DATA } = await import('./fishGuideData');
   
-  assert.equal(FISH_COLLECTION.length, 198, 'Total fish collection must be 198 species');
+  assert.equal(FISH_COLLECTION.length, 200, 'Total fish collection must be 200 species');
   
   for (const fish of FISH_COLLECTION) {
     const guide = FISH_GUIDE_DATA[fish.id];
@@ -626,10 +626,10 @@ test('Hatchery logic calculates breeding, feed options, clutch yields, and bait 
   assert.equal(getSearchFocusLabel('volume'), 'Quantity');
   assert.equal(getSearchFocusLabel('trophy'), 'Quality');
 
-  // Verify tanks: Tank 1 starts locked and costs $500
+  // Verify tanks: Tank 1 starts locked and costs $1,000 (rebalanced +$500)
   assert.equal(INITIAL_HATCHERY_TANKS.length, 4);
   assert.equal(INITIAL_HATCHERY_TANKS[0].unlocked, false);
-  assert.equal(INITIAL_HATCHERY_TANKS[0].unlockCost, 500);
+  assert.equal(INITIAL_HATCHERY_TANKS[0].unlockCost, 1000);
   assert.equal(INITIAL_HATCHERY_TANKS[1].unlocked, false);
   assert.equal(INITIAL_HATCHERY_TANKS[1].unlockCost, 350);
 
@@ -895,6 +895,7 @@ test('Dynamic Weather Sighting Rumors and Town Civic Investments', async () => {
     generateTownBounties,
   } = await import('./townLogic');
   const { rollHookedEncounter, RODS, REELS, LURES } = await import('./fishingLogic');
+  const { BOATS_CATALOG, calculateVoyageDuration } = await import('./commercialLogic');
 
   // 1. Weather sighting rumors
   assert.ok(WEATHER_SIGHTING_RUMORS.length >= 6);
@@ -926,7 +927,16 @@ test('Dynamic Weather Sighting Rumors and Town Civic Investments', async () => {
   assert.ok(rumorCatches > 0, 'Matching weather rumor should reliably hook the legendary lurker');
 
   // 2. Town logic
-  assert.equal(CIVIC_INVESTMENTS.length, 5);
+  assert.equal(CIVIC_INVESTMENTS.length, 6);
+  const canalUpgrade = CIVIC_INVESTMENTS.find((c) => c.id === 'deepwater_channel');
+  assert.ok(canalUpgrade, 'deepwater_channel upgrade must exist in CIVIC_INVESTMENTS');
+  assert.equal(canalUpgrade.cost, 9800, 'deepwater_channel upgrade must cost $9,800');
+
+  // Verify deepwater_channel cuts fleet commercial voyage duration in half
+  const testBoat = BOATS_CATALOG[1]; // Dory (base 360s)
+  const fullVoyageSec = calculateVoyageDuration(testBoat, [], [], 'lake', 'bare_gear', null, false);
+  const halfVoyageSec = calculateVoyageDuration(testBoat, [], [], 'lake', 'bare_gear', null, true);
+  assert.equal(halfVoyageSec, Math.round(fullVoyageSec * 0.5), 'deepwater_channel upgrade must cut commercial voyage times in half');
   assert.equal(ANGLER_CLUBS.length, 4);
   assert.equal(getClubRankTitle(0), 'Novice Member');
   assert.equal(getClubRankTitle(150), 'Journeyman');
@@ -1129,7 +1139,7 @@ test('Guild monthly subscriptions, rebalanced perks, and perk activity checks', 
 
 test('Hatchery starter tank unlock cost and town investment requirements', async () => {
   const { INITIAL_HATCHERY_TANKS } = await import('./hatcheryLogic');
-  assert.equal(INITIAL_HATCHERY_TANKS[0].unlockCost, 500, 'Hatchery must cost $500 to unlock');
+  assert.equal(INITIAL_HATCHERY_TANKS[0].unlockCost, 1000, 'Hatchery must cost $1,000 to unlock');
 });
 
 test('Fish pixel art sprites and mutation filter styles resolve properly', async () => {
@@ -1435,16 +1445,16 @@ test('Largest whales (Titans) require max rod and max reel to catch', () => {
   assert.equal(rolledMega, true, 'With max gear, titan whales must be rollable in encounters');
 });
 
-test('Deep sea stuff (Abyssal Trench catches) takes 2x as long to reel in', () => {
+test('Deep sea stuff (Abyssal Trench catches) takes extended time (4x base / 2x deep-sea duration) to reel in', () => {
   const bigRod = RODS.find((r) => r.id === 'big_game_rod') || RODS[3];
   const reel = REELS.find((r) => r.id === 'bearing_reel') || REELS[3];
 
   const surfaceDuration = calculateReelDuration(25.0, bigRod, reel, false, 'rare', 'lake');
   const deepSeaDuration = calculateReelDuration(25.0, bigRod, reel, false, 'rare', 'trench');
 
-  // Deep sea duration should be 2x the standard duration
+  // Deep sea duration should be 4x surface duration (2x the prior deep sea reel time)
   const ratio = deepSeaDuration / surfaceDuration;
-  assert.ok(Math.abs(ratio - 2.0) < 0.1, `Deep sea duration must be 2x standard (got ${ratio.toFixed(2)})`);
+  assert.ok(Math.abs(ratio - 4.0) < 0.2, `Deep sea duration must be 4x standard (got ${ratio.toFixed(2)})`);
 });
 
 test('Guide sorting metrics: average size, length calculation, and catch recency', async () => {
@@ -1567,6 +1577,82 @@ test('Commercial Fleet crew conflict rules: Crew out fishing cannot be selected 
   const unlockedState = { ...INITIAL_SALVAGE_STATE, unlocked: true };
   assert.equal(unlockedState.unlocked, true);
 });
+
+test('Commercial fleet balance: Fleets cannot catch mythicals and rarely catch at most 1 legendary when targeted', async () => {
+  const { calculateExpeditionHaul, BOATS_CATALOG, getRecommendedCommercialBait } = await import('./commercialLogic');
+  const { FISH_COLLECTION } = await import('./fishingLogic');
+
+  const factoryShip = BOATS_CATALOG.find((b) => b.id === 'factory_ship')!; // Large 95 cargo boat
+  const mythicalFish = FISH_COLLECTION.find((f) => f.tier === 'mythical')!;
+  const legendaryFish = FISH_COLLECTION.find((f) => f.tier === 'legendary')!;
+
+  assert.ok(mythicalFish, 'Must have at least one mythical fish');
+  assert.ok(legendaryFish, 'Must have at least one legendary fish');
+
+  const dummyBoat = {
+    instanceId: 'test_heavy_boat',
+    boatDefId: factoryShip.id,
+    customName: 'The Goliath',
+    assignedCrewIds: ['c1'],
+    installedUpgradeIds: [],
+    expedition: null,
+  };
+  const dummyCrew = [{ id: 'c1', name: 'Captain', hireCost: 100, wagePerVoyage: 10, specialty: 'apprentice' as const, specialtyTitle: '', specialtyDescription: '', avatarIcon: '', bio: '' }];
+
+  // 1. Attempt to target a mythical fish over multiple voyages
+  for (let seed = 0; seed < 25; seed++) {
+    const mythicalExpedition = {
+      startedAt: 1700000000000 + seed * 99999,
+      durationSec: 1200,
+      destinationAreaId: mythicalFish.areaId,
+      searchFocus: 'quantity' as const,
+      baitId: 'bulk_abyssal_slurry' as const,
+      wageCost: 10,
+      targetFishId: mythicalFish.id, // Targeting mythical
+    };
+
+    const haul = calculateExpeditionHaul(dummyBoat, factoryShip, dummyCrew, [], mythicalExpedition);
+    const mythicalCaught = haul.fishes.filter((f) => f.tier === 'mythical');
+    assert.equal(mythicalCaught.length, 0, 'Commercial fleets must NEVER catch mythical fish under any circumstance');
+  }
+
+  // 2. Targeting a legendary fish over 50 voyages:
+  // Must NEVER catch more than 1 legendary in any single voyage, and must catch legendaries rarely overall
+  let voyagesWithLegendary = 0;
+  const favoredBait = getRecommendedCommercialBait(legendaryFish);
+
+  for (let seed = 0; seed < 50; seed++) {
+    const legendaryExpedition = {
+      startedAt: 1700000000000 + seed * 123456,
+      durationSec: 1200,
+      destinationAreaId: legendaryFish.areaId,
+      searchFocus: 'quantity' as const,
+      baitId: favoredBait,
+      wageCost: 10,
+      targetFishId: legendaryFish.id, // Targeting legendary
+    };
+
+    const haul = calculateExpeditionHaul(dummyBoat, factoryShip, dummyCrew, [], legendaryExpedition);
+    const legendariesInHaul = haul.fishes.filter((f) => f.tier === 'legendary');
+
+    // Hard rule: No boat can ever return with multiple legendaries
+    assert.ok(
+      legendariesInHaul.length <= 1,
+      `A commercial boat can never catch more than 1 legendary per voyage (got ${legendariesInHaul.length})`
+    );
+
+    if (legendariesInHaul.length > 0) {
+      voyagesWithLegendary++;
+    }
+  }
+
+  // Out of 50 voyages, it should be rare (e.g. between 1 and 12 voyages, not 40 or 50)
+  assert.ok(
+    voyagesWithLegendary <= 15,
+    `Legendary catches should be rare even when targeted (got ${voyagesWithLegendary}/50 voyages)`
+  );
+});
+
 
 
 

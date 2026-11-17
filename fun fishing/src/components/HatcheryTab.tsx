@@ -178,26 +178,26 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
           <div className="p-3 border border-[#232730] bg-[#101215] text-xs text-[#a3aab8] space-y-1">
             <div className="flex justify-between">
               <span className="text-[#717885]">Facility Cost:</span>
-              <span className="font-bold text-emerald-400">$500</span>
+              <span className="font-bold text-emerald-400">$1,000</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#717885]">Available Money:</span>
-              <span className={`font-bold ${money >= 500 ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <span className={`font-bold ${money >= 1000 ? 'text-emerald-400' : 'text-amber-400'}`}>
                 ${money.toLocaleString()}
               </span>
             </div>
           </div>
 
           <button
-            disabled={money < 500}
+            disabled={money < 1000}
             onClick={onUnlockHatchery}
             className={`w-full py-2.5 font-bold border text-xs transition-colors ${
-              money >= 500
+              money >= 1000
                 ? 'border-emerald-600 bg-emerald-950 hover:bg-emerald-900 text-emerald-200 cursor-pointer'
                 : 'border-[#282a32] bg-[#121417] text-[#555a64] cursor-not-allowed'
             }`}
           >
-            {money >= 500 ? 'Unlock Hatchery Facility · $500' : 'Need $500 to Unlock'}
+            {money >= 1000 ? 'Unlock Hatchery Facility · $1,000' : 'Need $1,000 to Unlock'}
           </button>
         </div>
       </div>
@@ -575,11 +575,11 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                           onClick={() => onFeedTank(tank.id)}
                           className="px-3 py-1.5 text-xs border border-amber-600 bg-amber-950 hover:bg-amber-900 text-amber-200 font-bold cursor-pointer inline-flex items-center gap-1.5"
                         >
-                          Replenish Feed ({activeFeed.name} · ${activeFeed.price})
+                          Feed Tank (${activeFeed.price})
                         </button>
                       ) : (
                         <span className="text-[11px] text-emerald-400 font-semibold">
-                          Feed Active: {activeFeed.name} ({activeFeed.speedMultiplier}x Speed)
+                          Feed: {activeFeed.name} ({activeFeed.speedMultiplier}x)
                         </span>
                       )}
 
@@ -705,17 +705,17 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                         </div>
                       </div>
 
-                      {/* Simple Feed Dropdown */}
+                      {/* Feed Dropdown */}
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#8c94a2]">Feed Formulation:</span>
+                          <span className="text-[#8c94a2]">Feed:</span>
                           <span className="text-[10px] text-emerald-400 font-mono font-semibold">
-                            ${(currentFeed.price * selectedPairs).toLocaleString()} (${currentFeed.price}/pair)
+                            ${(currentFeed.price * selectedPairs).toLocaleString()}
                           </span>
                         </div>
                         <select
                           value={currentFeedId}
-                          aria-label="Select Feed Formulation"
+                          aria-label="Select Feed"
                           onChange={(e) =>
                             setSelectedFeedByTank((prev) => ({
                               ...prev,
@@ -726,11 +726,11 @@ export const HatcheryTab: React.FC<HatcheryTabProps> = ({
                         >
                           {FEED_OPTIONS.map((fd) => {
                             const cost = fd.price * selectedPairs;
-                            const bonusStr = fd.clutchBonus > 0 ? ` · +${fd.clutchBonus * selectedPairs} Fry` : '';
-                            const trophyStr = fd.trophyChance > 0.01 ? ' · Trophy Boost' : '';
+                            const bonusStr = fd.clutchBonus > 0 ? ` · +${fd.clutchBonus * selectedPairs} fry` : '';
+                            const trophyStr = fd.trophyChance > 0.01 ? ' · Trophy' : '';
                             return (
                               <option key={fd.id} value={fd.id}>
-                                {fd.name} (${cost.toLocaleString()}) · {fd.speedMultiplier}x Speed{bonusStr}{trophyStr}
+                                {fd.name} (${cost.toLocaleString()}) · {fd.speedMultiplier}x speed{bonusStr}{trophyStr}
                               </option>
                             );
                           })}
