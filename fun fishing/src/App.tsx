@@ -2351,9 +2351,9 @@ export default function App() {
   // Commercial Fleet Empire Handlers
   const handleStartCommercialBusiness = (name: string) => {
     const trimmed = name.trim();
-    if (money < 1000 || !trimmed || commercialBusinessName) return;
+    if (money < 2000 || !trimmed || commercialBusinessName) return;
     soundManager.playRegisterSfx();
-    setMoney((prev) => prev - 1000);
+    setMoney((prev) => prev - 2000);
     setCommercialBusinessName(trimmed);
   };
 
