@@ -56,7 +56,7 @@ class Virus extends Entity {
         super(id, x, y, Config.VIRUS_MASS, '#33ff33');
         this.type = 'virus';
         this.wobble = Math.random() * Math.PI * 2;
-        this.spikes = 18;
+        this.spikes = 32;
     }
 
     update(dt) {
@@ -67,14 +67,12 @@ class Virus extends Entity {
 
 class MotherCell extends Entity {
     constructor(id, x, y) {
-        // Authentic Agar experimental mother cell: deep crimson-brown with darker rim
-        super(id, x, y, Config.MOTHER_CELL_MASS, '#9c3b2e');
+        // Authentic Agar experimental mother cell: rich terracotta / crimson-brown
+        super(id, x, y, Config.MOTHER_CELL_MASS, '#cd5344');
         this.type = 'mothercell';
         this.wobble = Math.random() * Math.PI * 2;
-        this.foodToSpawn = 0;
-        this.pulse = 0;
-        this.spawnCooldown = 0;
-        this.spikes = 22;
+        this.spikes = 32;
+        this.spawnTimer = Math.floor(Math.random() * 6);
     }
 
     update(dt) {
@@ -83,7 +81,6 @@ class MotherCell extends Entity {
         const timeScale = dtClamped / 16.666;
 
         this.wobble += 0.02 * timeScale;
-        this.pulse += 0.05 * timeScale;
 
         // Strict mass cap to prevent infinite ballooning
         if (this.mass > Config.MOTHER_CELL_MAX_MASS) {

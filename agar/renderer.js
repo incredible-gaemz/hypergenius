@@ -42,7 +42,7 @@ class Renderer {
 
     draw() {
         // Clear background
-        this.ctx.fillStyle = '#f3f9fc';
+        this.ctx.fillStyle = '#f8fafc';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
@@ -92,8 +92,8 @@ class Renderer {
         }
 
         // Draw Map Border
-        this.ctx.strokeStyle = '#2c3e50';
-        this.ctx.lineWidth = 14;
+        this.ctx.strokeStyle = '#0f172a';
+        this.ctx.lineWidth = 12;
         this.ctx.strokeRect(0, 0, Config.MAP_WIDTH, Config.MAP_HEIGHT);
 
         this.ctx.restore();
@@ -118,7 +118,7 @@ class Renderer {
         const endY = Math.min(height, Math.ceil((this.cameraY + halfH) / gridSize) * gridSize);
 
         this.ctx.beginPath();
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+        this.ctx.strokeStyle = 'rgba(15, 23, 42, 0.06)';
         this.ctx.lineWidth = 1;
 
         for (let x = startX; x <= endX; x += gridSize) {
@@ -173,8 +173,8 @@ class Renderer {
     drawJigglyCell(cell) {
         this.ctx.save();
 
-        // Spawn immunity visual indicator
-        if (cell.spawnTime && Date.now() - cell.spawnTime < 3000) {
+        // Spawn immunity visual indicator (0.8s)
+        if (cell.spawnTime && Date.now() - cell.spawnTime < (Config.SPAWN_IMMUNITY_MS || 800)) {
             this.ctx.globalAlpha = 0.55;
         }
 
@@ -216,9 +216,9 @@ class Renderer {
             this.ctx.textBaseline = 'middle';
 
             const nameSize = Math.max(11, Math.min(38, cell.radius * 0.35));
-            this.ctx.font = `bold ${nameSize}px "Ubuntu", sans-serif`;
+            this.ctx.font = `700 ${nameSize}px "Space Grotesk", sans-serif`;
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
             this.ctx.lineWidth = Math.max(2, nameSize * 0.16);
 
             const hasName = Boolean(cell.name);
@@ -232,7 +232,7 @@ class Renderer {
             // Draw mass below name if large enough
             if (cell.radius > 28) {
                 const massSize = Math.max(9, nameSize * 0.65);
-                this.ctx.font = `bold ${massSize}px "Ubuntu", sans-serif`;
+                this.ctx.font = `600 ${massSize}px "JetBrains Mono", monospace`;
                 this.ctx.lineWidth = Math.max(2, massSize * 0.16);
                 const massY = hasName ? cell.y + massSize * 0.85 : cell.y;
                 const massText = Math.floor(cell.mass).toString();
@@ -246,16 +246,17 @@ class Renderer {
 
     drawVirus(virus) {
         const r = virus.displayRadius !== undefined ? virus.displayRadius : virus.radius;
-        const spikes = virus.spikes || 18;
+        const spikes = 32;
         const step = (Math.PI * 2) / spikes;
         const outerR = r;
         const innerR = r * 0.88;
 
         this.ctx.save();
         this.ctx.translate(virus.x, virus.y);
-        this.ctx.rotate(Math.sin(virus.wobble || 0) * 0.06);
-        this.ctx.lineJoin = 'round';
+        this.ctx.rotate(Math.sin(virus.wobble || 0) * 0.04);
+        this.ctx.lineJoin = 'miter';
 
+        // Sharp sawtooth spiky border
         this.ctx.beginPath();
         for (let i = 0; i < spikes; i++) {
             const angle = i * step;
@@ -264,39 +265,29 @@ class Renderer {
         }
         this.ctx.closePath();
 
-        // Virus body fill & border
-        this.ctx.fillStyle = virus.color;
+        // Classic Agar vibrant green body
+        this.ctx.fillStyle = '#33ff33';
         this.ctx.fill();
-        this.ctx.lineWidth = Math.max(3, outerR * 0.07);
-        this.ctx.strokeStyle = '#22b322';
+        this.ctx.lineWidth = Math.max(3.5, outerR * 0.065);
+        this.ctx.strokeStyle = '#22aa22';
         this.ctx.stroke();
-
-        // Inner virus core disc for depth
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, innerR * 0.82, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#44ff44';
-        this.ctx.fill();
 
         this.ctx.restore();
     }
 
     drawMotherCell(mc) {
         const r = mc.displayRadius !== undefined ? mc.displayRadius : mc.radius;
-        const spikes = mc.spikes || 22;
+        const spikes = 32;
         const step = (Math.PI * 2) / spikes;
         const outerR = r;
         const innerR = r * 0.88;
 
         this.ctx.save();
         this.ctx.translate(mc.x, mc.y);
-        this.ctx.lineJoin = 'round';
-        
-        // Gentle organic breathing pulsation
-        const pulseScale = 1 + Math.sin(mc.pulse || 0) * 0.02;
-        this.ctx.scale(pulseScale, pulseScale);
-        this.ctx.rotate(Math.sin(mc.wobble || 0) * 0.04);
+        this.ctx.rotate(Math.sin(mc.wobble || 0) * 0.03);
+        this.ctx.lineJoin = 'miter';
 
-        // Outer jagged spiky membrane
+        // Sharp sawtooth spiky outer membrane
         this.ctx.beginPath();
         for (let i = 0; i < spikes; i++) {
             const angle = i * step;
@@ -305,43 +296,21 @@ class Renderer {
         }
         this.ctx.closePath();
 
-        // Fill deep mothercell crimson-brown
-        this.ctx.fillStyle = mc.color;
+        // Authentic rich terracotta / crimson-brown
+        this.ctx.fillStyle = '#cd5344';
         this.ctx.fill();
-        
-        // Dark menacing outer rim
-        this.ctx.lineWidth = Math.max(3, outerR * 0.08);
-        this.ctx.strokeStyle = '#5a160d';
+        this.ctx.lineWidth = Math.max(4, outerR * 0.07);
+        this.ctx.strokeStyle = '#8a281e';
         this.ctx.stroke();
 
-        // Inner nucleus / core disc
-        const coreR = innerR * 0.62;
+        // Clean concentric inner core for subtle depth
         this.ctx.beginPath();
-        this.ctx.arc(0, 0, coreR, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#7a271c';
+        this.ctx.arc(0, 0, innerR * 0.65, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#b34133';
         this.ctx.fill();
-        this.ctx.lineWidth = Math.max(2, coreR * 0.08);
-        this.ctx.strokeStyle = '#4a120b';
+        this.ctx.lineWidth = Math.max(2, outerR * 0.03);
+        this.ctx.strokeStyle = '#7c2217';
         this.ctx.stroke();
-
-        // Spawner pores / organic vesicles in center
-        const poreCount = 6;
-        const poreOrbit = coreR * 0.52;
-        this.ctx.fillStyle = '#54170f';
-        for (let i = 0; i < poreCount; i++) {
-            const pAngle = (i / poreCount) * Math.PI * 2 + (mc.pulse * 0.2);
-            const px = Math.cos(pAngle) * poreOrbit;
-            const py = Math.sin(pAngle) * poreOrbit;
-            this.ctx.beginPath();
-            this.ctx.arc(px, py, coreR * 0.16, 0, Math.PI * 2);
-            this.ctx.fill();
-        }
-
-        // Center spawner mouth
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, coreR * 0.22, 0, Math.PI * 2);
-        this.ctx.fillStyle = '#3a0d07';
-        this.ctx.fill();
 
         this.ctx.restore();
     }
@@ -386,12 +355,12 @@ class Renderer {
             mCtx.clearRect(0, 0, size, size);
             
             // Background
-            mCtx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+            mCtx.fillStyle = 'rgba(15, 23, 42, 0.75)';
             mCtx.fillRect(0, 0, size, size);
             
             // Border
-            mCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            mCtx.lineWidth = 1.5;
+            mCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+            mCtx.lineWidth = 1;
             mCtx.strokeRect(0, 0, size, size);
             
             const scaleX = size / Config.MAP_WIDTH;
@@ -424,7 +393,7 @@ class Renderer {
                     const mapR = Math.max(1.5, entity.radius * scaleX);
                     mCtx.beginPath();
                     mCtx.arc(mapX, mapY, mapR, 0, Math.PI * 2);
-                    mCtx.fillStyle = '#9c3b2e';
+                    mCtx.fillStyle = '#cd5344';
                     mCtx.fill();
                 }
             }

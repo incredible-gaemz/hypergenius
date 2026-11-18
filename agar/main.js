@@ -125,10 +125,10 @@ function init() {
     if (tabGlobal) {
         tabGlobal.addEventListener('click', () => {
             currentTab = 'global';
-            tabGlobal.style.background = '#2ecc71';
-            tabGlobal.style.color = 'white';
-            tabPersonal.style.background = '#ecf0f1';
-            tabPersonal.style.color = '#333';
+            tabGlobal.style.background = '#22c55e';
+            tabGlobal.style.color = '#052e16';
+            tabPersonal.style.background = '#334155';
+            tabPersonal.style.color = '#cbd5e1';
             renderMenuLeaderboard();
         });
     }
@@ -136,10 +136,10 @@ function init() {
     if (tabPersonal) {
         tabPersonal.addEventListener('click', () => {
             currentTab = 'personal';
-            tabPersonal.style.background = '#2ecc71';
-            tabPersonal.style.color = 'white';
-            tabGlobal.style.background = '#ecf0f1';
-            tabGlobal.style.color = '#333';
+            tabPersonal.style.background = '#22c55e';
+            tabPersonal.style.color = '#052e16';
+            tabGlobal.style.background = '#334155';
+            tabGlobal.style.color = '#cbd5e1';
             renderMenuLeaderboard();
         });
     }

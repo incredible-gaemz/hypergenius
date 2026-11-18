@@ -278,40 +278,41 @@ class Game {
             this.entities[i].update(dt);
         }
 
-        // Mother Cell natural food ejection & stabilization
-        if (this.motherCellTick % 30 === 0) {
-            for (let i = 0; i < this.staticsArray.length; i++) {
-                const stat = this.staticsArray[i];
-                if (stat.type !== 'mothercell' || stat.killedBy) continue;
+        // Mother Cell continuous food fountain & stabilization
+        for (let i = 0; i < this.staticsArray.length; i++) {
+            const stat = this.staticsArray[i];
+            if (stat.type !== 'mothercell' || stat.killedBy) continue;
 
-                // Eject a food pellet every 0.5s into the surrounding area
-                if (foodCount < Config.MAX_FOOD + 200) {
+            stat.spawnTimer = (stat.spawnTimer || 0) + 1;
+            // Eject a food pellet every 4 frames outward into the arena
+            if (stat.spawnTimer >= 4) {
+                stat.spawnTimer = 0;
+                if (foodCount < Config.MAX_FOOD + 400) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = MathUtils.randomRange(10, 22);
-                    const vx = Math.cos(angle) * speed;
-                    const vy = Math.sin(angle) * speed;
-                    const spawnX = stat.x + Math.cos(angle) * (stat.radius + 10);
-                    const spawnY = stat.y + Math.sin(angle) * (stat.radius + 10);
+                    const speed = MathUtils.randomRange(14, 26);
+                    const spawnX = stat.x + Math.cos(angle) * (stat.radius + 8);
+                    const spawnY = stat.y + Math.sin(angle) * (stat.radius + 8);
 
                     const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
-                    f.vx = vx;
-                    f.vy = vy;
+                    f.vx = Math.cos(angle) * speed;
+                    f.vy = Math.sin(angle) * speed;
                     this.entities.push(f);
+                    foodCount++;
                 }
+            }
 
-                // If mother cell hit max mass, burst into a circle of pellets
-                if (stat.mass >= Config.MOTHER_CELL_MAX_MASS) {
-                    stat.mass = Config.MOTHER_CELL_MASS;
-                    for (let p = 0; p < 12; p++) {
-                        const angle = (p / 12) * Math.PI * 2;
-                        const speed = MathUtils.randomRange(15, 28);
-                        const spawnX = stat.x + Math.cos(angle) * (stat.radius + 12);
-                        const spawnY = stat.y + Math.sin(angle) * (stat.radius + 12);
-                        const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
-                        f.vx = Math.cos(angle) * speed;
-                        f.vy = Math.sin(angle) * speed;
-                        this.entities.push(f);
-                    }
+            // If mother cell reached max mass, burst into a large nova of pellets
+            if (stat.mass >= Config.MOTHER_CELL_MAX_MASS) {
+                stat.mass = Config.MOTHER_CELL_MASS;
+                for (let p = 0; p < 32; p++) {
+                    const angle = (p / 32) * Math.PI * 2 + (Math.random() * 0.1);
+                    const speed = MathUtils.randomRange(18, 34);
+                    const spawnX = stat.x + Math.cos(angle) * (stat.radius + 10);
+                    const spawnY = stat.y + Math.sin(angle) * (stat.radius + 10);
+                    const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
+                    f.vx = Math.cos(angle) * speed;
+                    f.vy = Math.sin(angle) * speed;
+                    this.entities.push(f);
                 }
             }
         }
@@ -460,9 +461,9 @@ class Game {
                         continue;
                     }
 
-                    // Immunity check (3 seconds on spawn)
-                    const cellImmune = cell.spawnTime && (Date.now() - cell.spawnTime < 3000);
-                    const otherImmune = other.spawnTime && (Date.now() - other.spawnTime < 3000);
+                    // Immunity check (0.8 seconds on spawn)
+                    const cellImmune = cell.spawnTime && (Date.now() - cell.spawnTime < (Config.SPAWN_IMMUNITY_MS || 800));
+                    const otherImmune = other.spawnTime && (Date.now() - other.spawnTime < (Config.SPAWN_IMMUNITY_MS || 800));
 
                     if (other.type === 'cell') {
                         if (cellImmune || otherImmune) continue;
@@ -519,8 +520,19 @@ class Game {
                             this.splitVirus(stat, mass.vx, mass.vy);
                         }
                     } else if (stat.type === 'mothercell') {
-                        stat.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, stat.mass + mass.mass);
+                        stat.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, stat.mass + mass.mass * 0.5);
                         mass.killedBy = stat.id;
+                        // Spray food pellets in response to being fed!
+                        for (let k = 0; k < 5; k++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const speed = MathUtils.randomRange(16, 30);
+                            const spawnX = stat.x + Math.cos(angle) * (stat.radius + 8);
+                            const spawnY = stat.y + Math.sin(angle) * (stat.radius + 8);
+                            const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
+                            f.vx = Math.cos(angle) * speed;
+                            f.vy = Math.sin(angle) * speed;
+                            this.entities.push(f);
+                        }
                     }
                 }
             }
@@ -562,9 +574,12 @@ class Game {
         const dirX = hitVx / dist;
         const dirY = hitVy / dist;
 
-        const newVirus = new Virus(this.getId(), virus.x, virus.y);
-        newVirus.vx = dirX * Config.SPLIT_SPEED;
-        newVirus.vy = dirY * Config.SPLIT_SPEED;
+        const spawnX = virus.x + dirX * (virus.radius + 14);
+        const spawnY = virus.y + dirY * (virus.radius + 14);
+
+        const newVirus = new Virus(this.getId(), spawnX, spawnY);
+        newVirus.vx = dirX * (Config.SPLIT_SPEED * 0.9);
+        newVirus.vy = dirY * (Config.SPLIT_SPEED * 0.9);
         this.entities.push(newVirus);
     }
 }

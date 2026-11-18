@@ -69,7 +69,7 @@ const PROJECT_NAMES = {
     'slopcraft-desktop': 'Slopcraft Desktop',
     'style': 'OS Style Showcase',
     'cmd': 'The Elias Thorne Mystery',
-    'agar': 'Agar Sandbox',
+    'agar': 'Microbe',
     'Cyber': 'Exodus Adventure',
     'trillion': 'Spend Elon\'s Money',
     'timeline': 'US History Timeline',
