@@ -1,5 +1,3 @@
-
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,8 +5,9 @@ let game;
 let renderer;
 let player;
 let lastTime = 0;
-let animationId;
-let myId = "player_1"; // Static for single player
+let lastUiUpdate = 0;
+let myId = "player_1";
+
 // UI Elements
 const startMenu = document.getElementById('startMenu');
 const playBtn = document.getElementById('playBtn');
@@ -17,9 +16,10 @@ const playerColorInput = document.getElementById('playerColor');
 
 // Autofill from global system
 const globalUsername = localStorage.getItem('hyper_username');
-if (globalUsername) {
+if (globalUsername && playerNameInput) {
     playerNameInput.value = globalUsername;
 }
+
 const overlays = document.getElementById('overlays');
 const scoreDisplay = document.getElementById('scoreDisplay');
 const leaderboardList = document.getElementById('leaderboardList');
@@ -31,7 +31,7 @@ const spectateTip = document.getElementById('spectateTip');
 let spectating = false;
 let globalMouseX = window.innerWidth / 2;
 let globalMouseY = window.innerHeight / 2;
-let spectateZoom = 0.2;
+let spectateZoom = 0.35;
 
 function resize() {
     canvas.width = window.innerWidth;
@@ -43,8 +43,11 @@ resize();
 function init() {
     game = new Game();
     renderer = new Renderer(canvas, ctx, game);
+    window.game = game;
+    window.renderer = renderer;
+    window.myId = myId;
     
-    // Inputs
+    // Mouse inputs
     window.addEventListener('mousemove', (e) => {
         globalMouseX = e.clientX;
         globalMouseY = e.clientY;
@@ -54,19 +57,41 @@ function init() {
         }
     });
 
+    // Touch support for mobile/trackpads
+    const handleTouch = (e) => {
+        if (e.touches && e.touches[0]) {
+            const touch = e.touches[0];
+            globalMouseX = touch.clientX;
+            globalMouseY = touch.clientY;
+            if (player) {
+                player.mouseX = touch.clientX;
+                player.mouseY = touch.clientY;
+            }
+        }
+    };
+    window.addEventListener('touchstart', handleTouch, { passive: true });
+    window.addEventListener('touchmove', handleTouch, { passive: true });
+
+    // Wheel zoom during spectating
     window.addEventListener('wheel', (e) => {
         if (spectating) {
             spectateZoom += e.deltaY * -0.0005;
-            spectateZoom = Math.max(0.05, Math.min(1.5, spectateZoom));
+            spectateZoom = Math.max(0.08, Math.min(1.2, spectateZoom));
         }
-    });
+    }, { passive: true });
 
+    // Keyboard controls
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Escape' && spectating) {
             spectating = false;
             startMenu.classList.remove('hidden');
             leaderboard.classList.add('hidden');
             spectateTip.classList.add('hidden');
+            return;
+        }
+
+        if (e.code === 'Enter' && !startMenu.classList.contains('hidden')) {
+            startGame();
             return;
         }
         
@@ -97,7 +122,6 @@ function init() {
     // UI Setup for Leaderboard Tabs
     const tabGlobal = document.getElementById('tabGlobal');
     const tabPersonal = document.getElementById('tabPersonal');
-    
     if (tabGlobal) {
         tabGlobal.addEventListener('click', () => {
             currentTab = 'global';
@@ -148,11 +172,11 @@ function init() {
         });
     }
 
-    // Start game loop in background to let bots move
+    // Start game loop
     lastTime = performance.now();
     requestAnimationFrame(gameLoop);
     
-    // Fetch initial global leaderboard
+    // Initial global leaderboard fetch
     fetchGlobalLeaderboard();
 }
 
@@ -168,8 +192,6 @@ function containsSwear(name) {
     const lowerName = name.toLowerCase();
     return SWEAR_WORDS.some(swear => lowerName.includes(swear));
 }
-
-// UI Setup for Leaderboard Tabs will be attached in init()
 
 async function fetchGlobalLeaderboard() {
     try {
@@ -205,7 +227,7 @@ function renderMenuLeaderboard() {
 }
 
 async function submitScoreToGlobal(name, score) {
-    if (score < 100) return; // Don't submit very low scores
+    if (score < 50) return;
     
     try {
         const response = await fetch(GLOBAL_LB_API);
@@ -217,7 +239,7 @@ async function submitScoreToGlobal(name, score) {
         
         scores.push({ name: name, score: score });
         scores.sort((a, b) => b.score - a.score);
-        scores = scores.slice(0, 100); // Keep top 100
+        scores = scores.slice(0, 100);
         
         await fetch(GLOBAL_LB_API, {
             method: 'PUT',
@@ -237,7 +259,8 @@ async function submitScoreToGlobal(name, score) {
 }
 
 function startGame() {
-    let name = playerNameInput.value || "An unnamed cell";
+    let name = playerNameInput.value ? playerNameInput.value.trim() : "An unnamed cell";
+    if (!name) name = "An unnamed cell";
     
     if (containsSwear(name)) {
         alert("Please choose a different name without inappropriate words.");
@@ -246,22 +269,21 @@ function startGame() {
     
     const colorInput = document.getElementById('playerColor');
     const selectedColor = colorInput ? colorInput.value : null;
-    // Clear previous
+
     if (player) {
         game.removePlayer(myId);
     }
     
     myHighScore = 0;
     
-    // Spawn human player at 400 mass
-    const { color } = game.addPlayer(myId, name, selectedColor, 400);
+    // Spawn human player at authentic Agar starting mass (15 mass)
+    const { color } = game.addPlayer(myId, name, selectedColor, 15);
     player = new Player(game, myId, name, color);
     
     startMenu.classList.add('hidden');
     leaderboard.classList.remove('hidden');
     scoreBox.classList.remove('hidden');
     
-    // Focus canvas
     canvas.focus();
 }
 
@@ -269,23 +291,23 @@ function updateUI() {
     if (!player && !spectating) return;
 
     if (player) {
-        // Check if player died without slow array filter
         let hasMyCells = false;
-        for (let i = 0; i < game.entities.length; i++) {
-            const e = game.entities[i];
-            if (e.type === 'cell' && e.ownerId === myId && !e.killedBy) {
+        let currentMass = 0;
+
+        for (let i = 0; i < game.cellsArray.length; i++) {
+            const e = game.cellsArray[i];
+            if (e.ownerId === myId && !e.killedBy) {
                 hasMyCells = true;
-                break;
+                currentMass += e.mass;
             }
         }
         
-        const score = game.getPlayerScore(myId);
+        const score = Math.floor(currentMass);
         if (score > myHighScore) {
             myHighScore = score;
         }
         
         if (!hasMyCells && startMenu.classList.contains('hidden') && document.getElementById('deathPopup').classList.contains('hidden')) {
-            // Player died
             handlePlayerDeath(player.name, myHighScore);
             player = null;
             return;
@@ -321,21 +343,17 @@ async function handlePlayerDeath(playerName, score) {
     spectateTip.classList.add('hidden');
     
     deathPopup.classList.remove('hidden');
-    
     document.getElementById('deathScoreDisplay').innerText = score;
     
-    // Store variables immediately before any async await calls
     window.lastDeathName = playerName;
     window.lastDeathScore = score;
     
-    // Calculate personal rank
     let personalRank = 1;
     for (let s of myPersonalScores) {
         if (s.score > score) personalRank++;
     }
     document.getElementById('personalPlacementDisplay').innerText = `#${personalRank}`;
     
-    // Fetch latest global to calculate global rank accurately
     document.getElementById('globalPlacementDisplay').innerText = "Loading...";
     try {
         const response = await fetch(GLOBAL_LB_API);
@@ -355,8 +373,6 @@ async function handlePlayerDeath(playerName, score) {
     document.getElementById('globalPlacementDisplay').innerText = `#${globalRank}`;
 }
 
-// Event listeners moved to init()
-
 function savePersonalScore(name, score) {
     myPersonalScores.push({ name: name, score: score });
     myPersonalScores.sort((a, b) => b.score - a.score);
@@ -374,10 +390,10 @@ function gameLoop(timestamp) {
     }
     game.update(dt);
     
-    // Determine if we have cells alive to focus camera (in multiplayer we check entity array)
     let hasMyCells = false;
-    for (let e of game.entities) {
-        if (e.type === 'cell' && (e.ownerId === myId || e.id === myId)) {
+    for (let i = 0; i < game.cellsArray.length; i++) {
+        const c = game.cellsArray[i];
+        if (c.ownerId === myId && !c.killedBy) {
             hasMyCells = true;
             break;
         }
@@ -386,31 +402,29 @@ function gameLoop(timestamp) {
     if (hasMyCells) {
         renderer.updateCamera(myId);
     } else if (spectating) {
-        // Free cam movement based on mouse distance from center
         const dx = globalMouseX - canvas.width / 2;
         const dy = globalMouseY - canvas.height / 2;
         
-        // Pan camera
-        renderer.cameraX += (dx * 0.03) / renderer.zoom;
-        renderer.cameraY += (dy * 0.03) / renderer.zoom;
+        renderer.cameraX += (dx * 0.035) / renderer.zoom;
+        renderer.cameraY += (dy * 0.035) / renderer.zoom;
         
-        // Keep in bounds
         renderer.cameraX = Math.max(0, Math.min(Config.MAP_WIDTH, renderer.cameraX));
         renderer.cameraY = Math.max(0, Math.min(Config.MAP_HEIGHT, renderer.cameraY));
         
         renderer.targetZoom = spectateZoom;
         renderer.zoom = MathUtils.lerp(renderer.zoom, renderer.targetZoom, 0.1);
     } else {
-        // If dead or main menu, just gently pan camera
-        renderer.cameraX += 0.5;
-        renderer.cameraY += 0.5;
-        renderer.zoom = 0.5;
+        // Idle camera drift when on menu
+        renderer.cameraX += 0.4;
+        renderer.cameraY += 0.4;
+        renderer.zoom = 0.4;
     }
     
     renderer.draw();
     
-    // Throttle local UI updates
-    if (Math.random() < 0.2) {
+    // Throttle UI update to every ~180ms for buttery-smooth performance
+    if (timestamp - lastUiUpdate > 180) {
+        lastUiUpdate = timestamp;
         updateUI();
     }
 

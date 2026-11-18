@@ -1,5 +1,3 @@
-
-
 class Renderer {
     constructor(canvas, ctx, game) {
         this.canvas = canvas;
@@ -10,82 +8,82 @@ class Renderer {
         this.cameraY = Config.MAP_HEIGHT / 2;
         this.zoom = 1;
         this.targetZoom = 1;
+        this.lastMinimapUpdate = 0;
     }
 
     updateCamera(playerId) {
-        const myCells = this.game.entities.filter(e => e.type === 'cell' && e.ownerId === playerId);
-        
-        if (myCells.length === 0) return; // Dead, leave camera where it is
-        
         let cx = 0, cy = 0, totalMass = 0;
-        for (let cell of myCells) {
-            cx += cell.x * cell.mass;
-            cy += cell.y * cell.mass;
-            totalMass += cell.mass;
+        let count = 0;
+        
+        for (let i = 0; i < this.game.entities.length; i++) {
+            const e = this.game.entities[i];
+            if (e.type === 'cell' && e.ownerId === playerId && !e.killedBy) {
+                cx += e.x * e.mass;
+                cy += e.y * e.mass;
+                totalMass += e.mass;
+                count++;
+            }
         }
         
-        if (totalMass > 0) {
-            cx /= totalMass;
-            cy /= totalMass;
-            
-            // Smooth camera interpolation
-            this.cameraX = MathUtils.lerp(this.cameraX, cx, 0.1);
-            this.cameraY = MathUtils.lerp(this.cameraY, cy, 0.1);
-            
-            // Zoom out as we get bigger
-            const targetZoom = Math.pow(Config.START_MASS / totalMass, 0.4) * 1.5;
-            this.targetZoom = Math.max(0.05, Math.min(1.5, targetZoom));
-        }
+        if (count === 0 || totalMass === 0) return;
         
-        this.zoom = MathUtils.lerp(this.zoom, this.targetZoom, 0.05);
+        cx /= totalMass;
+        cy /= totalMass;
+        
+        // Smooth camera interpolation
+        this.cameraX = MathUtils.lerp(this.cameraX, cx, 0.1);
+        this.cameraY = MathUtils.lerp(this.cameraY, cy, 0.1);
+        
+        // Zoom out smoothly as mass grows
+        const targetZoom = Math.max(0.12, Math.min(1.2, Math.pow(Math.min(64 / totalMass, 1), 0.38) * 1.1));
+        this.targetZoom = targetZoom;
+        this.zoom = MathUtils.lerp(this.zoom, this.targetZoom, 0.06);
     }
 
     draw() {
-        // Clear screen
-        this.ctx.fillStyle = '#f2fbff';
+        // Clear background
+        this.ctx.fillStyle = '#f3f9fc';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
         
-        // Center camera
+        // Center camera and scale
         this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
         this.ctx.scale(this.zoom, this.zoom);
         this.ctx.translate(-this.cameraX, -this.cameraY);
 
         this.drawGrid();
 
-        // Calculate view bounds for culling
-        const viewLeft = this.cameraX - (this.canvas.width / 2 / this.zoom);
-        const viewRight = this.cameraX + (this.canvas.width / 2 / this.zoom);
-        const viewTop = this.cameraY - (this.canvas.height / 2 / this.zoom);
-        const viewBottom = this.cameraY + (this.canvas.height / 2 / this.zoom);
+        // View bounds for culling
+        const halfW = (this.canvas.width / 2) / this.zoom;
+        const halfH = (this.canvas.height / 2) / this.zoom;
+        const viewLeft = this.cameraX - halfW;
+        const viewRight = this.cameraX + halfW;
+        const viewTop = this.cameraY - halfH;
+        const viewBottom = this.cameraY + halfH;
 
+        // View culling: collect visible entities
         const visibleEntities = [];
-        for (let i = 0; i < this.game.entities.length; i++) {
-            const entity = this.game.entities[i];
+        const entities = this.game.entities;
+        
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i];
+            if (entity.killedBy) continue;
             
-            // Optimization: If we are huge and zoomed way out, don't render tiny passive food
-            if (entity.type === 'food' && this.zoom < 0.15) {
-                continue;
-            }
-            
-            const renderRadius = entity.displayRadius !== undefined ? entity.displayRadius : entity.radius;
-
-            // View culling: don't draw if completely outside camera bounds
-            if (entity.x + renderRadius < viewLeft ||
-                entity.x - renderRadius > viewRight ||
-                entity.y + renderRadius < viewTop ||
-                entity.y - renderRadius > viewBottom) {
+            const r = entity.displayRadius !== undefined ? entity.displayRadius : entity.radius;
+            if (entity.x + r < viewLeft || entity.x - r > viewRight ||
+                entity.y + r < viewTop || entity.y - r > viewBottom) {
                 continue;
             }
             visibleEntities.push(entity);
         }
 
-        // Sort ONLY visible entities by radius to draw smaller ones first
+        // Draw in correct z-order: food first, then ejected, then viruses/mothercells, then cells by radius
         visibleEntities.sort((a, b) => {
-            // Food always on bottom, then viruses, then cells
             if (a.type === 'food' && b.type !== 'food') return -1;
             if (b.type === 'food' && a.type !== 'food') return 1;
+            if (a.type === 'ejected' && b.type === 'cell') return -1;
+            if (b.type === 'ejected' && a.type === 'cell') return 1;
             return a.radius - b.radius;
         });
 
@@ -94,35 +92,34 @@ class Renderer {
         }
 
         // Draw Map Border
-        this.ctx.strokeStyle = '#000000';
-        this.ctx.lineWidth = 10;
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 14;
         this.ctx.strokeRect(0, 0, Config.MAP_WIDTH, Config.MAP_HEIGHT);
 
         this.ctx.restore();
         
-        // Draw minimap on top of everything
+        // Draw minimap on HUD
         this.drawMinimap();
     }
 
     drawGrid() {
-        if (this.zoom < 0.1) return; // Don't draw grid if heavily zoomed out
+        if (this.zoom < 0.1) return;
         
-        let gridSize = 50;
-        if (this.zoom < 0.5) gridSize = 100;
-        if (this.zoom < 0.25) gridSize = 250;
-        
+        const gridSize = 60;
         const width = Config.MAP_WIDTH;
         const height = Config.MAP_HEIGHT;
         
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-        this.ctx.lineWidth = 1;
+        const halfW = (this.canvas.width / 2) / this.zoom;
+        const halfH = (this.canvas.height / 2) / this.zoom;
         
-        // Only draw grid where camera sees
-        const startX = Math.max(0, Math.floor((this.cameraX - this.canvas.width / 2 / this.zoom) / gridSize) * gridSize);
-        const endX = Math.min(width, Math.ceil((this.cameraX + this.canvas.width / 2 / this.zoom) / gridSize) * gridSize);
-        const startY = Math.max(0, Math.floor((this.cameraY - this.canvas.height / 2 / this.zoom) / gridSize) * gridSize);
-        const endY = Math.min(height, Math.ceil((this.cameraY + this.canvas.height / 2 / this.zoom) / gridSize) * gridSize);
+        const startX = Math.max(0, Math.floor((this.cameraX - halfW) / gridSize) * gridSize);
+        const endX = Math.min(width, Math.ceil((this.cameraX + halfW) / gridSize) * gridSize);
+        const startY = Math.max(0, Math.floor((this.cameraY - halfH) / gridSize) * gridSize);
+        const endY = Math.min(height, Math.ceil((this.cameraY + halfH) / gridSize) * gridSize);
+
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+        this.ctx.lineWidth = 1;
 
         for (let x = startX; x <= endX; x += gridSize) {
             this.ctx.moveTo(x, startY);
@@ -137,128 +134,245 @@ class Renderer {
 
     drawEntity(entity) {
         if (entity.type === 'food') {
-            const renderRadius = entity.displayRadius !== undefined ? entity.displayRadius : entity.radius;
+            const r = entity.radius;
             this.ctx.fillStyle = entity.color;
-            // Drawing rectangles is vastly faster than drawing arcs/circles in HTML5 Canvas
-            this.ctx.fillRect(entity.x - renderRadius, entity.y - renderRadius, renderRadius * 2, renderRadius * 2);
+            this.ctx.beginPath();
+            this.ctx.arc(entity.x, entity.y, r, 0, Math.PI * 2);
+            this.ctx.fill();
             return;
         }
+
+        if (entity.type === 'ejected') {
+            const r = entity.radius;
+            this.ctx.fillStyle = entity.color;
+            this.ctx.beginPath();
+            this.ctx.arc(entity.x, entity.y, r, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.strokeStyle = this.shadeColor(entity.color, -20);
+            this.ctx.lineWidth = Math.max(2, r * 0.12);
+            this.ctx.stroke();
+            return;
+        }
+
+        if (entity.type === 'virus') {
+            this.drawVirus(entity);
+            return;
+        }
+
+        if (entity.type === 'mothercell') {
+            this.drawMotherCell(entity);
+            return;
+        }
+
+        // Draw Jiggly Cell
+        if (entity.type === 'cell') {
+            this.drawJigglyCell(entity);
+        }
+    }
+
+    drawJigglyCell(cell) {
+        this.ctx.save();
+
+        // Spawn immunity visual indicator
+        if (cell.spawnTime && Date.now() - cell.spawnTime < 3000) {
+            this.ctx.globalAlpha = 0.55;
+        }
+
+        // Get jiggly perimeter vertices
+        const pts = cell.getPerimeterPoints();
+        const len = pts.length;
 
         this.ctx.beginPath();
-        
-        if (entity.type === 'cell' && entity.spawnTime && Date.now() - entity.spawnTime < 3000) {
-            this.ctx.globalAlpha = 0.4; // Semi-transparent for spawn immunity
-        }
-        
-        if (entity.type === 'virus' || entity.type === 'mothercell') {
-            this.drawVirus(entity);
-            this.ctx.globalAlpha = 1.0;
-            return;
-        }
+        if (len >= 3) {
+            let midX = (pts[len - 1].x + pts[0].x) / 2;
+            let midY = (pts[len - 1].y + pts[0].y) / 2;
+            this.ctx.moveTo(midX, midY);
 
-        const renderRadius = entity.displayRadius !== undefined ? entity.displayRadius : entity.radius;
-        this.ctx.arc(entity.x, entity.y, renderRadius, 0, 2 * Math.PI, false);
-        this.ctx.fillStyle = entity.color;
+            for (let i = 0; i < len; i++) {
+                const next = pts[(i + 1) % len];
+                const nextMidX = (pts[i].x + next.x) / 2;
+                const nextMidY = (pts[i].y + next.y) / 2;
+                this.ctx.quadraticCurveTo(pts[i].x, pts[i].y, nextMidX, nextMidY);
+            }
+        } else {
+            const r = cell.displayRadius || cell.radius;
+            this.ctx.arc(cell.x, cell.y, r, 0, Math.PI * 2);
+        }
+        this.ctx.closePath();
+
+        // Fill cell
+        this.ctx.fillStyle = cell.color;
         this.ctx.fill();
-        
-        // Border
-        if (entity.type === 'cell' || entity.type === 'ejected') {
-            this.ctx.lineWidth = Math.max(2, entity.radius * 0.1);
-            this.ctx.strokeStyle = this.shadeColor(entity.color, -20);
-            this.ctx.stroke();
-        }
 
-        // Text
-        if (entity.type === 'cell') {
-            if (entity.radius > 20) {
-                this.ctx.fillStyle = 'white';
-                this.ctx.strokeStyle = 'black';
-                this.ctx.lineWidth = 3;
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                
-                // Name
-                if (entity.name) {
-                    const fontSize = Math.max(10, entity.radius * 0.4);
-                    this.ctx.font = `bold ${fontSize}px "Ubuntu", sans-serif`;
-                    this.ctx.strokeText(entity.name, entity.x, entity.y);
-                    this.ctx.fillText(entity.name, entity.x, entity.y);
-                }
+        // Outline
+        const borderWidth = Math.max(3, cell.radius * 0.08);
+        this.ctx.lineWidth = borderWidth;
+        this.ctx.strokeStyle = this.shadeColor(cell.color, -22);
+        this.ctx.stroke();
+
+        // Draw Cell Name & Mass
+        if (cell.radius > 16) {
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+
+            const nameSize = Math.max(11, Math.min(38, cell.radius * 0.35));
+            this.ctx.font = `bold ${nameSize}px "Ubuntu", sans-serif`;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+            this.ctx.lineWidth = Math.max(2, nameSize * 0.16);
+
+            const hasName = Boolean(cell.name);
+            const nameY = (cell.radius > 32 && hasName) ? cell.y - nameSize * 0.35 : cell.y;
+
+            if (hasName) {
+                this.ctx.strokeText(cell.name, cell.x, nameY);
+                this.ctx.fillText(cell.name, cell.x, nameY);
+            }
+
+            // Draw mass below name if large enough
+            if (cell.radius > 28) {
+                const massSize = Math.max(9, nameSize * 0.65);
+                this.ctx.font = `bold ${massSize}px "Ubuntu", sans-serif`;
+                this.ctx.lineWidth = Math.max(2, massSize * 0.16);
+                const massY = hasName ? cell.y + massSize * 0.85 : cell.y;
+                const massText = Math.floor(cell.mass).toString();
+                this.ctx.strokeText(massText, cell.x, massY);
+                this.ctx.fillText(massText, cell.x, massY);
             }
         }
-        
-        this.ctx.globalAlpha = 1.0;
+
+        this.ctx.restore();
     }
 
     drawVirus(virus) {
-        const renderRadius = virus.displayRadius !== undefined ? virus.displayRadius : virus.radius;
-        let spikes = 30;
-        let innerRatio = 0.9;
-        
-        if (virus.type === 'mothercell') {
-            spikes = 45;
-            innerRatio = 0.96; // Lower spike depth ratio for brown viruses
-        }
-        
-        const step = Math.PI * 2 / spikes;
-        const outerRadius = renderRadius;
-        const innerRadius = renderRadius * innerRatio;
+        const r = virus.displayRadius !== undefined ? virus.displayRadius : virus.radius;
+        const spikes = virus.spikes || 18;
+        const step = (Math.PI * 2) / spikes;
+        const outerR = r;
+        const innerR = r * 0.88;
 
         this.ctx.save();
         this.ctx.translate(virus.x, virus.y);
-        
-        // Wobble effect
-        virus.wobble += 0.05;
-        this.ctx.rotate(Math.sin(virus.wobble) * 0.05);
+        this.ctx.rotate(Math.sin(virus.wobble || 0) * 0.06);
+        this.ctx.lineJoin = 'round';
 
         this.ctx.beginPath();
         for (let i = 0; i < spikes; i++) {
             const angle = i * step;
-            const radius = (i % 2 === 0) ? outerRadius : innerRadius;
-            this.ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+            const currentR = (i % 2 === 0) ? outerR : innerR;
+            this.ctx.lineTo(Math.cos(angle) * currentR, Math.sin(angle) * currentR);
         }
         this.ctx.closePath();
 
+        // Virus body fill & border
         this.ctx.fillStyle = virus.color;
         this.ctx.fill();
-        this.ctx.lineWidth = outerRadius * 0.1;
-        this.ctx.strokeStyle = this.shadeColor(virus.color, -20);
+        this.ctx.lineWidth = Math.max(3, outerR * 0.07);
+        this.ctx.strokeStyle = '#22b322';
         this.ctx.stroke();
-        
+
+        // Inner virus core disc for depth
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, innerR * 0.82, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#44ff44';
+        this.ctx.fill();
+
         this.ctx.restore();
     }
 
-    // Helper to darken colors for borders
+    drawMotherCell(mc) {
+        const r = mc.displayRadius !== undefined ? mc.displayRadius : mc.radius;
+        const spikes = mc.spikes || 22;
+        const step = (Math.PI * 2) / spikes;
+        const outerR = r;
+        const innerR = r * 0.88;
+
+        this.ctx.save();
+        this.ctx.translate(mc.x, mc.y);
+        this.ctx.lineJoin = 'round';
+        
+        // Gentle organic breathing pulsation
+        const pulseScale = 1 + Math.sin(mc.pulse || 0) * 0.02;
+        this.ctx.scale(pulseScale, pulseScale);
+        this.ctx.rotate(Math.sin(mc.wobble || 0) * 0.04);
+
+        // Outer jagged spiky membrane
+        this.ctx.beginPath();
+        for (let i = 0; i < spikes; i++) {
+            const angle = i * step;
+            const currentR = (i % 2 === 0) ? outerR : innerR;
+            this.ctx.lineTo(Math.cos(angle) * currentR, Math.sin(angle) * currentR);
+        }
+        this.ctx.closePath();
+
+        // Fill deep mothercell crimson-brown
+        this.ctx.fillStyle = mc.color;
+        this.ctx.fill();
+        
+        // Dark menacing outer rim
+        this.ctx.lineWidth = Math.max(3, outerR * 0.08);
+        this.ctx.strokeStyle = '#5a160d';
+        this.ctx.stroke();
+
+        // Inner nucleus / core disc
+        const coreR = innerR * 0.62;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, coreR, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#7a271c';
+        this.ctx.fill();
+        this.ctx.lineWidth = Math.max(2, coreR * 0.08);
+        this.ctx.strokeStyle = '#4a120b';
+        this.ctx.stroke();
+
+        // Spawner pores / organic vesicles in center
+        const poreCount = 6;
+        const poreOrbit = coreR * 0.52;
+        this.ctx.fillStyle = '#54170f';
+        for (let i = 0; i < poreCount; i++) {
+            const pAngle = (i / poreCount) * Math.PI * 2 + (mc.pulse * 0.2);
+            const px = Math.cos(pAngle) * poreOrbit;
+            const py = Math.sin(pAngle) * poreOrbit;
+            this.ctx.beginPath();
+            this.ctx.arc(px, py, coreR * 0.16, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+
+        // Center spawner mouth
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, coreR * 0.22, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#3a0d07';
+        this.ctx.fill();
+
+        this.ctx.restore();
+    }
+
     shadeColor(color, percent) {
-        let R = parseInt(color.substring(1,3),16);
-        let G = parseInt(color.substring(3,5),16);
-        let B = parseInt(color.substring(5,7),16);
+        if (!color || color[0] !== '#') return color;
+        let R = parseInt(color.substring(1,3), 16);
+        let G = parseInt(color.substring(3,5), 16);
+        let B = parseInt(color.substring(5,7), 16);
 
-        R = parseInt(R * (100 + percent) / 100);
-        G = parseInt(G * (100 + percent) / 100);
-        B = parseInt(B * (100 + percent) / 100);
+        R = Math.min(255, Math.max(0, parseInt(R * (100 + percent) / 100)));
+        G = Math.min(255, Math.max(0, parseInt(G * (100 + percent) / 100)));
+        B = Math.min(255, Math.max(0, parseInt(B * (100 + percent) / 100)));
 
-        R = (R<255)?R:255;  
-        G = (G<255)?G:255;  
-        B = (B<255)?B:255;  
+        const RR = R.toString(16).padStart(2, '0');
+        const GG = G.toString(16).padStart(2, '0');
+        const BB = B.toString(16).padStart(2, '0');
 
-        let RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-        let GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-        let BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-
-        return "#"+RR+GG+BB;
+        return `#${RR}${GG}${BB}`;
     }
 
     drawMinimap() {
         if (!this.game) return;
         
-        const size = 150; // Size of minimap on screen
-        const padding = 20;
+        const size = 140;
+        const padding = 16;
         const x = this.canvas.width - size - padding;
         const y = this.canvas.height - size - padding;
         
         const now = Date.now();
-        if (!this.minimapCanvas || !this.lastMinimapUpdate || now - this.lastMinimapUpdate > 5000) {
+        if (!this.minimapCanvas || !this.lastMinimapUpdate || now - this.lastMinimapUpdate > 600) {
             this.lastMinimapUpdate = now;
             
             if (!this.minimapCanvas) {
@@ -272,30 +386,31 @@ class Renderer {
             mCtx.clearRect(0, 0, size, size);
             
             // Background
-            mCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            mCtx.fillStyle = 'rgba(15, 23, 42, 0.45)';
             mCtx.fillRect(0, 0, size, size);
             
             // Border
-            mCtx.strokeStyle = '#000';
-            mCtx.lineWidth = 2;
+            mCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            mCtx.lineWidth = 1.5;
             mCtx.strokeRect(0, 0, size, size);
             
-            // Draw entities (only players/bots and mothercells to save performance)
             const scaleX = size / Config.MAP_WIDTH;
             const scaleY = size / Config.MAP_HEIGHT;
             
-            for (let entity of this.game.entities) {
+            for (let i = 0; i < this.game.entities.length; i++) {
+                const entity = this.game.entities[i];
+                if (entity.killedBy) continue;
+
                 if (entity.type === 'cell') {
                     const mapX = entity.x * scaleX;
                     const mapY = entity.y * scaleY;
-                    const mapRadius = Math.max(1.5, entity.radius * Math.max(scaleX, scaleY));
+                    const mapR = Math.max(1.5, entity.radius * scaleX);
                     
                     mCtx.beginPath();
-                    mCtx.arc(mapX, mapY, mapRadius, 0, 2 * Math.PI);
+                    mCtx.arc(mapX, mapY, mapR, 0, Math.PI * 2);
                     
-                    // Highlight my player
                     if (typeof myId !== 'undefined' && entity.ownerId === myId) {
-                        mCtx.fillStyle = '#ffffff'; // Make my cells white on minimap
+                        mCtx.fillStyle = '#ffffff';
                         mCtx.strokeStyle = '#000000';
                         mCtx.lineWidth = 1;
                         mCtx.stroke();
@@ -306,19 +421,16 @@ class Renderer {
                 } else if (entity.type === 'mothercell') {
                     const mapX = entity.x * scaleX;
                     const mapY = entity.y * scaleY;
-                    const mapRadius = Math.max(1, entity.radius * Math.max(scaleX, scaleY));
-                    
+                    const mapR = Math.max(1.5, entity.radius * scaleX);
                     mCtx.beginPath();
-                    mCtx.arc(mapX, mapY, mapRadius, 0, 2 * Math.PI);
-                    mCtx.fillStyle = '#8B4513';
+                    mCtx.arc(mapX, mapY, mapR, 0, Math.PI * 2);
+                    mCtx.fillStyle = '#9c3b2e';
                     mCtx.fill();
                 }
             }
         }
         
         this.ctx.save();
-        
-        // Draw the cached minimap
         if (this.minimapCanvas) {
             this.ctx.drawImage(this.minimapCanvas, x, y);
         }
@@ -331,15 +443,14 @@ class Renderer {
         const viewX = this.cameraX - viewWidth / 2;
         const viewY = this.cameraY - viewHeight / 2;
         
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        this.ctx.lineWidth = 1.5;
         this.ctx.strokeRect(
             x + viewX * scaleX, 
             y + viewY * scaleY, 
             viewWidth * scaleX, 
             viewHeight * scaleY
         );
-        
         this.ctx.restore();
     }
 }

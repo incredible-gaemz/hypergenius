@@ -1,40 +1,40 @@
 const Config = {
-    MAP_WIDTH: 40000,
-    MAP_HEIGHT: 40000,
-    MAX_FOOD: 6000,
-    MAX_VIRUSES: 120,
-    MAX_MOTHER_CELLS: 150,
-    MAX_BOTS: 200,
+    MAP_WIDTH: 14000,
+    MAP_HEIGHT: 14000,
+    MAX_FOOD: 2200,
+    MAX_VIRUSES: 35,
+    MAX_MOTHER_CELLS: 18,
+    MAX_BOTS: 45,
     
     // Mechanics
     FOOD_MASS: 1,
-    EJECTED_MASS: 14, // Mass of W pellet
-    VIRUS_MASS: 100, // Starting mass of a virus
-    VIRUS_MAX_MASS: 180, // Virus splits when it hits this mass
-    MOTHER_CELL_MASS: 250,
-    MOTHER_CELL_MAX_MASS: 800,
-    START_MASS: 10,
-    BASE_SPEED: 28,
-    SPEED_SCALE: 0.25, // Lowered from 0.44 so players keep more speed when huge
+    EJECTED_MASS: 13,        // Mass of W pellet
+    VIRUS_MASS: 100,         // Starting mass of a virus
+    VIRUS_MAX_MASS: 180,     // Virus splits when it hits this mass
+    MOTHER_CELL_MASS: 220,   // Base mass of a mother cell
+    MOTHER_CELL_MAX_MASS: 500, // Capped: over this it bursts/stabilizes
+    START_MASS: 10,          // Authentic Agar starting mass
+    BASE_SPEED: 32,          // Movement speed baseline
+    SPEED_SCALE: 0.44,       // Authentic Agar speed decay: speed = base * (mass ^ -0.44)
     
-    // Speeds
-    EJECT_SPEED: 35,
-    SPLIT_SPEED: 50,
+    // Speeds & Physics
+    EJECT_SPEED: 36,
+    SPLIT_SPEED: 46,
+    SPEED_DECAY: 0.88,
+    MAX_CELLS: 16,           // Standard Agar maximum split count
+    MASS_DECAY_RATE: 0.0018, // 0.18% mass lost per second for cells > 100 mass
     
-    // Sizes
-    MIN_EJECT_MASS: 35, // Minimum mass to press W
-    MIN_SPLIT_MASS: 35, // Minimum mass to split
-    
-    // Physics decay
-    SPEED_DECAY: 0.85,
+    // Minimums
+    MIN_EJECT_MASS: 35,
+    MIN_SPLIT_MASS: 36,
     
     // Merging
-    MERGE_TIME_BASE: 10, // seconds
-    MERGE_TIME_SCALE: 0.01, // seconds per mass
+    MERGE_TIME_BASE: 25,     // Seconds before own cells can recombine
+    MERGE_TIME_SCALE: 0.02,  // Extra seconds per mass unit
     
-    // Bot configs (Easy-Medium)
-    BOT_VISION_RADIUS: 1500,
-    BOT_UPDATE_INTERVAL: 5 // ticks between thinking
+    // Bot configs
+    BOT_VISION_RADIUS: 1400,
+    BOT_UPDATE_INTERVAL: 4
 };
 
 if (typeof module !== 'undefined') module.exports = Config;

@@ -1,24 +1,26 @@
-
-
 class Game {
     constructor() {
         this.entities = [];
         this.bots = [];
         this.nextId = 1;
-        this.players = new Map(); // id -> score info
+        this.players = new Map(); // id -> { name, score, color }
         
-        // Pre-allocated arrays for performance (avoids GC lag)
+        // Spatial hash grid
+        this.gridSize = 700;
+        this.gridCols = Math.ceil(Config.MAP_WIDTH / this.gridSize);
+        this.numBins = this.gridCols * this.gridCols;
+        this.grid = new Array(this.numBins);
+        for (let i = 0; i < this.numBins; i++) {
+            this.grid[i] = [];
+        }
+
+        // Pre-allocated arrays for garbage-collection-free performance
         this.cellsArray = [];
         this.ejectedArray = [];
         this.staticsArray = [];
         this.queryResult = [];
-        this.grid = []; // Will be populated with arrays once
-        this.gridSize = 500;
-        this.gridCols = Math.ceil(Config.MAP_WIDTH / this.gridSize);
-        for (let i = 0; i < this.gridCols * this.gridCols; i++) {
-            this.grid.push([]);
-        }
-        
+        this.motherCellTick = 0;
+
         this.init();
     }
 
@@ -28,6 +30,7 @@ class Game {
             this.spawnVirus();
         }
         
+        // Spawn initial mother cells
         for (let i = 0; i < Config.MAX_MOTHER_CELLS; i++) {
             this.spawnMotherCell();
         }
@@ -43,46 +46,45 @@ class Game {
     }
 
     spawnFood() {
-        const x = MathUtils.randomRange(0, Config.MAP_WIDTH);
-        const y = MathUtils.randomRange(0, Config.MAP_HEIGHT);
+        const x = MathUtils.randomRange(50, Config.MAP_WIDTH - 50);
+        const y = MathUtils.randomRange(50, Config.MAP_HEIGHT - 50);
         const color = MathUtils.getRandomColor();
         this.entities.push(new Food(this.getId(), x, y, color));
     }
 
     spawnVirus() {
-        const x = MathUtils.randomRange(0, Config.MAP_WIDTH);
-        const y = MathUtils.randomRange(0, Config.MAP_HEIGHT);
+        const x = MathUtils.randomRange(300, Config.MAP_WIDTH - 300);
+        const y = MathUtils.randomRange(300, Config.MAP_HEIGHT - 300);
         this.entities.push(new Virus(this.getId(), x, y));
     }
 
-    spawnMotherCell() {
-        const x = MathUtils.randomRange(0, Config.MAP_WIDTH);
-        const y = MathUtils.randomRange(0, Config.MAP_HEIGHT);
-        this.entities.push(new MotherCell(this.getId(), x, y));
+    spawnMotherCell(x = null, y = null) {
+        const posX = x !== null ? x : MathUtils.randomRange(400, Config.MAP_WIDTH - 400);
+        const posY = y !== null ? y : MathUtils.randomRange(400, Config.MAP_HEIGHT - 400);
+        this.entities.push(new MotherCell(this.getId(), posX, posY));
     }
 
     addPlayer(id, name, colorCode = null, startMass = Config.START_MASS) {
-        const x = MathUtils.randomRange(100, Config.MAP_WIDTH - 100);
-        const y = MathUtils.randomRange(100, Config.MAP_HEIGHT - 100);
+        const x = MathUtils.randomRange(200, Config.MAP_WIDTH - 200);
+        const y = MathUtils.randomRange(200, Config.MAP_HEIGHT - 200);
         const color = colorCode || MathUtils.getRandomColor();
         
         const cell = new Cell(this.getId(), id, name, x, y, startMass, color);
         cell.spawnTime = Date.now();
         this.entities.push(cell);
         
-        // Spawn a cluster of food around the new player
-        for (let i = 0; i < 30; i++) {
+        // Spawn a pleasant cluster of food around new player for early foraging
+        for (let i = 0; i < 20; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 400; // Spread radius
+            const dist = Math.random() * 250;
             const fx = x + Math.cos(angle) * dist;
             const fy = y + Math.sin(angle) * dist;
-            // Keep within map bounds
             if (fx > 0 && fx < Config.MAP_WIDTH && fy > 0 && fy < Config.MAP_HEIGHT) {
                 this.entities.push(new Food(this.getId(), fx, fy, MathUtils.getRandomColor()));
             }
         }
         
-        this.players.set(id, { name: name, score: startMass });
+        this.players.set(id, { name: name, score: startMass, color: color });
         return { x, y, color };
     }
 
@@ -91,7 +93,7 @@ class Game {
         let name = MathUtils.generateBotName();
         if (isBoss) name = "★ " + name + " ★";
         
-        const startMass = isBoss ? 800 : Config.START_MASS;
+        const startMass = isBoss ? 500 : Config.START_MASS;
         const { color } = this.addPlayer(botId, name, null, startMass);
         
         const cell = this.entities[this.entities.length - 1];
@@ -112,8 +114,9 @@ class Game {
 
     getPlayerScore(id) {
         let score = 0;
-        for (let e of this.entities) {
-            if (e.type === 'cell' && e.ownerId === id) {
+        for (let i = 0; i < this.cellsArray.length; i++) {
+            const e = this.cellsArray[i];
+            if (e.ownerId === id && !e.killedBy) {
                 score += e.mass;
             }
         }
@@ -121,172 +124,192 @@ class Game {
     }
 
     getLeaderboard() {
-        // Update scores
-        for (let [id, info] of this.players.entries()) {
-            info.score = this.getPlayerScore(id);
+        const scores = new Map();
+        for (let i = 0; i < this.cellsArray.length; i++) {
+            const c = this.cellsArray[i];
+            if (!c.killedBy) {
+                scores.set(c.ownerId, (scores.get(c.ownerId) || 0) + c.mass);
+            }
         }
-        
-        const sorted = Array.from(this.players.entries())
-                            .filter(([id, p]) => p.score > 0)
-                            .sort((a, b) => b[1].score - a[1].score)
-                            .slice(0, 10)
-                            .map(([id, p]) => ({ id: id, name: p.name, score: p.score }));
-        return sorted;
+
+        const entries = [];
+        for (let [id, score] of scores.entries()) {
+            const p = this.players.get(id);
+            if (p && score > 0) {
+                entries.push({ id, name: p.name, score: Math.floor(score) });
+            }
+        }
+
+        entries.sort((a, b) => b.score - a.score);
+        return entries.slice(0, 10);
     }
 
     splitPlayer(ownerId) {
-        const myCells = this.entities.filter(e => e.type === 'cell' && e.ownerId === ownerId);
+        const myCells = [];
+        for (let i = 0; i < this.cellsArray.length; i++) {
+            const c = this.cellsArray[i];
+            if (c.ownerId === ownerId && !c.killedBy) {
+                myCells.push(c);
+            }
+        }
         
-        let totalMass = 0;
-        for (let cell of myCells) totalMass += cell.mass;
-        
-        // Dynamic split limit: base 16, plus 4 more cells for every 500 mass, capped at 128
-        const maxCells = Math.min(128, 16 + Math.floor(totalMass / 500) * 4);
-        
+        if (myCells.length === 0 || myCells.length >= Config.MAX_CELLS) return;
+
+        // Sort descending by mass so largest split first
+        myCells.sort((a, b) => b.mass - a.mass);
+
         for (let cell of myCells) {
             if (cell.mass < Config.MIN_SPLIT_MASS) continue;
-            
-            // Limit cells per player
-            if (this.entities.filter(e => e.type === 'cell' && e.ownerId === ownerId).length >= maxCells) break;
+            if (myCells.length >= Config.MAX_CELLS) break;
 
-            const halfMass = cell.mass / 2;
-            cell.mass = halfMass;
+            const halfMass = Math.floor(cell.mass / 2);
+            cell.mass = cell.mass - halfMass;
             cell.setMergeTime();
+            cell.jiggle(Math.random() * Math.PI * 2, 2.0);
 
-            // Calculate direction towards target
             let dx = cell.targetX - cell.x;
             let dy = cell.targetY - cell.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
-            
             if (dist === 0) { dx = 1; dy = 0; dist = 1; }
 
-            const newCell = new Cell(this.getId(), cell.ownerId, cell.name, cell.x, cell.y, halfMass, cell.color);
+            const dirX = dx / dist;
+            const dirY = dy / dist;
+
+            const spawnX = cell.x + dirX * (cell.radius * 0.8);
+            const spawnY = cell.y + dirY * (cell.radius * 0.8);
+
+            const newCell = new Cell(this.getId(), cell.ownerId, cell.name, spawnX, spawnY, halfMass, cell.color);
             newCell.isBot = cell.isBot;
-            
-            // Add momentum
-            newCell.vx = (dx / dist) * Config.SPLIT_SPEED;
-            newCell.vy = (dy / dist) * Config.SPLIT_SPEED;
+            newCell.vx = dirX * Config.SPLIT_SPEED;
+            newCell.vy = dirY * Config.SPLIT_SPEED;
             newCell.targetX = cell.targetX;
             newCell.targetY = cell.targetY;
             newCell.setMergeTime();
-            
+            newCell.jiggle(Math.atan2(dirY, dirX), 2.5);
+
             this.entities.push(newCell);
+            myCells.push(newCell);
         }
     }
 
     ejectMass(ownerId) {
-        const myCells = this.entities.filter(e => e.type === 'cell' && e.ownerId === ownerId);
-        
-        for (let cell of myCells) {
+        for (let i = 0; i < this.cellsArray.length; i++) {
+            const cell = this.cellsArray[i];
+            if (cell.ownerId !== ownerId || cell.killedBy) continue;
             if (cell.mass < Config.MIN_EJECT_MASS) continue;
-            
+
             cell.mass -= Config.EJECTED_MASS;
-            
+            cell.jiggle(Math.random() * Math.PI * 2, 0.8);
+
             let dx = cell.targetX - cell.x;
             let dy = cell.targetY - cell.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
-            
             if (dist === 0) { dx = 1; dy = 0; dist = 1; }
-            
-            // Eject from the edge of the cell
-            const spawnX = cell.x + (dx / dist) * cell.radius;
-            const spawnY = cell.y + (dy / dist) * cell.radius;
-            
-            const vx = (dx / dist) * Config.EJECT_SPEED;
-            const vy = (dy / dist) * Config.EJECT_SPEED;
-            
+
+            const dirX = dx / dist;
+            const dirY = dy / dist;
+
+            const spawnX = cell.x + dirX * (cell.radius + 6);
+            const spawnY = cell.y + dirY * (cell.radius + 6);
+
+            const vx = dirX * Config.EJECT_SPEED;
+            const vy = dirY * Config.EJECT_SPEED;
+
             this.entities.push(new EjectedMass(this.getId(), spawnX, spawnY, cell.color, vx, vy));
         }
     }
 
     update(dt) {
-        this.buildGrid(); // Build spatial grid for the frame
+        this.motherCellTick++;
 
-        // Gather counts in a single fast loop instead of multiple .filters
+        // Fast entity type filtering & spatial grid update
+        this.buildGrid();
+
+        // Count current populations
         let foodCount = 0;
         let motherCellCount = 0;
+        let virusCount = 0;
         let bossCount = 0;
-        
+
         for (let i = 0; i < this.entities.length; i++) {
             const e = this.entities[i];
             if (e.killedBy) continue;
             if (e.type === 'food') foodCount++;
             else if (e.type === 'mothercell') motherCellCount++;
+            else if (e.type === 'virus') virusCount++;
         }
+
         for (let i = 0; i < this.bots.length; i++) {
             if (this.bots[i].isBoss) bossCount++;
         }
 
-        // Replenish bots
+        // Replenish bots smoothly
         while (this.bots.length < Config.MAX_BOTS) {
-            if (bossCount < 3) {
-                this.addBot(true);
-                bossCount++;
-            } else {
-                this.addBot(false);
-            }
+            this.addBot(bossCount < 2);
+            if (bossCount < 2) bossCount++;
         }
 
         // Replenish food
-        while (foodCount < Config.MAX_FOOD) {
+        let foodToSpawn = Math.min(25, Config.MAX_FOOD - foodCount);
+        while (foodToSpawn > 0) {
             this.spawnFood();
-            foodCount++;
+            foodToSpawn--;
         }
-        
+
+        // Replenish viruses
+        while (virusCount < Config.MAX_VIRUSES) {
+            this.spawnVirus();
+            virusCount++;
+        }
+
+        // Replenish mother cells if needed
         while (motherCellCount < Config.MAX_MOTHER_CELLS) {
             this.spawnMotherCell();
             motherCellCount++;
         }
 
-        // Update bots
-        for (let bot of this.bots) {
-            bot.update();
+        // Update bot AI
+        for (let i = 0; i < this.bots.length; i++) {
+            this.bots[i].update();
         }
 
         // Update all entities
-        for (let entity of this.entities) {
-            entity.update(dt);
-            
-            if (entity.type === 'mothercell' && entity.foodToSpawn > 0) {
-                // If it's big enough (> 400 mass), it shoots big pellets instead of small food
-                if (entity.mass > 400) {
-                    let ejectCount = Math.floor(Math.min(entity.foodToSpawn / Config.EJECTED_MASS, 2));
-                    
-                    if (ejectCount > 0) {
-                        entity.foodToSpawn -= ejectCount * Config.EJECTED_MASS;
-                        entity.mass = Math.max(Config.MOTHER_CELL_MASS, entity.mass - (ejectCount * Config.EJECTED_MASS * 0.5));
-                        
-                        for (let i = 0; i < ejectCount; i++) {
-                            const angle = Math.random() * Math.PI * 2;
-                            const speed = Config.EJECT_SPEED;
-                            const vx = Math.cos(angle) * speed;
-                            const vy = Math.sin(angle) * speed;
-                            const color = MathUtils.getRandomColor();
-                            const spawnX = entity.x + Math.cos(angle) * entity.radius;
-                            const spawnY = entity.y + Math.sin(angle) * entity.radius;
-                            
-                            this.entities.push(new EjectedMass(this.getId(), spawnX, spawnY, color, vx, vy));
-                        }
-                    }
-                } else {
-                    let spawnCount = Math.floor(Math.min(entity.foodToSpawn, 5));
-                    entity.foodToSpawn -= spawnCount;
-                    
-                    // Lose mass as it spawns food, returning to base size
-                    entity.mass = Math.max(Config.MOTHER_CELL_MASS, entity.mass - (spawnCount * 0.5));
-                    
-                    for (let i = 0; i < spawnCount; i++) {
-                        const angle = Math.random() * Math.PI * 2;
-                        const speed = MathUtils.randomRange(Config.EJECT_SPEED * 0.2, Config.EJECT_SPEED * 0.8);
-                        const vx = Math.cos(angle) * speed;
-                        const vy = Math.sin(angle) * speed;
-                        const color = MathUtils.getRandomColor();
-                        const spawnX = entity.x + Math.cos(angle) * entity.radius;
-                        const spawnY = entity.y + Math.sin(angle) * entity.radius;
-                        
-                        const f = new Food(this.getId(), spawnX, spawnY, color);
-                        f.vx = vx;
-                        f.vy = vy;
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].update(dt);
+        }
+
+        // Mother Cell natural food ejection & stabilization
+        if (this.motherCellTick % 30 === 0) {
+            for (let i = 0; i < this.staticsArray.length; i++) {
+                const stat = this.staticsArray[i];
+                if (stat.type !== 'mothercell' || stat.killedBy) continue;
+
+                // Eject a food pellet every 0.5s into the surrounding area
+                if (foodCount < Config.MAX_FOOD + 200) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = MathUtils.randomRange(10, 22);
+                    const vx = Math.cos(angle) * speed;
+                    const vy = Math.sin(angle) * speed;
+                    const spawnX = stat.x + Math.cos(angle) * (stat.radius + 10);
+                    const spawnY = stat.y + Math.sin(angle) * (stat.radius + 10);
+
+                    const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
+                    f.vx = vx;
+                    f.vy = vy;
+                    this.entities.push(f);
+                }
+
+                // If mother cell hit max mass, burst into a circle of pellets
+                if (stat.mass >= Config.MOTHER_CELL_MAX_MASS) {
+                    stat.mass = Config.MOTHER_CELL_MASS;
+                    for (let p = 0; p < 12; p++) {
+                        const angle = (p / 12) * Math.PI * 2;
+                        const speed = MathUtils.randomRange(15, 28);
+                        const spawnX = stat.x + Math.cos(angle) * (stat.radius + 12);
+                        const spawnY = stat.y + Math.sin(angle) * (stat.radius + 12);
+                        const f = new Food(this.getId(), spawnX, spawnY, MathUtils.getRandomColor());
+                        f.vx = Math.cos(angle) * speed;
+                        f.vy = Math.sin(angle) * speed;
                         this.entities.push(f);
                     }
                 }
@@ -295,57 +318,62 @@ class Game {
 
         this.checkCollisions();
 
-        // Handle dead entities efficiently
+        // Clean dead entities efficiently
         const aliveBots = new Set();
-        const newEntities = [];
-        
+        const activeEntities = [];
+
         for (let i = 0; i < this.entities.length; i++) {
-            const entity = this.entities[i];
-            if (entity.killedBy !== null) continue;
-            
-            newEntities.push(entity);
-            if (entity.type === 'cell' && entity.ownerId.startsWith("bot_")) {
-                aliveBots.add(entity.ownerId);
+            const e = this.entities[i];
+            if (e.killedBy !== null) continue;
+
+            activeEntities.push(e);
+            if (e.type === 'cell' && e.ownerId.startsWith("bot_")) {
+                aliveBots.add(e.ownerId);
             }
         }
-        this.entities = newEntities;
-        
-        // Remove dead bots
+        this.entities = activeEntities;
+
+        // Clean dead bots
         this.bots = this.bots.filter(b => aliveBots.has(b.id));
     }
 
     buildGrid() {
-        // Clear existing grid bins without reallocating arrays
-        const numBins = this.gridCols * this.gridCols;
-        for (let i = 0; i < numBins; i++) {
+        // Clear bins
+        for (let i = 0; i < this.numBins; i++) {
             this.grid[i].length = 0;
         }
-        
+
+        this.cellsArray.length = 0;
+        this.ejectedArray.length = 0;
+        this.staticsArray.length = 0;
+
         for (let i = 0; i < this.entities.length; i++) {
             const e = this.entities[i];
             if (e.killedBy) continue;
-            
+
+            if (e.type === 'cell') this.cellsArray.push(e);
+            else if (e.type === 'ejected') this.ejectedArray.push(e);
+            else if (e.type === 'virus' || e.type === 'mothercell') this.staticsArray.push(e);
+
             const gx = Math.max(0, Math.min(this.gridCols - 1, Math.floor(e.x / this.gridSize)));
             const gy = Math.max(0, Math.min(this.gridCols - 1, Math.floor(e.y / this.gridSize)));
-            const idx = gy * this.gridCols + gx;
-            
-            this.grid[idx].push(e);
+            this.grid[gy * this.gridCols + gx].push(e);
         }
     }
 
     queryGrid(x, y, radius) {
-        this.queryResult.length = 0; // Clear previous results without reallocating
-        
+        this.queryResult.length = 0;
         const minGx = Math.max(0, Math.floor((x - radius) / this.gridSize));
         const maxGx = Math.min(this.gridCols - 1, Math.floor((x + radius) / this.gridSize));
         const minGy = Math.max(0, Math.floor((y - radius) / this.gridSize));
         const maxGy = Math.min(this.gridCols - 1, Math.floor((y + radius) / this.gridSize));
-        
+
         for (let gy = minGy; gy <= maxGy; gy++) {
+            const rowOffset = gy * this.gridCols;
             for (let gx = minGx; gx <= maxGx; gx++) {
-                const gridCell = this.grid[gy * this.gridCols + gx];
-                for (let i = 0; i < gridCell.length; i++) {
-                    this.queryResult.push(gridCell[i]);
+                const bin = this.grid[rowOffset + gx];
+                for (let i = 0; i < bin.length; i++) {
+                    this.queryResult.push(bin[i]);
                 }
             }
         }
@@ -353,23 +381,11 @@ class Game {
     }
 
     checkCollisions() {
-        this.cellsArray.length = 0;
-        this.ejectedArray.length = 0;
-        this.staticsArray.length = 0;
-        
-        for (let i = 0; i < this.entities.length; i++) {
-            const e = this.entities[i];
-            if (e.killedBy) continue;
-            if (e.type === 'cell') this.cellsArray.push(e);
-            else if (e.type === 'ejected') this.ejectedArray.push(e);
-            else if (e.type === 'virus' || e.type === 'mothercell') this.staticsArray.push(e);
-        }
-        
         for (let i = 0; i < this.cellsArray.length; i++) {
             const cell = this.cellsArray[i];
             if (cell.killedBy) continue;
-            
-            const searchRadius = Math.max(cell.radius * 2, 200);
+
+            const searchRadius = Math.max(cell.radius * 2, 250);
             const nearby = this.queryGrid(cell.x, cell.y, searchRadius);
 
             for (let j = 0; j < nearby.length; j++) {
@@ -379,73 +395,72 @@ class Game {
                 const rSum = cell.radius + other.radius;
                 const dx = cell.x - other.x;
                 const dy = cell.y - other.y;
-                
-                // Extremely fast AABB check before doing multiplication
+
+                // AABB fast reject
                 if (Math.abs(dx) > rSum || Math.abs(dy) > rSum) continue;
 
                 const distSq = dx * dx + dy * dy;
-                
-                // Broad phase
                 if (distSq > rSum * rSum) continue;
-                
+
                 let dist = Math.sqrt(distSq);
+                if (dist === 0) {
+                    dist = 0.1;
+                }
 
-                // Handle cell-cell merging or bouncing
+                // Handle cell-cell collision with same owner (recombination vs soft elastic push)
                 if (other.type === 'cell' && cell.ownerId === other.ownerId) {
-                    if (dist === 0) {
-                        cell.x += (Math.random() - 0.5) * 0.1;
-                        cell.y += (Math.random() - 0.5) * 0.1;
-                        dist = 0.1;
-                    }
-
                     if (cell.timeToMerge === 0 && other.timeToMerge === 0) {
-                        // Merge (easier condition)
-                        if (dist < rSum * 0.8) {
+                        // Cells are ready to recombine
+                        if (dist < rSum * 0.95) {
                             if (cell.mass >= other.mass) {
                                 cell.mass += other.mass;
                                 other.killedBy = cell.id;
+                                cell.jiggle(Math.atan2(dy, dx), 1.5);
                             } else {
                                 other.mass += cell.mass;
                                 cell.killedBy = other.id;
+                                other.jiggle(Math.atan2(-dy, -dx), 1.5);
                             }
                         }
                     } else {
-                        // Push away from each other to prevent overlapping own cells
+                        // Elastic separation to prevent overlapping own split pieces
                         if (dist < rSum) {
                             const overlap = rSum - dist;
-                            if (dist > 0) {
-                                const pushForce = overlap * 0.75;
-                                const pushX = ((cell.x - other.x) / dist) * pushForce;
-                                const pushY = ((cell.y - other.y) / dist) * pushForce;
-                                
-                                const totalMass = cell.mass + other.mass;
-                                const cellRatio = other.mass / totalMass;
-                                const otherRatio = cell.mass / totalMass;
+                            const pushForce = overlap * 0.45;
+                            const pushX = (dx / dist) * pushForce;
+                            const pushY = (dy / dist) * pushForce;
 
-                                cell.x += pushX * cellRatio;
-                                cell.y += pushY * cellRatio;
-                                other.x -= pushX * otherRatio;
-                                other.y -= pushY * otherRatio;
-                            }
+                            const totalM = cell.mass + other.mass;
+                            cell.x += pushX * (other.mass / totalM);
+                            cell.y += pushY * (other.mass / totalM);
+                            other.x -= pushX * (cell.mass / totalM);
+                            other.y -= pushY * (cell.mass / totalM);
                         }
                     }
                     continue;
                 }
 
-                // Eating logic. To eat, center of smaller must be inside larger, and larger must be 1.15x mass
+                // Eating logic: center of smaller cell must be inside perimeter of larger cell
                 if (dist < cell.radius) {
+                    const angle = Math.atan2(dy, dx);
+
                     if (other.type === 'food') {
                         cell.mass += other.mass;
                         other.killedBy = cell.id;
-                    } else if (other.type === 'ejected') {
-                        // Needs to be slightly bigger than ejected mass to eat it instantly, or just wait for it to stop
-                        if (cell.mass > other.mass * 1.15) {
+                        cell.jiggle(angle, 0.4);
+                        continue;
+                    }
+
+                    if (other.type === 'ejected') {
+                        if (cell.mass > other.mass * 1.1) {
                             cell.mass += other.mass;
                             other.killedBy = cell.id;
+                            cell.jiggle(angle, 0.8);
                         }
+                        continue;
                     }
-                    
-                    // Spawn immunity check (3 seconds)
+
+                    // Immunity check (3 seconds on spawn)
                     const cellImmune = cell.spawnTime && (Date.now() - cell.spawnTime < 3000);
                     const otherImmune = other.spawnTime && (Date.now() - other.spawnTime < 3000);
 
@@ -454,22 +469,24 @@ class Game {
                         if (cell.mass > other.mass * 1.15) {
                             cell.mass += other.mass;
                             other.killedBy = cell.id;
+                            cell.jiggle(angle, 2.0);
                         }
                     } else if (other.type === 'virus') {
                         if (cellImmune) continue;
                         if (cell.mass > other.mass * 1.15) {
-                            // Pop the cell
+                            // Cell pops into pieces!
                             this.popCell(cell);
                             other.killedBy = cell.id;
                         }
                     } else if (other.type === 'mothercell') {
                         if (cellImmune) continue;
-                        if (other.mass > cell.mass * 1.15) {
-                            other.mass += cell.mass;
-                            other.foodToSpawn += cell.mass * 2;
+                        if (cell.mass < other.mass * 1.15) {
+                            // Mother cell eats smaller player/bot
+                            other.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, other.mass + cell.mass);
                             cell.killedBy = other.id;
                         } else if (cell.mass > other.mass * 1.15) {
-                            // Just gives you that mass
+                            // Big cell eats MotherCell: Pops player (like a virus) and gives mass!
+                            this.popCell(cell);
                             cell.mass += other.mass;
                             other.killedBy = cell.id;
                         }
@@ -477,22 +494,22 @@ class Game {
                 }
             }
         }
-        
-        // Virus and Mothercell eating ejected mass (fix for bug where viruses didn't eat mass)
+
+        // Virus and Mother Cell eating ejected mass
         for (let i = 0; i < this.ejectedArray.length; i++) {
             const mass = this.ejectedArray[i];
             if (mass.killedBy) continue;
-            
+
             for (let j = 0; j < this.staticsArray.length; j++) {
                 const stat = this.staticsArray[j];
                 if (stat.killedBy) continue;
-                
+
                 const rSum = mass.radius + stat.radius;
                 const dx = mass.x - stat.x;
                 const dy = mass.y - stat.y;
-                
+
                 if (Math.abs(dx) > rSum || Math.abs(dy) > rSum) continue;
-                
+
                 const distSq = dx * dx + dy * dy;
                 if (distSq < rSum * rSum) {
                     if (stat.type === 'virus') {
@@ -502,8 +519,7 @@ class Game {
                             this.splitVirus(stat, mass.vx, mass.vy);
                         }
                     } else if (stat.type === 'mothercell') {
-                        stat.mass += mass.mass;
-                        stat.foodToSpawn += mass.mass * 2;
+                        stat.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, stat.mass + mass.mass);
                         mass.killedBy = stat.id;
                     }
                 }
@@ -512,40 +528,43 @@ class Game {
     }
 
     popCell(cell) {
-        // Split cell into many smaller cells
-        const numPieces = 8;
-        const pieceMass = cell.mass / numPieces;
-        
+        // Explode into up to 16 pieces distributed radially
+        const existingCount = this.cellsArray.filter(c => c.ownerId === cell.ownerId && !c.killedBy).length;
+        const maxNewPieces = Math.max(1, Config.MAX_CELLS - existingCount);
+        const numPieces = Math.min(10, maxNewPieces);
+
+        const pieceMass = cell.mass / (numPieces + 1);
         if (pieceMass < Config.START_MASS) return;
 
         cell.mass = pieceMass;
         cell.setMergeTime();
-        
-        for (let i = 1; i < numPieces; i++) {
-            const angle = Math.random() * Math.PI * 2;
+        cell.jiggle(Math.random() * Math.PI * 2, 3.0);
+
+        for (let i = 0; i < numPieces; i++) {
+            const angle = (i / numPieces) * Math.PI * 2 + Math.random() * 0.2;
             const newCell = new Cell(this.getId(), cell.ownerId, cell.name, cell.x, cell.y, pieceMass, cell.color);
             newCell.vx = Math.cos(angle) * Config.SPLIT_SPEED;
             newCell.vy = Math.sin(angle) * Config.SPLIT_SPEED;
             newCell.targetX = cell.targetX;
             newCell.targetY = cell.targetY;
             newCell.setMergeTime();
+            newCell.jiggle(angle, 3.0);
             this.entities.push(newCell);
         }
     }
 
     splitVirus(virus, hitVx, hitVy) {
         virus.mass = Config.VIRUS_MASS;
-        
-        // Spawn new virus flying in direction of ejected mass
+
         let dist = Math.sqrt(hitVx * hitVx + hitVy * hitVy);
-        if (dist === 0) { hitVx = 1; hitVy = 0; dist = 1;}
-        
-        const dx = hitVx / dist;
-        const dy = hitVy / dist;
-        
+        if (dist === 0) { hitVx = 1; hitVy = 0; dist = 1; }
+
+        const dirX = hitVx / dist;
+        const dirY = hitVy / dist;
+
         const newVirus = new Virus(this.getId(), virus.x, virus.y);
-        newVirus.vx = dx * Config.SPLIT_SPEED;
-        newVirus.vy = dy * Config.SPLIT_SPEED;
+        newVirus.vx = dirX * Config.SPLIT_SPEED;
+        newVirus.vy = dirY * Config.SPLIT_SPEED;
         this.entities.push(newVirus);
     }
 }
