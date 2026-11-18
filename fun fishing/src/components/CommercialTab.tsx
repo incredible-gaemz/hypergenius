@@ -64,12 +64,14 @@ interface CommercialTabProps {
   onFulfillOrder?: (orderId: string) => void;
   onDeclineOrder?: (orderId: string) => void;
   onGiveCrewBonus?: (crewId: string, amount: number) => void;
+  onFireCrew?: (crewId: string) => void;
   hasVoyageSpeedCivic?: boolean;
   commercialBusinessName?: string | null;
   onStartCommercialBusiness?: (name: string) => void;
   salvageState?: SalvageState;
   onUnlockSalvageCharter?: () => void;
   onBuySalvageBoat?: (boatDefId: string) => void;
+  onRetireSalvageBoat?: (boatInstanceId: string) => void;
   onUnlockWreckSite?: (siteId: string) => void;
   onAssignCrewToSalvageBoat?: (boatInstanceId: string, crewId: string) => void;
   onUnassignCrewFromSalvageBoat?: (boatInstanceId: string, crewId: string) => void;
@@ -103,12 +105,14 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
   onFulfillOrder,
   onDeclineOrder,
   onGiveCrewBonus,
+  onFireCrew,
   hasVoyageSpeedCivic = false,
   commercialBusinessName = null,
   onStartCommercialBusiness,
   salvageState = INITIAL_SALVAGE_STATE,
   onUnlockSalvageCharter,
   onBuySalvageBoat,
+  onRetireSalvageBoat,
   onUnlockWreckSite,
   onAssignCrewToSalvageBoat,
   onUnassignCrewFromSalvageBoat,
@@ -135,6 +139,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
     } catch {}
   };
   const [charterNameInput, setCharterNameInput] = useState('');
+  const [firingCrewId, setFiringCrewId] = useState<string | null>(null);
 
   const [docksCooldownSec, setDocksCooldownSec] = useState<number>(() => {
     try {
@@ -942,6 +947,7 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
           salvageState={salvageState}
           onUnlockSalvageCharter={onUnlockSalvageCharter || (() => {})}
           onBuySalvageBoat={onBuySalvageBoat || (() => {})}
+          onRetireSalvageBoat={onRetireSalvageBoat}
           onUnlockWreckSite={onUnlockWreckSite || (() => {})}
           onAssignCrewToSalvageBoat={onAssignCrewToSalvageBoat || (() => {})}
           onUnassignCrewFromSalvageBoat={onUnassignCrewFromSalvageBoat || (() => {})}
@@ -1034,6 +1040,13 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {hiredCrew.map((crew) => {
                   const assignedBoat = ownedBoats.find((b) => b.assignedCrewIds.includes(crew.id));
+                  const assignedSalvageBoat = salvageState?.ownedSalvageBoatInstances?.find((b) =>
+                    b.assignedCrewIds.includes(crew.id)
+                  );
+                  const isAtSea = Boolean(
+                    (assignedBoat && assignedBoat.expedition) ||
+                    salvageState?.activeExpeditions?.some((e) => e.assignedCrewIds.includes(crew.id))
+                  );
                   const moraleInfo = getCrewMoraleTitle(crew.moraleLevel || 0);
                   const canAfford50 = money >= 50;
                   const canAfford100 = money >= 100;
@@ -1074,8 +1087,8 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                       <div className="space-y-1.5 border-t border-[#23262f] pt-1.5">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="text-[#8c94a2]">${crew.wagePerVoyage}/voyage</span>
-                          <span className={assignedBoat ? 'text-emerald-400 font-bold' : 'text-sky-400'}>
-                            {assignedBoat ? assignedBoat.customName : 'In Reserve'}
+                          <span className={assignedBoat ? 'text-emerald-400 font-bold' : assignedSalvageBoat ? 'text-amber-400 font-bold' : 'text-sky-400'}>
+                            {assignedBoat ? assignedBoat.customName : assignedSalvageBoat ? assignedSalvageBoat.customName : 'In Reserve'}
                           </span>
                         </div>
 
@@ -1115,6 +1128,46 @@ export const CommercialTab: React.FC<CommercialTabProps> = ({
                                   Bonus +$100
                                 </button>
                               </>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Fire Crew Action */}
+                        {onFireCrew && (
+                          <div className="pt-1 border-t border-[#23262f]/60">
+                            {isAtSea ? (
+                              <div className="text-center py-1 text-[10px] text-[#6b7280] font-semibold">
+                                Out at Sea
+                              </div>
+                            ) : firingCrewId === crew.id ? (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    onFireCrew(crew.id);
+                                    setFiringCrewId(null);
+                                  }}
+                                  className="flex-1 py-1 text-[10px] font-bold border border-rose-700 bg-rose-950 hover:bg-rose-900 text-rose-200 cursor-pointer transition-colors"
+                                >
+                                  Confirm Fire
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setFiringCrewId(null)}
+                                  className="px-2 py-1 text-[10px] font-bold border border-[#353a45] bg-[#1a1d24] hover:bg-[#232731] text-[#a0a8b6] cursor-pointer transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setFiringCrewId(crew.id)}
+                                className="w-full py-1 text-[10px] font-bold border border-rose-900/60 bg-rose-950/30 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 cursor-pointer transition-colors"
+                                title="Fire crew member"
+                              >
+                                Fire
+                              </button>
                             )}
                           </div>
                         )}

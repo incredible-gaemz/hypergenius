@@ -62,6 +62,20 @@ export const SALVAGE_BOATS_CATALOG: SalvageBoatDef[] = [
   },
 ];
 
+/**
+ * Calculates the scrap / retirement resale refund value for an owned salvage vessel.
+ * Returns 25% to 50% of the original purchase price.
+ */
+export function getSalvageBoatRetireValue(
+  boat: { instanceId: string; boatDefId: string },
+  boatDef: SalvageBoatDef
+): { value: number; percent: number } {
+  const seed = (boat.instanceId || 'salvage_boat').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const percent = 25 + (seed % 26); // 25% to 50%
+  const value = Math.max(1, Math.round(boatDef.cost * (percent / 100)));
+  return { value, percent };
+}
+
 export interface SunkenWreckSite {
   id: string;
   name: string;

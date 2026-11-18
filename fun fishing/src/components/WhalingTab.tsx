@@ -214,7 +214,7 @@ export const WhalingTab: React.FC<WhalingTabProps> = ({
         } else {
           // Reeling while whale rests: winch makes steady headway
           distanceRef.current = Math.max(0, distanceRef.current - (stats.reelSpeedMps * 0.05));
-          tensionRef.current += 1.5;
+          tensionRef.current += 0.8;
         }
       } else {
         if (isPulling) {

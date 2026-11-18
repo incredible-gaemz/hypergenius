@@ -81,7 +81,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleExportSave = () => {
     try {
-      const data = localStorage.getItem('cozy_reel_save_v1');
+      const data =
+        localStorage.getItem('cozy_reel_save_v10') ||
+        localStorage.getItem('cozy_reel_save_v9') ||
+        localStorage.getItem('cozy_reel_save_v7') ||
+        localStorage.getItem('cozy_reel_save_v1');
       if (!data) {
         setCopiedStatus('No save data found');
         setTimeout(() => setCopiedStatus(null), 3000);

@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/* ============================================================
+   THE LOT — ANTIQUE CURIO & AUCTION HOUSE
+   Tactile mechanical game aesthetic (No generic AI rounded boxes)
+   ============================================================ */
+
+:root {
+  --wood-darkest: #100d0a;
+  --wood-dark: #16120e;
+  --wood-panel: #1e1914;
+  --wood-tray: #14100c;
+  --wood-border: #352a20;
+  --wood-border-bright: #4e3e30;
+  --wood-brass: #c8953c;
+  --wood-brass-bright: #e2ad4f;
+  --wood-brass-shadow: #7a581c;
+  --text-parchment: #e8ded0;
+  --text-muted: #8c7e6e;
+  --stamp-green: #3ea860;
+  --stamp-red: #c04040;
+}
+
+html, body {
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--wood-dark);
+  color: var(--text-parchment);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Chunky retro scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3d3228 #100d0a;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--wood-darkest);
+  border: 1px solid #201a14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3d3228;
+  border: 1px solid #5a4a3a;
+  box-shadow: inset 1px 1px 0 rgba(255, 220, 160, 0.15), inset -1px -1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   TACTILE MECHANICAL BEVELED BUTTONS
+   ============================================================ */
+
+button {
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-family: inherit;
+  user-select: none;
+  cursor: pointer;
+  border-style: solid;
+  border-width: 1px;
+}
+
+/* Tactile 3D beveled button state */
+button:not(:disabled) {
+  box-shadow: 
+    inset 1px 1px 0px 0px rgba(255, 230, 180, 0.22),
+    inset -2px -2px 0px 0px rgba(0, 0, 0, 0.8),
+    1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Physical mechanical press on active */
+button:active:not(:disabled) {
+  box-shadow: 
+    inset 2px 2px 0px 0px rgba(0, 0, 0, 0.9),
+    inset -1px -1px 0px 0px rgba(255, 230, 180, 0.08);
+  transform: translate(1px, 1px);
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Inset inputs / selects like engraved register panels */
+input, select {
+  font-family: inherit;
+  background-color: var(--wood-darkest);
+  color: var(--text-parchment);
+  border: 1px solid var(--wood-border);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.9), inset -1px -1px 0px rgba(255, 220, 160, 0.05);
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--wood-brass);
+}
+
+/* ============================================================
+   DISPLAY TRAYS & SLOTS (CURIO CABINET FEEL)
+   ============================================================ */
+
+.curio-tray {
+  background-color: var(--wood-panel);
+  border: 2px solid var(--wood-border);
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 220, 160, 0.08),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.7),
+    0px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.curio-slot {
+  background-color: var(--wood-tray);
+  border: 1px solid var(--wood-border);
+  box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.8);
+}
+
+.curio-slot:hover {
+  border-color: var(--wood-border-bright);
+}
+
+/* Brass register header */
+.brass-bar {
+  background-color: var(--wood-panel);
+  border: 2px solid var(--wood-border);
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 220, 160, 0.12),
+    inset -1px -1px 0px rgba(0, 0, 0, 0.8);
+}
+
+/* Tab indicator */
+.curio-tab-active {
+  background-color: var(--wood-brass);
+  color: #100d0a !important;
+  font-weight: 700;
+  border-color: var(--wood-brass-bright);
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 0px rgba(0, 0, 0, 0.7);
+}
+
+.curio-tab-inactive {
+  background-color: var(--wood-tray);
+  color: var(--text-muted);
+  border-color: var(--wood-border);
+}
+
+.curio-tab-inactive:hover {
+  color: var(--text-parchment);
+  border-color: var(--wood-border-bright);
+}
+
+/* Stamped seals */
+.seal-tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-width: 1px;
+  border-style: solid;
+}

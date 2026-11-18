@@ -951,7 +951,11 @@ test('Dynamic Weather Sighting Rumors and Town Civic Investments', async () => {
   });
 
   const bounties = generateTownBounties();
-  assert.equal(bounties.length, 3);
+  assert.equal(bounties.length, 4, 'Bounties must cover all 4 clubs: casters, commercial, breeders, explorers');
+  assert.deepEqual(
+    bounties.map((b) => b.targetClubId).sort(),
+    ['breeders', 'casters', 'commercial', 'explorers']
+  );
 });
 
 test('Worker bonuses and crew morale enhance voyage speed and catch volume', async () => {
@@ -1651,6 +1655,103 @@ test('Commercial fleet balance: Fleets cannot catch mythicals and rarely catch a
     voyagesWithLegendary <= 15,
     `Legendary catches should be rare even when targeted (got ${voyagesWithLegendary}/50 voyages)`
   );
+});
+
+test('Crew firing rules: Crew can be fired when docked or in reserve, unassigning them from fleet vessels', async () => {
+  let hiredCrew = [
+    { id: 'crew_1', name: 'Deckhand Sam', wagePerVoyage: 50 },
+    { id: 'crew_2', name: 'Navigator Max', wagePerVoyage: 80 },
+  ];
+  let ownedBoats = [
+    { instanceId: 'boat_a', assignedCrewIds: ['crew_1'], expedition: null },
+    { instanceId: 'boat_b', assignedCrewIds: ['crew_2'], expedition: { isCompleted: false } },
+  ];
+
+  // Attempting to fire crew_2 who is at sea should be prevented
+  const isCrew2AtSea = ownedBoats.some((b) => Boolean(b.expedition) && b.assignedCrewIds.includes('crew_2'));
+  assert.equal(isCrew2AtSea, true, 'Crew member actively at sea cannot be fired');
+
+  // Firing crew_1 who is on a docked boat
+  const isCrew1AtSea = ownedBoats.some((b) => Boolean(b.expedition) && b.assignedCrewIds.includes('crew_1'));
+  assert.equal(isCrew1AtSea, false, 'Docked crew member can be fired');
+
+  // Fire crew_1
+  hiredCrew = hiredCrew.filter((c) => c.id !== 'crew_1');
+  ownedBoats = ownedBoats.map((b) => ({
+    ...b,
+    assignedCrewIds: b.assignedCrewIds.filter((id) => id !== 'crew_1'),
+  }));
+
+  assert.equal(hiredCrew.length, 1, 'Hired crew should now have only 1 member');
+  assert.equal(hiredCrew[0].id, 'crew_2', 'Remaining crew is crew_2');
+  assert.deepEqual(ownedBoats[0].assignedCrewIds, [], 'boat_a should now have no assigned crew');
+});
+
+test('Whaling battle physics: Large titan whales can be reeled in with positive net distance gain', async () => {
+  const { WHALE_SPECIES, getWhaleFightStats } = await import('./whalingLogic');
+  
+  // Test every whale from Beluga to a 380,000 lb Blue Whale
+  WHALE_SPECIES.forEach((w) => {
+    const statsMin = getWhaleFightStats(w, w.minWeightLbs);
+    const statsMax = getWhaleFightStats(w, w.maxWeightLbs);
+
+    [statsMin, statsMax].forEach((st) => {
+      // Starting distance should be reasonable (< 500m)
+      assert.ok(st.startDistanceM <= 500, `${w.name} start distance (${st.startDistanceM}m) must be under 500m`);
+      
+      // Line gained during rest vs line lost during surge
+      const lostInSurge = st.runSpeedMps * st.pullDurationSec;
+      const gainedInRest = st.reelSpeedMps * st.restDurationSec;
+      const netGain = gainedInRest - lostInSurge;
+
+      // Net gain MUST be strictly positive so the whale gets closer
+      assert.ok(
+        netGain > 5.0,
+        `${w.name} must gain net forward distance per cycle (got ${netGain.toFixed(1)}m/cycle)`
+      );
+    });
+  });
+});
+
+test('Salvage expedition boat scrap: Commissioned salvage vessels can be scrapped for resale refund', async () => {
+  const { SALVAGE_BOATS_CATALOG, getSalvageBoatRetireValue } = await import('./salvageLogic');
+  
+  const doryDef = SALVAGE_BOATS_CATALOG.find((b) => b.id === 'salvage_dory')!;
+  const explorerDef = SALVAGE_BOATS_CATALOG.find((b) => b.id === 'oceanic_explorer')!;
+
+  const doryScrap = getSalvageBoatRetireValue({ instanceId: 'sb_test_1', boatDefId: doryDef.id }, doryDef);
+  assert.ok(doryScrap.percent >= 25 && doryScrap.percent <= 50);
+  assert.ok(doryScrap.value >= Math.round(doryDef.cost * 0.25));
+
+  const explorerScrap = getSalvageBoatRetireValue({ instanceId: 'sb_test_2', boatDefId: explorerDef.id }, explorerDef);
+  assert.ok(explorerScrap.percent >= 25 && explorerScrap.percent <= 50);
+  assert.ok(explorerScrap.value >= Math.round(explorerDef.cost * 0.25));
+});
+
+test('Reputation system: Fulfilling contracts and town bounties awards club reputation and rank bonuses', async () => {
+  const { getClubRankTitle, getClubRankBonus, getNextRankProgress } = await import('./townLogic');
+
+  // Ranks and bonuses
+  assert.equal(getClubRankTitle(0), 'Novice Member');
+  assert.equal(getClubRankBonus(0).percent, 0);
+
+  assert.equal(getClubRankTitle(120), 'Journeyman');
+  assert.equal(getClubRankBonus(120).percent, 5);
+
+  assert.equal(getClubRankTitle(350), 'Master Angler');
+  assert.equal(getClubRankBonus(350).percent, 10);
+
+  assert.equal(getClubRankTitle(800), 'Commodore');
+  assert.equal(getClubRankBonus(800).percent, 15);
+
+  // Next rank progress
+  const p1 = getNextRankProgress(50);
+  assert.equal(p1.nextRank, 'Journeyman (100 Rep)');
+  assert.equal(p1.pct, 50);
+
+  const p2 = getNextRankProgress(200);
+  assert.equal(p2.nextRank, 'Master Angler (300 Rep)');
+  assert.equal(p2.pct, 50);
 });
 
 

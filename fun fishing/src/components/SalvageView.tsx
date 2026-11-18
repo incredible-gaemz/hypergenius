@@ -16,6 +16,7 @@ import {
   getTreasureSpriteUrl,
   calculateExpeditionDurationSec,
   formatMinutesSeconds,
+  getSalvageBoatRetireValue,
 } from '../game/salvageLogic';
 
 interface SalvageViewProps {
@@ -25,6 +26,7 @@ interface SalvageViewProps {
   salvageState: SalvageState;
   onUnlockSalvageCharter: () => void;
   onBuySalvageBoat: (boatDefId: string) => void;
+  onRetireSalvageBoat?: (boatInstanceId: string) => void;
   onUnlockWreckSite: (siteId: string) => void;
   onAssignCrewToSalvageBoat: (boatInstanceId: string, crewId: string) => void;
   onUnassignCrewFromSalvageBoat: (boatInstanceId: string, crewId: string) => void;
@@ -42,6 +44,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   salvageState,
   onUnlockSalvageCharter,
   onBuySalvageBoat,
+  onRetireSalvageBoat,
   onUnlockWreckSite,
   onAssignCrewToSalvageBoat,
   onUnassignCrewFromSalvageBoat,
@@ -52,6 +55,7 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
   onCollectAuctionProceeds,
 }) => {
   const [salvageSection, setSalvageSection] = useState<'wrecks' | 'fleet' | 'auctions'>('wrecks');
+  const [boatRetireConfirmId, setBoatRetireConfirmId] = useState<string | null>(null);
   const [selectedLaunchBoatByWreck, setSelectedLaunchBoatByWreck] = useState<Record<string, string>>({});
   const [startingBids, setStartingBids] = useState<Record<string, number>>({});
   const [nowTick, setNowTick] = useState<number>(Date.now());
@@ -541,13 +545,52 @@ export const SalvageView: React.FC<SalvageViewProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-bold text-xs text-[#f1f3f5] truncate">{def.name}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 border font-bold flex-shrink-0 ${
-                              isBusy
-                                ? 'border-amber-600 bg-amber-950 text-amber-300'
-                                : 'border-[#333742] bg-[#1c1f26] text-[#8c94a2]'
-                            }`}>
-                              {isBusy ? 'At Sea' : 'Docked'}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className={`text-[10px] px-1.5 py-0.5 border font-bold ${
+                                isBusy
+                                  ? 'border-amber-600 bg-amber-950 text-amber-300'
+                                  : 'border-[#333742] bg-[#1c1f26] text-[#8c94a2]'
+                              }`}>
+                                {isBusy ? 'At Sea' : 'Docked'}
+                              </span>
+                              {!isBusy && onRetireSalvageBoat && (() => {
+                                const scrapInfo = getSalvageBoatRetireValue(boat, def);
+                                return (
+                                  <div>
+                                    {boatRetireConfirmId === boat.instanceId ? (
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            onRetireSalvageBoat(boat.instanceId);
+                                            setBoatRetireConfirmId(null);
+                                          }}
+                                          className="px-1.5 py-0.5 border border-rose-600 bg-rose-950 text-rose-200 font-bold text-[10px] cursor-pointer transition-colors"
+                                        >
+                                          Confirm · +${scrapInfo.value.toLocaleString()}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setBoatRetireConfirmId(null)}
+                                          className="px-1 py-0.5 border border-[#333742] bg-[#1c1e24] text-[#8c94a2] text-[10px] cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setBoatRetireConfirmId(boat.instanceId)}
+                                        className="text-[10px] px-1.5 py-0.5 border border-[#2c303c] hover:border-amber-600 bg-[#14161c] text-[#8c94a2] hover:text-amber-300 cursor-pointer transition-colors"
+                                        title={`Scrap vessel for ${scrapInfo.percent}% salvage refund`}
+                                      >
+                                        Scrap · +${scrapInfo.value.toLocaleString()}
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
                           </div>
                           <div className="text-[11px] text-[#8c94a2] flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
                             <span>Speed: <strong className="text-sky-300">{def.speedMultiplier}x</strong></span>

@@ -11,6 +11,8 @@ import {
   ANGLER_CLUBS,
   ClubMemberState,
   getClubRankTitle,
+  getClubRankBonus,
+  getNextRankProgress,
   getDailyCommodityTrends,
   TownBounty,
   isClubPerkActive,
@@ -98,6 +100,8 @@ export const TownTab: React.FC<TownTabProps> = ({
   const currentClub = ANGLER_CLUBS.find((c) => c.id === clubState.currentClubId) || null;
   const currentRep = currentClub ? clubState.reputationPoints[currentClub.id] || 0 : 0;
   const currentRankTitle = currentClub ? getClubRankTitle(currentRep) : 'Unenrolled';
+  const currentRankBonus = currentClub ? getClubRankBonus(currentRep) : { percent: 0, label: 'Base Payouts' };
+  const totalRep = Object.values(clubState.reputationPoints || {}).reduce((a, b) => a + b, 0);
   const isSubActive = currentClub ? isClubPerkActive(clubState, currentClub.id) : false;
   const subInfo = getSubscriptionTimeRemaining(clubState.subscriptionDueAt);
 
@@ -129,11 +133,11 @@ export const TownTab: React.FC<TownTabProps> = ({
                   : 'border-amber-700/80 bg-amber-950/60 text-amber-300'
               }`}
             >
-              {currentClub.name} · {currentRankTitle} · {currentRep} Rep · {subInfo.label}
+              {currentClub.name} · {currentRankTitle} ({currentRep} Rep) {currentRankBonus.percent > 0 ? `· ${currentRankBonus.label}` : ''} · {subInfo.label}
             </div>
           ) : (
-            <div className="border border-[#2c303c] bg-[#14161c] px-2.5 py-1 text-[#717885]">
-              No Guild Active
+            <div className="border border-[#2c303c] bg-[#14161c] px-2.5 py-1 text-[#8c94a2]">
+              No Guild Active · {totalRep} Total Rep
             </div>
           )}
         </div>
@@ -230,9 +234,14 @@ export const TownTab: React.FC<TownTabProps> = ({
                           <span className="text-[#8c94a2]">
                             Box: <strong className={canFulfill ? 'text-emerald-300' : 'text-amber-400'}>{held} / {order.requiredCount}</strong>
                           </span>
-                          <span className="font-bold text-emerald-400 text-xs">
-                            ${order.rewardCash.toLocaleString()}
-                          </span>
+                          <div className="text-right">
+                            <span className="font-bold text-emerald-400 text-xs">
+                              ${order.rewardCash.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-sky-300 font-bold ml-1.5">
+                              +{isRare ? 75 : 45} Rep
+                            </span>
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-1.5">
@@ -304,9 +313,14 @@ export const TownTab: React.FC<TownTabProps> = ({
                           <span className="text-[#8c94a2]">
                             Box: <strong className={canFulfill ? 'text-emerald-300' : 'text-amber-400'}>{held} / {order.requiredCount}</strong>
                           </span>
-                          <span className="font-bold text-emerald-400 text-xs">
-                            ${order.rewardCash.toLocaleString()}
-                          </span>
+                          <div className="text-right">
+                            <span className="font-bold text-emerald-400 text-xs">
+                              ${order.rewardCash.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-sky-300 font-bold ml-1.5">
+                              +50 Rep
+                            </span>
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-1.5">
@@ -562,6 +576,8 @@ export const TownTab: React.FC<TownTabProps> = ({
               const isMember = clubState.currentClubId === club.id;
               const rep = clubState.reputationPoints[club.id] || 0;
               const rank = getClubRankTitle(rep);
+              const rankBonus = getClubRankBonus(rep);
+              const nextRankInfo = getNextRankProgress(rep);
               const canAffordDues = money >= club.membershipDues;
 
               return (
@@ -609,6 +625,20 @@ export const TownTab: React.FC<TownTabProps> = ({
                       <span className="text-amber-300 font-bold">
                         ${club.membershipDues.toLocaleString()}/mo
                       </span>
+                    </div>
+
+                    {/* Rank Progress Bar & Contract Bonus */}
+                    <div className="space-y-1 bg-[#101217] p-2 border border-[#23262f]">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-[#8c94a2]">Next: {nextRankInfo.nextRank}</span>
+                        <span className="text-emerald-400 font-bold">{rankBonus.label}</span>
+                      </div>
+                      <div className="w-full bg-[#1b1e26] h-1.5 border border-[#2b303d] overflow-hidden">
+                        <div
+                          className="bg-sky-500 h-full transition-all duration-300"
+                          style={{ width: `${nextRankInfo.pct}%` }}
+                        />
+                      </div>
                     </div>
 
                     {isMember ? (

@@ -192,6 +192,27 @@ export function getClubRankTitle(points: number): string {
   return 'Novice Member';
 }
 
+export function getClubRankBonus(points: number): { percent: number; label: string } {
+  if (points >= 750) return { percent: 15, label: '+15% Contract Payouts' };
+  if (points >= 300) return { percent: 10, label: '+10% Contract Payouts' };
+  if (points >= 100) return { percent: 5, label: '+5% Contract Payouts' };
+  return { percent: 0, label: 'Base Payouts' };
+}
+
+export function getNextRankProgress(points: number): { current: number; max: number; nextRank: string; pct: number } {
+  if (points >= 750) return { current: points, max: 750, nextRank: 'Max Rank', pct: 100 };
+  if (points >= 300) {
+    const pct = Math.min(100, Math.round(((points - 300) / (750 - 300)) * 100));
+    return { current: points, max: 750, nextRank: 'Commodore (750 Rep)', pct };
+  }
+  if (points >= 100) {
+    const pct = Math.min(100, Math.round(((points - 100) / (300 - 100)) * 100));
+    return { current: points, max: 300, nextRank: 'Master Angler (300 Rep)', pct };
+  }
+  const pct = Math.min(100, Math.round((points / 100) * 100));
+  return { current: points, max: 100, nextRank: 'Journeyman (100 Rep)', pct };
+}
+
 // ==========================================
 // DAILY COMMODITY MARKET TRENDS
 // ==========================================
@@ -289,6 +310,18 @@ export function generateTownBounties(timestamp: number = Date.now()): TownBounty
       rewardCash: 180,
       rewardClubRep: 50,
       targetClubId: 'breeders',
+    },
+    {
+      id: `town_bounty_${seed}_4`,
+      title: 'Pelagic Oceanographic Survey',
+      sponsor: 'Deepwater Marine Observatory',
+      description: 'Provide oceanic specimens for tidal pattern and deep current tracking.',
+      targetSpeciesName: 'Atlantic Cod',
+      targetSpeciesId: 27, // Atlantic Cod
+      requiredCount: 4,
+      rewardCash: 420,
+      rewardClubRep: 90,
+      targetClubId: 'explorers',
     },
   ];
 }

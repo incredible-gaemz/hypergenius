@@ -94,6 +94,7 @@ import {
   isClubPerkActive,
   GUILD_SUBSCRIPTION_CYCLE_MS,
   INITIAL_CLUB_STATE,
+  getClubRankBonus,
 } from './game/townLogic';
 import {
   getCurrentWeatherRumor,
@@ -109,6 +110,7 @@ import {
   calculateExpeditionDurationSec,
   createAuctionListing,
   getDiscoveredArtifactIds,
+  getSalvageBoatRetireValue,
 } from './game/salvageLogic';
 import {
   OwnedBoat,
@@ -1624,8 +1626,23 @@ export default function App() {
     setInventory((prev) => prev.filter((f) => !removeCatchIds.has(f.catchId)));
 
     const hasTourism = civicInvestments.includes('tourism_board');
-    const reward = hasTourism ? Math.round(order.rewardCash * 1.35) : order.rewardCash;
+    const activeRep = clubState.currentClubId ? clubState.reputationPoints[clubState.currentClubId] || 0 : 0;
+    const rankBonus = getClubRankBonus(activeRep).percent;
+    const baseReward = hasTourism ? Math.round(order.rewardCash * 1.35) : order.rewardCash;
+    const reward = Math.round(baseReward * (1 + rankBonus / 100));
     setMoney((prev) => prev + reward);
+    soundManager.playRegisterSfx();
+
+    // Award reputation: +45 Rep (+75 for rare/luxury)
+    const repReward = order.category === 'luxury' || order.category === 'private' ? 75 : 45;
+    setClubState((prev) => {
+      const nextRep = { ...prev.reputationPoints };
+      nextRep['casters'] = (nextRep['casters'] || 0) + repReward;
+      if (prev.currentClubId && prev.currentClubId !== 'casters') {
+        nextRep[prev.currentClubId] = (nextRep[prev.currentClubId] || 0) + repReward;
+      }
+      return { ...prev, reputationPoints: nextRep };
+    });
 
     // Vanishes until another contract arrives via timer (max 3)
     setPrivateOrders((prev) => prev.filter((o) => o.id !== orderId));
@@ -1649,7 +1666,22 @@ export default function App() {
     );
     setInventory((prev) => prev.filter((f) => !removeCatchIds.has(f.catchId)));
     soundManager.playRegisterSfx();
-    setMoney((prev) => prev + order.rewardCash);
+
+    const activeRep = clubState.currentClubId ? clubState.reputationPoints[clubState.currentClubId] || 0 : 0;
+    const rankBonus = getClubRankBonus(activeRep).percent;
+    const reward = Math.round(order.rewardCash * (1 + rankBonus / 100));
+    setMoney((prev) => prev + reward);
+
+    // Award reputation: +50 Rep
+    const repReward = 50;
+    setClubState((prev) => {
+      const nextRep = { ...prev.reputationPoints };
+      nextRep['commercial'] = (nextRep['commercial'] || 0) + repReward;
+      if (prev.currentClubId && prev.currentClubId !== 'commercial') {
+        nextRep[prev.currentClubId] = (nextRep[prev.currentClubId] || 0) + repReward;
+      }
+      return { ...prev, reputationPoints: nextRep };
+    });
 
     // Vanishes until wholesale market order arrives via timer (max 3)
     setCommercialOrders((prev) => prev.filter((o) => o.id !== orderId));
@@ -2298,21 +2330,33 @@ export default function App() {
     const usedIds = new Set(matching.slice(0, bounty.requiredCount).map((f) => f.catchId));
     setInventory((prev) => prev.filter((f) => !usedIds.has(f.catchId)));
     soundManager.playRegisterSfx();
-    setMoney((prev) => prev + bounty.rewardCash);
 
-    setClubState((prev) => ({
-      ...prev,
-      reputationPoints: {
-        ...prev.reputationPoints,
-        [bounty.targetClubId]: (prev.reputationPoints[bounty.targetClubId] || 0) + bounty.rewardClubRep,
-      },
-    }));
+    const activeRep = clubState.currentClubId ? clubState.reputationPoints[clubState.currentClubId] || 0 : 0;
+    const rankBonus = getClubRankBonus(activeRep).percent;
+    const cashReward = Math.round(bounty.rewardCash * (1 + rankBonus / 100));
+    setMoney((prev) => prev + cashReward);
+
+    setClubState((prev) => {
+      const nextRep = { ...prev.reputationPoints };
+      // Always award to bounty target club
+      nextRep[bounty.targetClubId] = (nextRep[bounty.targetClubId] || 0) + bounty.rewardClubRep;
+      // ALSO award to the player's active club if different
+      if (prev.currentClubId && prev.currentClubId !== bounty.targetClubId) {
+        nextRep[prev.currentClubId] = (nextRep[prev.currentClubId] || 0) + bounty.rewardClubRep;
+      }
+      return {
+        ...prev,
+        reputationPoints: nextRep,
+      };
+    });
 
     setTownBounties((prev) => {
       const remaining = prev.filter((b) => b.id !== bounty.id);
       const freshPool = generateTownBounties(Date.now() + 1000);
-      const nextBounty = freshPool.find((b) => !remaining.some((r) => r.id === b.id)) || freshPool[0];
-      return [...remaining, { ...nextBounty, id: `town_bounty_${Date.now()}` }];
+      const nextBounty = freshPool.find((b) => !remaining.some((r) => r.targetClubId === b.targetClubId)) ||
+        freshPool.find((b) => !remaining.some((r) => r.id === b.id)) ||
+        freshPool[0];
+      return [...remaining, { ...nextBounty, id: `town_bounty_${Date.now()}_${Math.random().toString(36).substring(2, 6)}` }];
     });
   };
 
@@ -2412,6 +2456,31 @@ export default function App() {
         };
       })
     );
+  };
+
+  const handleFireCrew = (crewId: string) => {
+    const isAtSea =
+      ownedBoats.some((b) => Boolean(b.expedition) && b.assignedCrewIds.includes(crewId)) ||
+      salvageState.activeExpeditions.some((e) => e.assignedCrewIds.includes(crewId));
+    if (isAtSea) return;
+
+    soundManager.playClickSfx();
+    setHiredCrew((prev) => prev.filter((c) => c.id !== crewId));
+    setOwnedBoats((prev) =>
+      prev.map((b) =>
+        b.assignedCrewIds.includes(crewId)
+          ? { ...b, assignedCrewIds: b.assignedCrewIds.filter((id) => id !== crewId) }
+          : b
+      )
+    );
+    setSalvageState((prev) => ({
+      ...prev,
+      ownedSalvageBoatInstances: prev.ownedSalvageBoatInstances.map((b) =>
+        b.assignedCrewIds.includes(crewId)
+          ? { ...b, assignedCrewIds: b.assignedCrewIds.filter((id) => id !== crewId) }
+          : b
+      ),
+    }));
   };
 
   const handleRetireBoat = (boatInstanceId: string) => {
@@ -2668,6 +2737,32 @@ export default function App() {
           assignedCrewIds: [],
         },
       ],
+    }));
+  };
+
+  const handleRetireSalvageBoat = (boatInstanceId: string) => {
+    const isAtSea = salvageState.activeExpeditions.some(
+      (e) => e.boatInstanceId === boatInstanceId
+    );
+    if (isAtSea) return;
+
+    const boat = salvageState.ownedSalvageBoatInstances.find(
+      (b) => b.instanceId === boatInstanceId
+    );
+    if (!boat) return;
+
+    const def =
+      SALVAGE_BOATS_CATALOG.find((b) => b.id === boat.boatDefId) ||
+      SALVAGE_BOATS_CATALOG[0];
+    const { value } = getSalvageBoatRetireValue(boat, def);
+
+    soundManager.playRegisterSfx();
+    setMoney((prev) => prev + value);
+    setSalvageState((prev) => ({
+      ...prev,
+      ownedSalvageBoatInstances: prev.ownedSalvageBoatInstances.filter(
+        (b) => b.instanceId !== boatInstanceId
+      ),
     }));
   };
 
@@ -3509,10 +3604,12 @@ export default function App() {
             onCallInEarly={handleCallInEarly}
             onRetireBoat={handleRetireBoat}
             onGiveCrewBonus={handleGiveCrewBonus}
+            onFireCrew={handleFireCrew}
             hasVoyageSpeedCivic={civicInvestments.includes('deepwater_channel')}
             salvageState={salvageState}
             onUnlockSalvageCharter={handleUnlockSalvageCharter}
             onBuySalvageBoat={handleBuySalvageBoat}
+            onRetireSalvageBoat={handleRetireSalvageBoat}
             onUnlockWreckSite={handleUnlockWreckSite}
             onAssignCrewToSalvageBoat={handleAssignCrewToSalvageBoat}
             onUnassignCrewFromSalvageBoat={handleUnassignCrewFromSalvageBoat}
@@ -3567,16 +3664,6 @@ export default function App() {
             discoveredArtifactIds={getDiscoveredArtifactIds(salvageState)}
           />
         </div>
-
-        {/* Footer */}
-        <footer className="pt-2 text-center text-[11px] text-[#555d6b] flex items-center justify-end border-t border-[#1d2026]">
-          <button
-            onClick={() => setShowResetConfirm(true)}
-            className="text-[#717885] hover:text-rose-400 underline underline-offset-2 cursor-pointer"
-          >
-            Reset Game Progress
-          </button>
-        </footer>
       </div>
 
       {/* Settings Modal */}

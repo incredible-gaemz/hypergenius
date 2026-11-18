@@ -365,18 +365,18 @@ export function getWhaleFightStats(whale: WhaleSpecies, weightLbs: number): Whal
   // Normalize weight ratio logarithmically between Beluga (2,000 lbs) and Blue Whale (380,000 lbs)
   const weightRatio = Math.min(1.0, Math.max(0.05, (Math.log10(weightLbs) - 3.2) / 2.4));
 
-  // Distance: 180m (Beluga) to 580m (Blue Whale)
-  const startDistanceM = Math.round(160 + whale.fightDurationSec * 8 + weightRatio * 150);
-  const maxDistanceM = Math.round(startDistanceM * 1.35);
+  // Distance: 160m (Beluga) to 340m (Blue Whale)
+  const startDistanceM = Math.round(110 + whale.fightDurationSec * 1.8 + weightRatio * 70);
+  const maxDistanceM = Math.round(startDistanceM * 1.4);
 
   // Tension rate multiplier when battling surges
-  const pullStrength = 1.6 + weightRatio * 3.2;
+  const pullStrength = 1.6 + weightRatio * 2.2;
 
   // How fast the whale pulls out line when surging (mps)
-  const runSpeedMps = 2.0 + weightRatio * 4.0;
+  const runSpeedMps = 2.4 + weightRatio * 1.8;
 
   // How fast hydraulic winch reels in when whale rests (mps)
-  const reelSpeedMps = Math.max(3.5, 9.0 - weightRatio * 4.8);
+  const reelSpeedMps = 14.0 - weightRatio * 4.5;
 
   return {
     startDistanceM,
@@ -384,7 +384,7 @@ export function getWhaleFightStats(whale: WhaleSpecies, weightLbs: number): Whal
     pullStrength,
     runSpeedMps,
     reelSpeedMps,
-    pullDurationSec: 1.8 + weightRatio * 1.8,
-    restDurationSec: 2.8 - weightRatio * 0.6,
+    pullDurationSec: 1.2 + weightRatio * 0.8,
+    restDurationSec: 2.4 + (1.0 - weightRatio) * 0.8,
   };
 }
