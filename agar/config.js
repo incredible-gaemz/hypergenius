@@ -1,10 +1,10 @@
 const Config = {
-    MAP_WIDTH: 14000,
-    MAP_HEIGHT: 14000,
-    MAX_FOOD: 2600,
-    MAX_VIRUSES: 35,
-    MAX_MOTHER_CELLS: 18,
-    MAX_BOTS: 45,
+    MAP_WIDTH: 9000,
+    MAP_HEIGHT: 9000,
+    MAX_FOOD: 4500,
+    MAX_VIRUSES: 26,
+    MAX_MOTHER_CELLS: 12,    // Exactly 10-13 as requested
+    MAX_BOTS: 36,
     
     // Mechanics
     FOOD_MASS: 1,
@@ -34,7 +34,7 @@ const Config = {
     MERGE_TIME_SCALE: 0.02,  // Extra seconds per mass unit
     
     // Bot configs
-    BOT_VISION_RADIUS: 1200,
+    BOT_VISION_RADIUS: 1100,
     BOT_UPDATE_INTERVAL: 3
 };
 

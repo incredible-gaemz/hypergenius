@@ -25,14 +25,23 @@ class Game {
     }
 
     init() {
+        // Spawn distributed mother cells across a 4x3 grid (exactly 12 across the whole map)
+        const cols = 4;
+        const rows = 3;
+        const cellW = Config.MAP_WIDTH / cols;
+        const cellH = Config.MAP_HEIGHT / rows;
+        
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const posX = (c + 0.5) * cellW + MathUtils.randomRange(-cellW * 0.22, cellW * 0.22);
+                const posY = (r + 0.5) * cellH + MathUtils.randomRange(-cellH * 0.22, cellH * 0.22);
+                this.spawnMotherCell(posX, posY);
+            }
+        }
+
         // Spawn initial viruses
         for (let i = 0; i < Config.MAX_VIRUSES; i++) {
             this.spawnVirus();
-        }
-        
-        // Spawn initial mother cells
-        for (let i = 0; i < Config.MAX_MOTHER_CELLS; i++) {
-            this.spawnMotherCell();
         }
         
         // Spawn initial food
@@ -74,12 +83,12 @@ class Game {
         this.entities.push(cell);
         
         // Spawn a pleasant cluster of food around new player for early foraging
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 35; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 250;
+            const dist = Math.random() * 260;
             const fx = x + Math.cos(angle) * dist;
             const fy = y + Math.sin(angle) * dist;
-            if (fx > 0 && fx < Config.MAP_WIDTH && fy > 0 && fy < Config.MAP_HEIGHT) {
+            if (fx > 50 && fx < Config.MAP_WIDTH - 50 && fy > 50 && fy < Config.MAP_HEIGHT - 50) {
                 this.entities.push(new Food(this.getId(), fx, fy, MathUtils.getRandomColor()));
             }
         }
@@ -249,11 +258,14 @@ class Game {
             if (bossCount < 2) bossCount++;
         }
 
-        // Replenish food
-        let foodToSpawn = Math.min(25, Config.MAX_FOOD - foodCount);
-        while (foodToSpawn > 0) {
-            this.spawnFood();
-            foodToSpawn--;
+        // Replenish food aggressively to keep floor dense with pellets
+        let foodDeficit = Config.MAX_FOOD - foodCount;
+        if (foodDeficit > 0) {
+            let toSpawn = Math.min(60, foodDeficit);
+            while (toSpawn > 0) {
+                this.spawnFood();
+                toSpawn--;
+            }
         }
 
         // Replenish viruses
@@ -481,15 +493,15 @@ class Game {
                         }
                     } else if (other.type === 'mothercell') {
                         if (cellImmune) continue;
-                        if (cell.mass < other.mass * 1.15) {
-                            // Mother cell eats smaller player/bot
+                        if (cell.mass < 30) {
+                            // Tiny cell gets eaten directly by mother cell
                             other.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, other.mass + cell.mass);
                             cell.killedBy = other.id;
-                        } else if (cell.mass > other.mass * 1.15) {
-                            // Big cell eats MotherCell: Pops player (like a virus) and gives mass!
+                        } else {
+                            // Cells >= 30 mass pop on mother cell into pieces
                             this.popCell(cell);
-                            cell.mass += other.mass;
-                            other.killedBy = cell.id;
+                            other.mass = Math.min(Config.MOTHER_CELL_MAX_MASS, other.mass + Math.min(40, cell.mass * 0.15));
+                            // Mother cell stays alive as the permanent arena spawner fixture!
                         }
                     }
                 }
