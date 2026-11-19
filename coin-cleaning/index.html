@@ -236,6 +236,12 @@
       background: #0284c7;
     }
 
+    .btn-action.muted {
+      color: var(--text-dim);
+      opacity: 0.65;
+      border-style: dashed;
+    }
+
     .btn-action.danger {
       color: #f87171;
       border-color: #4c1d1d;
@@ -683,6 +689,12 @@
           <span id="labelTableBg">Desk Surface</span>
         </button>
 
+        <!-- Audio Mute/Unmute Toggle -->
+        <button class="btn-action" id="btnToggleAudio" onclick="toggleAudioMute()" title="Toggle Sound Effects (M)">
+          <span id="labelAudio">Audio: ON</span>
+          <span class="tab-badge">M</span>
+        </button>
+
         <!-- Flip Face (F / Space) -->
         <button class="btn-action" id="btnFlipFace" onclick="flipFace()" title="Flip Obverse / Reverse (Space or F)">
           <span id="labelFace">Obverse</span>
@@ -713,7 +725,6 @@
 
         <div class="hud-specimen-meta">
           <span id="hudSpecs">--</span>
-          <span id="hudValue" style="color: var(--text-high); font-weight: 700;">$0.00</span>
         </div>
 
         <div class="hud-grade-row">
@@ -802,6 +813,226 @@
   </div>
 
   <script>
+    // --- DYNAMIC AUDIO ENGINE (WEB AUDIO API) ---
+    const SoundFX = {
+      ctx: null,
+      buffers: {},
+      activeSources: {},
+      gainNodes: {},
+      muted: localStorage.getItem('numis_audio_muted') === 'true',
+      masterVolume: 0.7,
+      currentPlayingTool: null,
+      stillTimeout: null,
+      loading: false,
+
+      init() {
+        if (this.ctx) {
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return;
+        }
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          this.ctx = new AudioContextClass();
+          this.loadSounds();
+          this.updateMuteUI();
+        } catch (e) {
+          console.warn('AudioContext init error:', e);
+        }
+      },
+
+      async loadSounds() {
+        if (this.loading) return;
+        this.loading = true;
+        const manifest = {
+          brush: './assets/audio/brush.mp3?v=3',
+          pick_coin: './assets/audio/scrape_coin.mp3?v=3',
+          pick_sword: './assets/audio/scrape_sword.mp3?v=3',
+          cloth: './assets/audio/wipe.mp3?v=3',
+          polish: './assets/audio/polish.mp3?v=3',
+          cash: './assets/audio/cash.mp3?v=3'
+        };
+
+        for (const [key, path] of Object.entries(manifest)) {
+          try {
+            const resp = await fetch(path);
+            if (!resp.ok) continue;
+            const arrayBuf = await resp.arrayBuffer();
+            const audioBuf = await this.ctx.decodeAudioData(arrayBuf);
+            this.buffers[key] = audioBuf;
+          } catch (err) {
+            console.warn(`Could not load audio for ${key}:`, err);
+          }
+        }
+      },
+
+      getSoundKey(tool) {
+        if (tool === 'pick') {
+          const cfg = (typeof catalog !== 'undefined' && typeof currentSpecimen !== 'undefined') ? catalog[currentSpecimen] : null;
+          return (cfg && !cfg.isCoin) ? 'pick_sword' : 'pick_coin';
+        }
+        return tool;
+      },
+
+      startToolSound(tool, velocity = 5) {
+        if (this.muted) return;
+        if (!this.ctx) this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        const soundKey = this.getSoundKey(tool);
+        if (!this.buffers[soundKey]) return;
+
+        // Reset stillness watchdog
+        if (this.stillTimeout) {
+          clearTimeout(this.stillTimeout);
+          this.stillTimeout = null;
+        }
+
+        // If mouse stops moving while down, smoothly fade down after 130ms
+        this.stillTimeout = setTimeout(() => {
+          this.pauseToolSound();
+        }, 130);
+
+        if (this.currentPlayingTool !== soundKey || !this.activeSources[soundKey]) {
+          this.stopAllTools(0.04);
+          this.playToolLoop(soundKey, velocity);
+        } else {
+          // Adjust volume/rate subtly with speed
+          const gain = this.gainNodes[soundKey];
+          if (gain && this.ctx) {
+            const targetVol = Math.min(1.0, Math.max(0.25, velocity * 0.08)) * this.masterVolume;
+            try {
+              gain.gain.cancelScheduledValues(this.ctx.currentTime);
+              gain.gain.linearRampToValueAtTime(targetVol, this.ctx.currentTime + 0.05);
+            } catch (e) {}
+          }
+        }
+      },
+
+      playToolLoop(soundKey, velocity = 5) {
+        const buf = this.buffers[soundKey];
+        if (!buf || !this.ctx) return;
+
+        try {
+          const src = this.ctx.createBufferSource();
+          src.buffer = buf;
+          src.loop = true;
+
+          // Tuning per tool and specimen
+          if (soundKey === 'pick_sword') {
+            src.playbackRate.value = Math.min(1.15, Math.max(0.92, 0.96 + velocity * 0.008));
+          } else if (soundKey === 'pick_coin') {
+            src.playbackRate.value = Math.min(1.2, Math.max(0.95, 1.0 + velocity * 0.01));
+          } else if (soundKey === 'brush') {
+            src.playbackRate.value = Math.min(1.1, Math.max(0.9, 0.95 + velocity * 0.006));
+          } else if (soundKey === 'polish') {
+            src.playbackRate.value = Math.min(1.15, Math.max(0.9, 0.98 + velocity * 0.005));
+          } else if (soundKey === 'cloth') {
+            src.playbackRate.value = Math.min(1.1, Math.max(0.92, 0.96 + velocity * 0.006));
+          }
+
+          const gain = this.ctx.createGain();
+          const targetVol = Math.min(1.0, Math.max(0.3, velocity * 0.08)) * this.masterVolume;
+          gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(targetVol, this.ctx.currentTime + 0.05);
+
+          src.connect(gain);
+          gain.connect(this.ctx.destination);
+          src.start(0);
+
+          this.activeSources[soundKey] = src;
+          this.gainNodes[soundKey] = gain;
+          this.currentPlayingTool = soundKey;
+        } catch (e) {
+          console.warn('Error starting tool loop:', e);
+        }
+      },
+
+      pauseToolSound() {
+        if (this.currentPlayingTool && this.gainNodes[this.currentPlayingTool] && this.ctx) {
+          const gain = this.gainNodes[this.currentPlayingTool];
+          try {
+            gain.gain.cancelScheduledValues(this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
+          } catch (e) {}
+        }
+      },
+
+      stopAllTools(fadeTime = 0.06) {
+        if (this.stillTimeout) {
+          clearTimeout(this.stillTimeout);
+          this.stillTimeout = null;
+        }
+        for (const [tool, src] of Object.entries(this.activeSources)) {
+          const gain = this.gainNodes[tool];
+          if (gain && this.ctx) {
+            try {
+              gain.gain.cancelScheduledValues(this.ctx.currentTime);
+              gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + fadeTime);
+              setTimeout(() => {
+                try { src.stop(); src.disconnect(); } catch (e) {}
+              }, fadeTime * 1000 + 20);
+            } catch (e) {}
+          } else {
+            try { src.stop(); src.disconnect(); } catch (e) {}
+          }
+        }
+        this.activeSources = {};
+        this.gainNodes = {};
+        this.currentPlayingTool = null;
+      },
+
+      playOneShot(soundKey, volume = 0.8) {
+        if (this.muted) return;
+        if (!this.ctx) this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        const buf = this.buffers[soundKey];
+        if (!buf || !this.ctx) return;
+
+        try {
+          const src = this.ctx.createBufferSource();
+          src.buffer = buf;
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(volume * this.masterVolume, this.ctx.currentTime);
+          src.connect(gain);
+          gain.connect(this.ctx.destination);
+          src.start(0);
+        } catch (e) {}
+      },
+
+      toggleMute() {
+        this.muted = !this.muted;
+        localStorage.setItem('numis_audio_muted', this.muted);
+        if (this.muted) {
+          this.stopAllTools(0.02);
+        }
+        this.updateMuteUI();
+      },
+
+      updateMuteUI() {
+        const btn = document.getElementById('btnToggleAudio');
+        const label = document.getElementById('labelAudio');
+        if (!btn || !label) return;
+        if (this.muted) {
+          label.textContent = 'Audio: OFF';
+          btn.classList.add('muted');
+        } else {
+          label.textContent = 'Audio: ON';
+          btn.classList.remove('muted');
+        }
+      }
+    };
+
+    function toggleAudioMute() {
+      SoundFX.init();
+      SoundFX.toggleMute();
+    }
+
     // --- SPECIMEN CATALOG DEFINITIONS ---
     const catalog = {
       denarius: {
@@ -878,6 +1109,27 @@
           clean: './assets/coins/quarter_reverse_clean.png',
           semi: './assets/coins/quarter_reverse_semi.png',
           dirty: './assets/coins/quarter_reverse_dirty.png'
+        }
+      },
+      bat_quarter: {
+        name: 'National Park Bat Quarter',
+        era: '2020',
+        specs: '25¢ · Cupro-Nickel · 24.3mm · American Samoa Bat',
+        baseVal: 8.00,
+        cleanVal: 280.00,
+        isCoin: true,
+        numLayers: 4,
+        obverse: {
+          clean: './assets/coins/bat_obverse_clean.png',
+          mild: './assets/coins/bat_obverse_mild.png',
+          heavy: './assets/coins/bat_obverse_heavy.png',
+          extreme: './assets/coins/bat_obverse_extreme.png'
+        },
+        reverse: {
+          clean: './assets/coins/bat_reverse_clean.png',
+          mild: './assets/coins/bat_reverse_mild.png',
+          heavy: './assets/coins/bat_reverse_heavy.png',
+          extreme: './assets/coins/bat_reverse_extreme.png'
         }
       },
       penny: {
@@ -1674,7 +1926,7 @@
       if (hudProgressFill) hudProgressFill.style.width = `${currentScore}%`;
 
       const val = cfg.baseVal + (cfg.cleanVal - cfg.baseVal) * Math.pow(totalScore / 100, 1.4);
-      hudValue.textContent = `$${val.toFixed(2)}`;
+      if (hudValue) hudValue.textContent = `$${val.toFixed(2)}`;
 
       if (cfg.isCoin) {
         if (totalScore < 15) {
@@ -1741,6 +1993,10 @@
       } else if (tool === 'polish') {
         document.getElementById('toolPolish').classList.add('active');
         cursorPolish.style.display = 'block';
+      }
+
+      if (isScrubbing) {
+        SoundFX.startToolSound(tool, 6);
       }
     }
 
@@ -1813,6 +2069,7 @@
     // --- SPECIMEN MOUNTING ---
     function mountSpecimen(id) {
       if (!catalog[id]) return;
+      SoundFX.stopAllTools(0.04);
       currentSpecimen = id;
       localStorage.setItem('numis_current_specimen', id);
 
@@ -1867,9 +2124,14 @@
       const activeLayer = layerCache[currentSpecimen] && layerCache[currentSpecimen][currentSide];
       if (!activeLayer) return;
 
+      SoundFX.playOneShot('cash', 0.85);
+
       document.getElementById('certSpecimenName').textContent = `${cfg.name} (${cfg.era})`;
       document.getElementById('certGradeText').textContent = hudGrade.textContent;
-      document.getElementById('certDesc').textContent = `${cfg.specs}. Current valuation: ${hudValue.textContent}.`;
+      const scores = cleanlinessState[currentSpecimen] || { obverse: 0, reverse: 0 };
+      const totalScore = (scores.obverse + scores.reverse) / 2;
+      const val = cfg.baseVal + (cfg.cleanVal - cfg.baseVal) * Math.pow(totalScore / 100, 1.4);
+      document.getElementById('certDesc').textContent = `${cfg.specs}. Appraised valuation: $${val.toFixed(2)}.`;
 
       const box = document.getElementById('certPreviewBox');
       if (cfg.isCoin) {
@@ -1955,11 +2217,13 @@
 
     stage.addEventListener('mousedown', (e) => {
       if (e.button === 0) {
+        SoundFX.init();
         isScrubbing = true;
         const pos = getStageCoords(e);
         const coinPos = screenToSpecimenCoords(pos.x, pos.y);
         lastScrubPos = { x: coinPos.x, y: coinPos.y };
         executeScrub(coinPos.x, coinPos.y, true);
+        SoundFX.startToolSound(currentTool, 6);
       }
     });
 
@@ -1977,6 +2241,10 @@
           vx = dx;
           vy = dy;
           const dist = Math.hypot(dx, dy);
+
+          if (dist > 0.5) {
+            SoundFX.startToolSound(currentTool, dist);
+          }
 
           // Dense step interpolation so rapid movement produces smooth continuous strokes instead of dots
           let step = 5;
@@ -2000,6 +2268,7 @@
         } else {
           lastScrubPos = { x: coinPos.x, y: coinPos.y };
           executeScrub(coinPos.x, coinPos.y, true);
+          SoundFX.startToolSound(currentTool, 6);
         }
 
         positionToolCursor(pos.x, pos.y, true, vx, vy);
@@ -2011,6 +2280,7 @@
     window.addEventListener('mouseup', (e) => {
       if (e.button === 0 && isScrubbing) {
         isScrubbing = false;
+        SoundFX.stopAllTools(0.06);
         lastScrubPos = null;
         const pos = getStageCoords(e);
         positionToolCursor(pos.x, pos.y, false, 0, 0);
@@ -2020,6 +2290,7 @@
 
     stage.addEventListener('mouseleave', () => {
       isScrubbing = false;
+      SoundFX.stopAllTools(0.06);
       lastScrubPos = null;
       hideToolCursor();
     });
@@ -2055,6 +2326,8 @@
         selectTool('cloth');
       } else if (key === '4') {
         selectTool('polish');
+      } else if (key === 'm') {
+        toggleAudioMute();
       } else if (key === 'f' || key === ' ') {
         e.preventDefault();
         flipFace();
@@ -2063,15 +2336,20 @@
 
     window.addEventListener('resize', resizeCanvas);
 
+    // First user gesture unlocks Web Audio
+    window.addEventListener('pointerdown', () => {
+      SoundFX.init();
+    }, { once: true });
+
     // --- INITIALIZATION ---
     buildSpecimenNav();
     labelTableBg.textContent = (activeTableBg === 'desk') ? 'Desk Surface' : 'Velvet Tray';
+    SoundFX.updateMuteUI();
     selectTool(currentTool);
     resizeCanvas();
     mountSpecimen(currentSpecimen);
     render();
   </script>
-
   <!-- Global Telemetry & Leaderboard -->
   <script type="module" src="../js/firebase-config.js"></script>
   <script type="module" src="../js/tracker.js"></script>
